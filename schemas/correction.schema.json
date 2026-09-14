@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "checked_at": {
+      "type": "string"
+    },
+    "correction": {
+      "additionalProperties": true,
+      "properties": {
+        "en": {
+          "type": "string"
+        },
+        "ru": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "en",
+        "ru"
+      ],
+      "type": "object"
+    },
+    "correction_id": {
+      "type": "string"
+    },
+    "evidence_ids": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "limitations": {
+      "additionalProperties": true,
+      "properties": {
+        "en": {
+          "type": "string"
+        },
+        "ru": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "en",
+        "ru"
+      ],
+      "type": "object"
+    },
+    "observation": {
+      "additionalProperties": true,
+      "properties": {
+        "en": {
+          "type": "string"
+        },
+        "ru": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "en",
+        "ru"
+      ],
+      "type": "object"
+    },
+    "record_id": {
+      "type": "string"
+    },
+    "source_ids": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "status": {
+      "enum": [
+        "corrected-static-interpretation"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "correction_id",
+    "record_id",
+    "evidence_ids",
+    "source_ids",
+    "status",
+    "checked_at",
+    "observation",
+    "correction",
+    "limitations"
+  ],
+  "title": "Observatory correction record",
+  "type": "object"
+}

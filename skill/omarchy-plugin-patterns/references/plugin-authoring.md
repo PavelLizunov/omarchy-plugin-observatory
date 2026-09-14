@@ -8,6 +8,16 @@
 - `root.opened`, `sleeping`, formatter, screen and theme adapters below are application contracts, not promised host APIs. Wire actual enable/suspend/disable events; unknown state must not authorize work. Render unavailable/loading/stale/error states through catalog keys.
 - Prefer existing platform features. A is reactive service; B is one owned streaming helper; C is gated/dual-cadence polling; D replaces command-based file reads. D can combine with C. These are architecture policies, not corpus prevalence or CPU claims.
 
+## Diagnose and change only what is needed
+
+Before a fix, record the symptom, expected behavior, host/source version and a safe reproduction. If reproduction is unavailable, state the limit instead of inventing a failure. Trace the relevant binding, callback or process lifecycle; name one hypothesis and the observation that would disprove it. Prefer one attributable change over several speculative fixes. For a new feature, define the observable result first.
+
+Choose an existing host capability before adding an abstraction or helper. Keep edits within the requested behavior: match local style, avoid unrelated formatting/refactors, and remove only unused code introduced by your change. Existing unrelated defects belong in a separate note. Do not remove working code merely because it predates a test.
+
+Pair each planned change with a check using the [review evidence ladder](plugin-review.md). Preserve valid evidence for an unchanged snapshot; rerun affected checks after relevant code, configuration or environment changes. Never reproduce a regression by reverting a live desktop worktree. Use an authorized temporary copy or isolated test input; isolation still does not authorize executing untrusted plugins.
+
+For work spanning sessions, leave a short handoff: source/version, decisions, rejected alternatives, changed paths, observed checks, remaining risks and next action. A small plugin task needs neither an obligatory swarm nor a new persistent service.
+
 ## A — Reactive PipeWire example
 
 QML component body; QtQuick and the installed PipeWire service are prerequisites. Documented Quickshell v0.2.x member names below still require target-version checking.

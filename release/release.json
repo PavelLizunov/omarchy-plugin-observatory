@@ -1,13 +1,17 @@
 {
-  "release_id": "v1.0.0-2026.09",
+  "schema_version": 2,
+  "release_id": "v1.0.1-rc.1",
   "release_date": "2026-09-14",
-  "status": "public-release",
-  "source_dataset": "Omarchy Plugin Observatory (3,086 community plugins, 10,310 evidence anchors)",
+  "status": "release-candidate",
+  "source_dataset": "Omarchy Plugin Observatory (3,086 historical report records, 10,310 reported evidence anchors)",
   "homepage": "https://github.com/PavelLizunov/omarchy-plugin-observatory",
   "skill_repository": "https://github.com/PavelLizunov/omarchy-plugin-patterns",
   "license": "MIT",
   "locales": [
     "en",
     "ru"
-  ]
+  ],
+  "license_scope": "Project-owned materials and compilation rights only; third-party code excluded (NOTICE.md)",
+  "historical_dataset": "draft-1813da97",
+  "historical_source_commit": "1813da9702e6a3ee3b1edfec2d7c2ee086cf3334"
 }

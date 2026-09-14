@@ -1,21 +1,23 @@
 # Omarchy Plugin Observatory
 
-> AI-first, versioned static audit dataset and architecture guidance for Omarchy Quattro plugins (v1.0.0-2026.09).
+> AI-first, versioned static audit dataset and architecture guidance for Omarchy Quattro plugins (v1.0.1-rc.1).
 
 ## Start here
 
-- [Quick overview](ai/packs/quick-overview.md): trust contract and task routing.
-- [Skill: omarchy-plugin-patterns](skill/omarchy-plugin-patterns/SKILL.md): open agent development skill.
+- [Quick overview](packs/quick-overview.md): trust contract, review status, corrections, sources, and routing.
+- [Skill: omarchy-plugin-patterns](../skill/omarchy-plugin-patterns/SKILL.md): open agent development skill.
 
 ## Machine-readable data
 
-- [Release metadata](release/release.json)
-- [Statistics](release/statistics.json)
-- [Verified public claims](data/claims.jsonl)
-- [Plugin records](data/plugins.jsonl)
-- [Evidence anchors](data/evidence.jsonl)
-- [Patterns](data/patterns.json)
-- [Schemas](schemas/)
+- [Release metadata](../release/release.json)
+- [Statistics](../release/statistics.json)
+- [Verified public claims](../data/claims.jsonl)
+- [Review corrections](../data/corrections.jsonl)
+- [Inspected sources](../data/sources.jsonl)
+- [Plugin records](../data/plugins.jsonl)
+- [Evidence anchors](../data/evidence.jsonl)
+- [Patterns](../data/patterns.json)
+- [Schemas](../schemas/)
 
 ## Method limits and data trust
 

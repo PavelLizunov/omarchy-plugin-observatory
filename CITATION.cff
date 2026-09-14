@@ -1,15 +1,18 @@
 cff-version: 1.2.0
-message: "This is an unpublished citation draft. Cite a future tagged release, not this working directory."
+message: "If you use this dataset or findings, please cite it as below. This citation refers to the current repository version (v1.0.1-rc.1 release candidate)."
 title: "Omarchy Plugin Observatory"
 type: dataset
 authors:
   - family-names: "Lizunov"
     given-names: "Pavel"
-abstract: "AI-first static audit records, evidence anchors, and architectural guidance for Omarchy Quattro plugins."
+version: "1.0.1-rc.1"
+date-released: "2026-09-14"
+abstract: "Historical static analysis records, evidence anchors, and architectural guidance for Omarchy Quattro plugins. The MIT License applies to the original project documentation, tooling, schemas, and compilation structure; third-party code citations retain their original upstream licenses."
 keywords:
   - Omarchy
   - Quickshell
   - QML
   - static analysis
   - AI agents
-license: "NOASSERTION"
+license: "MIT"
+repository-code: "https://github.com/PavelLizunov/omarchy-plugin-observatory"

@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "checked_at": {
+      "type": "string"
+    },
+    "files": {
+      "items": {
+        "additionalProperties": true,
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "url",
+          "sha256"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "license": {
+      "additionalProperties": true,
+      "properties": {
+        "copyright_notices": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "sha256": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "spdx": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "enum": [
+            "identified-at-revision",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "spdx",
+        "url",
+        "status"
+      ],
+      "type": "object"
+    },
+    "limitations": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "record_ids": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "repository_url": {
+      "type": "string"
+    },
+    "revision": {
+      "type": "string"
+    },
+    "revision_relation": {
+      "enum": [
+        "reported-registry-reference",
+        "current-reference"
+      ],
+      "type": "string"
+    },
+    "scope": {
+      "type": "string"
+    },
+    "source_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "source_id",
+    "record_ids",
+    "repository_url",
+    "revision",
+    "revision_relation",
+    "checked_at",
+    "files",
+    "license",
+    "scope",
+    "limitations"
+  ],
+  "title": "Inspected source entry",
+  "type": "object"
+}

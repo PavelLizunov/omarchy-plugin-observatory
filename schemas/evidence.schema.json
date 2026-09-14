@@ -67,6 +67,18 @@
     },
     "type": {
       "type": "string"
+    },
+    "interpretation_status": {
+      "enum": [
+        "historical-unverified"
+      ],
+      "type": "string"
+    },
+    "correction_ids": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
     }
   },
   "required": [
@@ -83,7 +95,9 @@
     "source_revision_verified",
     "limitations",
     "source_report",
-    "release"
+    "release",
+    "interpretation_status",
+    "correction_ids"
   ],
   "title": "Evidence anchor",
   "type": "object"

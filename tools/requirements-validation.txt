@@ -1,0 +1,13 @@
+# Omarchy Plugin Observatory - Validation Requirements
+#
+# The base export verifier (python3 tools/verify_public_export.py) runs with the
+# Python 3 standard library only (strictly offline, zero external dependencies).
+#
+# To enable full Draft 2020-12 JSON Schema validation via the --schema flag,
+# install jsonschema in an isolated environment.
+# Supported range: 4.x (specifically tested in this environment with 4.10.3).
+#
+# Schemas are self-contained: verification executes in strictly offline mode
+# with all $ref, $dynamicRef, $recursiveRef, and $id keywords rejected,
+# with zero remote resolver retrieval or network access.
+jsonschema>=4.0.0,<5.0.0

@@ -2,39 +2,52 @@
   "@context": "https://schema.org/",
   "@type": "Dataset",
   "name": "Omarchy Plugin Observatory",
-  "description": "Empirical security, lifecycle, and architecture audit dataset for 3,086 Omarchy Quattro plugins with 10,310 verified code evidence anchors.",
-  "version": "1.0.0",
+  "description": "Historical static analysis dataset containing 3,086 report records and 10,310 reported code evidence anchors from the Omarchy Quattro plugin ecosystem, with recorded verification limits, structural schemas, and review corrections.",
+  "version": "1.0.1-rc.1",
   "dateModified": "2026-09-14",
   "inLanguage": [
     "en",
     "ru"
   ],
   "isAccessibleForFree": true,
-  "license": "https://opensource.org/licenses/MIT",
+  "license": "../NOTICE.md",
+  "usageInfo": "MIT applies only to project-owned materials and compilation rights; third-party excerpts retain their own rights and may have unknown licensing.",
   "distribution": [
     {
       "@type": "DataDownload",
       "encodingFormat": "application/jsonl",
-      "contentUrl": "data/plugins.jsonl",
-      "name": "Plugin audit records"
+      "contentUrl": "../data/plugins.jsonl",
+      "name": "Historical plugin report records"
     },
     {
       "@type": "DataDownload",
       "encodingFormat": "application/jsonl",
-      "contentUrl": "data/evidence.jsonl",
-      "name": "Evidence anchors"
+      "contentUrl": "../data/evidence.jsonl",
+      "name": "Reported evidence anchors"
     },
     {
       "@type": "DataDownload",
       "encodingFormat": "application/jsonl",
-      "contentUrl": "data/claims.jsonl",
-      "name": "Verified aggregate claims"
+      "contentUrl": "../data/claims.jsonl",
+      "name": "Aggregate claims and dataset limitations"
     },
     {
       "@type": "DataDownload",
       "encodingFormat": "application/json",
-      "contentUrl": "data/patterns.json",
+      "contentUrl": "../data/patterns.json",
       "name": "Architectural and review patterns"
+    },
+    {
+      "@type": "DataDownload",
+      "encodingFormat": "application/jsonl",
+      "contentUrl": "../data/corrections.jsonl",
+      "name": "Static interpretation corrections for historical records"
+    },
+    {
+      "@type": "DataDownload",
+      "encodingFormat": "application/jsonl",
+      "contentUrl": "../data/sources.jsonl",
+      "name": "Pinned source repository references and verification records"
     }
   ]
 }

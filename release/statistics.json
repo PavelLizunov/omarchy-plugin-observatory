@@ -15,6 +15,7 @@
     "records": "CLM-CORPUS-RECORDS",
     "revision_verified_records": "CLM-SOURCE-REVISIONS"
   },
+  "corrections": 4,
   "files_inspected_references": 21843,
   "joins": {
     "directory_candidate": 5,
@@ -27,9 +28,15 @@
     "suspicious": 108,
     "warning": 800
   },
+  "privilege_distribution": {
+    "false": 1569,
+    "null": 1441,
+    "true": 76
+  },
   "records": 3086,
-  "release": "draft-1813da97",
+  "release": "v1.0.1-rc.1",
   "revision_verified_records": 0,
   "source_commit": "1813da9702e6a3ee3b1edfec2d7c2ee086cf3334",
+  "sources": 11,
   "units_note": "Report records and explicit typed metadata; not verified source behavior."
 }

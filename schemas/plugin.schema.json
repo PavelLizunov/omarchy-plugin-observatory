@@ -110,6 +110,39 @@
         "runtime_verified"
       ],
       "type": "object"
+    },
+    "review": {
+      "properties": {
+        "correction_ids": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "runtime_verified": {
+          "type": "boolean"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "historical-unverified",
+            "corrected-static-interpretation"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "correction_ids",
+        "source_ids",
+        "runtime_verified"
+      ],
+      "type": "object"
     }
   },
   "required": [
@@ -118,6 +151,7 @@
     "plugin_id",
     "directory",
     "verdict",
+    "review",
     "features",
     "evidence_ids",
     "release",
