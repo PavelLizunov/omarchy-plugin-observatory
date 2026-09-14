@@ -1,0 +1,35 @@
+{
+  "anchors": 10310,
+  "chunks": 311,
+  "claim_ids": {
+    "anchors": "CLM-CORPUS-ANCHORS",
+    "chunks": "CLM-CORPUS-CHUNKS",
+    "files_inspected_references": "CLM-CORPUS-FILE-REFERENCES",
+    "joins.directory_candidate": "CLM-JOIN-DIRECTORY-CANDIDATE",
+    "joins.exact": "CLM-JOIN-EXACT",
+    "joins.unmatched": "CLM-JOIN-UNMATCHED",
+    "normalized_verdicts.broken": "CLM-VERDICT-BROKEN",
+    "normalized_verdicts.pass": "CLM-VERDICT-PASS",
+    "normalized_verdicts.suspicious": "CLM-VERDICT-SUSPICIOUS",
+    "normalized_verdicts.warning": "CLM-VERDICT-WARNING",
+    "records": "CLM-CORPUS-RECORDS",
+    "revision_verified_records": "CLM-SOURCE-REVISIONS"
+  },
+  "files_inspected_references": 21843,
+  "joins": {
+    "directory_candidate": 5,
+    "exact": 2528,
+    "unmatched": 553
+  },
+  "normalized_verdicts": {
+    "broken": 126,
+    "pass": 2052,
+    "suspicious": 108,
+    "warning": 800
+  },
+  "records": 3086,
+  "release": "draft-1813da97",
+  "revision_verified_records": 0,
+  "source_commit": "1813da9702e6a3ee3b1edfec2d7c2ee086cf3334",
+  "units_note": "Report records and explicit typed metadata; not verified source behavior."
+}

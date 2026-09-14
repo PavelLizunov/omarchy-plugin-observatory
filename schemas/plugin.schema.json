@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "category": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "directory": {
+      "type": "string"
+    },
+    "evidence_ids": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "features": {
+      "type": "object"
+    },
+    "files_inspected_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "join": {
+      "enum": [
+        "exact",
+        "directory_candidate",
+        "unmatched"
+      ],
+      "type": "string"
+    },
+    "limitations": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "manifest_author": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "plugin_id": {
+      "type": "string"
+    },
+    "record_id": {
+      "type": "string"
+    },
+    "record_key": {
+      "type": "string"
+    },
+    "redactions": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "registry_commit": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "release": {
+      "type": "string"
+    },
+    "revision_verified": {
+      "type": "boolean"
+    },
+    "source_report": {
+      "type": "string"
+    },
+    "verdict": {
+      "properties": {
+        "normalized": {
+          "enum": [
+            "pass",
+            "warning",
+            "broken",
+            "suspicious"
+          ]
+        },
+        "raw": {
+          "type": "string"
+        },
+        "runtime_verified": {
+          "type": "boolean"
+        },
+        "scope": {
+          "enum": [
+            "static-audit"
+          ]
+        },
+        "summary": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "normalized",
+        "raw",
+        "summary",
+        "scope",
+        "runtime_verified"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "record_id",
+    "record_key",
+    "plugin_id",
+    "directory",
+    "verdict",
+    "features",
+    "evidence_ids",
+    "release",
+    "limitations",
+    "revision_verified",
+    "source_report"
+  ],
+  "title": "Public plugin audit record",
+  "type": "object"
+}

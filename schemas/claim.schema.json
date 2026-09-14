@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "claim_id": {
+      "type": "string"
+    },
+    "evidence_level": {
+      "enum": [
+        "reproduced-metadata",
+        "documented-limit"
+      ]
+    },
+    "kind": {
+      "type": "string"
+    },
+    "release": {
+      "type": "string"
+    },
+    "source": {
+      "properties": {
+        "file": {
+          "type": "string"
+        },
+        "json_path_or_section": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "file",
+        "json_path_or_section"
+      ],
+      "type": "object"
+    },
+    "statement": {
+      "properties": {
+        "en": {
+          "type": "string"
+        },
+        "ru": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "en",
+        "ru"
+      ],
+      "type": "object"
+    },
+    "status": {
+      "enum": [
+        "verified",
+        "review-required",
+        "disputed",
+        "superseded",
+        "retracted"
+      ]
+    },
+    "unit": {
+      "type": "string"
+    },
+    "value": {
+      "type": [
+        "integer",
+        "boolean"
+      ]
+    }
+  },
+  "required": [
+    "claim_id",
+    "kind",
+    "value",
+    "unit",
+    "statement",
+    "source",
+    "evidence_level",
+    "release",
+    "status"
+  ],
+  "title": "Observatory claim",
+  "type": "object"
+}

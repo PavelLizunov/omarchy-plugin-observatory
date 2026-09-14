@@ -1,0 +1,13 @@
+{
+  "release_id": "v1.0.0-2026.09",
+  "release_date": "2026-09-14",
+  "status": "public-release",
+  "source_dataset": "Omarchy Plugin Observatory (3,086 community plugins, 10,310 evidence anchors)",
+  "homepage": "https://github.com/PavelLizunov/omarchy-plugin-observatory",
+  "skill_repository": "https://github.com/PavelLizunov/omarchy-plugin-patterns",
+  "license": "MIT",
+  "locales": [
+    "en",
+    "ru"
+  ]
+}

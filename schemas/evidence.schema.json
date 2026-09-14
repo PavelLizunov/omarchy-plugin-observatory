@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "evidence_id": {
+      "type": "string"
+    },
+    "evidence_level": {
+      "enum": [
+        "reported-anchor"
+      ],
+      "type": "string"
+    },
+    "file": {
+      "type": "string"
+    },
+    "limitations": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "line": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "plugin_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "proof": {
+      "type": "string"
+    },
+    "proof_grade": {
+      "enum": [
+        "legacy-reported-interpretation"
+      ]
+    },
+    "record_id": {
+      "type": "string"
+    },
+    "record_key": {
+      "type": "string"
+    },
+    "redactions": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "release": {
+      "type": "string"
+    },
+    "runtime_measurement_required": {
+      "type": "boolean"
+    },
+    "snippet": {
+      "type": "string"
+    },
+    "source_report": {
+      "type": "string"
+    },
+    "source_revision_verified": {
+      "type": "boolean"
+    },
+    "type": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "evidence_id",
+    "record_id",
+    "record_key",
+    "file",
+    "line",
+    "snippet",
+    "type",
+    "proof",
+    "proof_grade",
+    "runtime_measurement_required",
+    "source_revision_verified",
+    "limitations",
+    "source_report",
+    "release"
+  ],
+  "title": "Evidence anchor",
+  "type": "object"
+}

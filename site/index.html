@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <title>Omarchy Plugin Observatory — public draft</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#summary" data-i18n="skip">Skip to research summary</a>
+  <header class="masthead">
+    <a class="wordmark" href="#summary" aria-label="Omarchy Plugin Observatory">OBS/OMARCHY</a>
+    <nav aria-label="Primary navigation" data-i18n-aria="nav_label">
+      <a href="#summary" data-i18n="nav_summary">Summary</a>
+      <a href="#method" data-i18n="nav_method">Method</a>
+      <a href="#agents" data-i18n="nav_agents">For agents</a>
+      <a href="#data" data-i18n="nav_data">Data</a>
+    </nav>
+    <label class="language">
+      <span class="sr-only" data-i18n="language_label">Language</span>
+      <select id="language-select">
+        <option value="en">English</option>
+        <option value="ru">Русский</option>
+        <option value="pt-BR">Português (Brasil)</option>
+        <option value="es">Español</option>
+        <option value="de">Deutsch</option>
+        <option value="fr">Français</option>
+        <option value="zh-CN">简体中文</option>
+        <option value="ja">日本語</option>
+        <option value="ko">한국어</option>
+        <option value="tr">Türkçe</option>
+      </select>
+    </label>
+  </header>
+
+  <main>
+    <section class="hero" id="summary">
+      <p class="draft" data-i18n="draft">Local draft — not published</p>
+      <p class="translation-note" id="translation-note" hidden role="status" aria-live="polite" data-i18n="translation_note">AI-translated draft — fluent human review required</p>
+      <p class="eyebrow" data-i18n="hero_eyebrow">AI-first research index</p>
+      <h1 data-i18n="hero_title">Plugin research, arranged for agents first</h1>
+      <p class="lede" data-i18n="hero_body">A versioned evidence index for writing and reviewing Omarchy plugins. The human view is generated from the same claims and records that agents consume.</p>
+      <p class="caveat" data-i18n="hero_caveat">Static audit only. A pass verdict is not a safety certificate, and timer syntax is not an energy measurement.</p>
+      <div class="stats" id="stats" aria-live="polite">
+        <div class="loading" data-i18n="loading">Loading verified claims…</div>
+      </div>
+    </section>
+
+    <section class="method" id="method">
+      <div>
+        <p class="section-number">01</p>
+        <h2 data-i18n="method_title">Evidence before narrative</h2>
+      </div>
+      <p data-i18n="method_body">Every public number resolves to a claim. Every code observation resolves to an evidence anchor. Documented facts, interpretations, hypotheses, and unknowns stay distinct.</p>
+      <ol class="evidence-flow">
+        <li><code>claims.jsonl</code><span data-i18n="flow_claims">numbers and method limits</span></li>
+        <li><code>plugins.jsonl</code><span data-i18n="flow_plugins">one record per audited plugin entry</span></li>
+        <li><code>evidence.jsonl</code><span data-i18n="flow_evidence">file, line, snippet, type, proof</span></li>
+      </ol>
+    </section>
+
+    <section class="agents" id="agents">
+      <p class="section-number">02</p>
+      <h2 data-i18n="agents_title">Choose the smallest context pack</h2>
+      <div class="pack-list">
+        <a href="../ai/packs/plugin-authoring.md"><strong data-i18n="authoring">Write a plugin</strong><code>plugin-authoring.md</code></a>
+        <a href="../ai/packs/plugin-review.md"><strong data-i18n="review">Review a plugin</strong><code>plugin-review.md</code></a>
+        <a href="../ai/packs/security-review.md"><strong data-i18n="security">Review security boundaries</strong><code>security-review.md</code></a>
+        <a href="../ai/packs/performance-review.md"><strong data-i18n="performance">Review lifecycle and polling</strong><code>performance-review.md</code></a>
+        <a href="../ai/packs/localization-review.md"><strong data-i18n="localization">Review localization</strong><code>localization-review.md</code></a>
+      </div>
+    </section>
+
+    <section class="data" id="data">
+      <div>
+        <p class="section-number">03</p>
+        <h2 data-i18n="data_title">Machine-readable release draft</h2>
+        <p data-i18n="data_body">JSONL records are UTF-8, one object per line. Schemas describe the contract; checksums bind generated files to this draft.</p>
+      </div>
+      <ul>
+        <li><a href="../release/release.json"><code>release/release.json</code></a></li>
+        <li><a href="../data/claims.jsonl"><code>data/claims.jsonl</code></a></li>
+        <li><a href="../data/plugins.jsonl"><code>data/plugins.jsonl</code></a></li>
+        <li><a href="../data/evidence.jsonl"><code>data/evidence.jsonl</code></a></li>
+        <li><a href="../data/patterns.json"><code>data/patterns.json</code></a></li>
+        <li><a href="../release/checksums.json"><code>release/checksums.json</code></a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer data-i18n="footer">Prepared locally. No repository, site, or social post has been published.</footer>
+  <script src="app.js"></script>
+</body>
+</html>

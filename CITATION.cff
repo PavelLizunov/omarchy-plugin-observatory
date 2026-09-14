@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "This is an unpublished citation draft. Cite a future tagged release, not this working directory."
+title: "Omarchy Plugin Observatory"
+type: dataset
+authors:
+  - family-names: "Lizunov"
+    given-names: "Pavel"
+abstract: "AI-first static audit records, evidence anchors, and architectural guidance for Omarchy Quattro plugins."
+keywords:
+  - Omarchy
+  - Quickshell
+  - QML
+  - static analysis
+  - AI agents
+license: "NOASSERTION"

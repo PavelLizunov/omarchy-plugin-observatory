@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "evidence_types": {
+      "type": "array"
+    },
+    "guidance": {
+      "required": [
+        "en",
+        "ru"
+      ],
+      "type": "object"
+    },
+    "pattern_id": {
+      "type": "string"
+    },
+    "polarity": {
+      "enum": [
+        "protective",
+        "hazard",
+        "neutral",
+        "method"
+      ]
+    },
+    "title": {
+      "required": [
+        "en",
+        "ru"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "pattern_id",
+    "polarity",
+    "title",
+    "guidance",
+    "evidence_types"
+  ],
+  "title": "Architecture or review pattern",
+  "type": "object"
+}

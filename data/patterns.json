@@ -1,0 +1,129 @@
+[
+  {
+    "evidence_types": [
+      "DISCRETE_ARGV_DISPATCH",
+      "PROCESS_SPAWN",
+      "SHELL_EXECUTION"
+    ],
+    "guidance": {
+      "en": "Prefer executable and arguments as separate array items. If a shell is unavoidable, pass dynamic values as positional parameters.",
+      "ru": "Передавайте исполняемый файл и аргументы отдельными элементами массива. Если shell неизбежен, передавайте динамические значения позиционными параметрами."
+    },
+    "pattern_id": "PAT-SAFE-ARGV",
+    "polarity": "protective",
+    "title": {
+      "en": "Discrete argument vectors",
+      "ru": "Дискретный массив аргументов"
+    }
+  },
+  {
+    "evidence_types": [
+      "PRIVILEGE_ESCALATION"
+    ],
+    "guidance": {
+      "en": "Never collect a system password in plugin UI. Delegate authorization to the session's Polkit agent or a system service.",
+      "ru": "Не собирайте системный пароль в UI плагина. Делегируйте авторизацию Polkit-агенту сессии или системному сервису."
+    },
+    "pattern_id": "PAT-CREDENTIAL-DELEGATION",
+    "polarity": "protective",
+    "title": {
+      "en": "Delegate authentication",
+      "ru": "Делегирование аутентификации"
+    }
+  },
+  {
+    "evidence_types": [
+      "GATED_TIMER",
+      "BATTERY_DRAIN_PREVENTION",
+      "UNTHROTTLED_BACKGROUND_POLLING"
+    ],
+    "guidance": {
+      "en": "Gate detail-view polling on visibility, serialize overlapping work, and use slower background cadence only when panel state must stay current.",
+      "ru": "Привязывайте опрос детального UI к видимости, не допускайте перекрывающихся процессов и используйте редкий фоновый интервал только когда состояние панели должно оставаться актуальным."
+    },
+    "pattern_id": "PAT-GATED-POLLING",
+    "polarity": "protective",
+    "title": {
+      "en": "Visibility-gated polling",
+      "ru": "Опрос с учётом видимости"
+    }
+  },
+  {
+    "evidence_types": [
+      "DEBOUNCE_TIMER"
+    ],
+    "guidance": {
+      "en": "Use repeat:false timers to coalesce input bursts; do not classify them as periodic polling.",
+      "ru": "Используйте таймеры repeat:false для объединения всплесков ввода; не классифицируйте их как периодический опрос."
+    },
+    "pattern_id": "PAT-ONE-SHOT-DEBOUNCE",
+    "polarity": "protective",
+    "title": {
+      "en": "One-shot debounce",
+      "ru": "Однократный debounce"
+    }
+  },
+  {
+    "evidence_types": [
+      "REACTIVE_FILE_VIEW",
+      "PROCESS_EXECUTION",
+      "SUBPROCESS_EXECUTION"
+    ],
+    "guidance": {
+      "en": "Prefer Quickshell service APIs, persistent event streams, or FileView over repeated CLI processes when the platform exposes the data.",
+      "ru": "Предпочитайте API сервисов Quickshell, постоянные потоки событий или FileView повторным CLI-процессам, когда платформа предоставляет данные."
+    },
+    "pattern_id": "PAT-REACTIVE-SERVICE",
+    "polarity": "protective",
+    "title": {
+      "en": "Reactive service integration",
+      "ru": "Реактивная интеграция с сервисами"
+    }
+  },
+  {
+    "evidence_types": [
+      "GUARDED_JSON_PARSE",
+      "BOUNDED_OUTPUT",
+      "INPUT_VALIDATION"
+    ],
+    "guidance": {
+      "en": "Cap stdout, network, clipboard, and file inputs before parsing; handle malformed JSON with a safe fallback.",
+      "ru": "Ограничивайте stdout, сеть, буфер обмена и файлы до парсинга; обрабатывайте повреждённый JSON с безопасным fallback."
+    },
+    "pattern_id": "PAT-BOUNDED-INPUT",
+    "polarity": "protective",
+    "title": {
+      "en": "Bound external input",
+      "ru": "Ограничение внешнего ввода"
+    }
+  },
+  {
+    "evidence_types": [
+      "MULTILINGUAL_I18N",
+      "UI_TEXT_FALSE_POSITIVE"
+    ],
+    "guidance": {
+      "en": "Keep human-facing strings in locale resources, preserve stable technical IDs, and test plural, number, date, RTL, long-text, and accessibility behavior.",
+      "ru": "Храните пользовательские строки в ресурсах локалей, сохраняйте стабильные технические ID и проверяйте plural, числа, даты, RTL, длинный текст и доступность."
+    },
+    "pattern_id": "PAT-LOCALIZED-UI",
+    "polarity": "protective",
+    "title": {
+      "en": "Localized natural-language UI",
+      "ru": "Локализованный пользовательский интерфейс"
+    }
+  },
+  {
+    "evidence_types": [],
+    "guidance": {
+      "en": "Separate documented code, interpretation, hypothesis, and unknown. Static indicators do not prove exploitation or measured energy cost.",
+      "ru": "Разделяйте наблюдаемый код, интерпретацию, гипотезу и unknown. Статические признаки не доказывают эксплуатацию или измеренные энергозатраты."
+    },
+    "pattern_id": "PAT-EVIDENCE-GRADE",
+    "polarity": "method",
+    "title": {
+      "en": "Grade every conclusion",
+      "ru": "Уровень доказательности для каждого вывода"
+    }
+  }
+]
