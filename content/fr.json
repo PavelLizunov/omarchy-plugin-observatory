@@ -10,7 +10,7 @@
   "flow_claims": "décomptes et méthode de vérification",
   "flow_evidence": "références de sources et interprétations enregistrées",
   "flow_plugins": "enregistrements de rapports historiques sur les plugins",
-  "footer": "v1.0.1-rc.1 · Version candidate locale. Préparée pour révision ; pas encore publiée.",
+  "footer": "v1.0.1-rc.1 · Version candidate. Préparée pour révision.",
   "hero_body": "Consultez les enregistrements d'examen statique historique des plugins Omarchy et utilisez le skill d'accompagnement pour écrire ou réviser vos propres plugins. Les décomptes ci-dessous proviennent des enregistrements exportés ; les vérifications de sources sélectionnées et les corrections sont liées séparément.",
   "hero_caveat": "Les extractions du code source d'origine et les citations n'ont pas été entièrement vérifiées. Les verdicts enregistrés, y compris pass, nécessitent un examen du code source. Aucune mesure d'exécution, d'usage CPU ou de batterie n'a été effectuée sur les plugins.",
   "hero_eyebrow": "Code, constats et corrections",

@@ -10,7 +10,7 @@
   "flow_claims": "Zählungen und wie sie geprüft wurden",
   "flow_evidence": "gespeicherte Quellverweise und Interpretationen",
   "flow_plugins": "historische Berichtsdatensätze zu Plugins",
-  "footer": "v1.0.1-rc.1 · Lokaler Release-Kandidat. Zur Prüfung vorbereitet; noch nicht veröffentlicht.",
+  "footer": "v1.0.1-rc.1 · Release-Kandidat. Zur Prüfung vorbereitet.",
   "hero_body": "Durchsuchen Sie historische statische Prüfungsdatensätze für Omarchy-Plugins und nutzen Sie den Begleit-Skill beim Schreiben oder Prüfen eigener Plugins. Die nachfolgenden Zählungen stammen aus den exportierten Datensätzen; ausgewählte Quellprüfungen und Korrekturen sind separat verlinkt.",
   "hero_caveat": "Ursprüngliche Quellcode-Checkouts und Zitate wurden nicht vollständig verifiziert. Gespeicherte Verdikte, einschließlich pass, erfordern eine Quellcode-Prüfung. Es wurden keine Messungen zu Plugin-Laufzeit, CPU- oder Akkuverbrauch durchgeführt.",
   "hero_eyebrow": "Code, Befunde und Korrekturen",

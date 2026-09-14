@@ -10,7 +10,7 @@
   "flow_claims": "sayımlar ve nasıl kontrol edildikleri",
   "flow_evidence": "saklanan kaynak referansları ve yorumlar",
   "flow_plugins": "geçmiş eklenti raporu kayıtları",
-  "footer": "v1.0.1-rc.1 · Yerel sürüm adayı. İnceleme için hazırlandı; henüz yayımlanmadı.",
+  "footer": "v1.0.1-rc.1 · Sürüm adayı. İnceleme için hazırlandı.",
   "hero_body": "Omarchy eklentilerine ait geçmiş statik inceleme kayıtlarına göz atın ve kendi eklentilerinizi yazarken veya incelerken tamamlayıcı beceriyi (skill) kullanın. Aşağıdaki sayımlar dışa aktarılan kayıtlardan alınmıştır; seçilen kaynak kontrolleri ve düzeltmeler ayrı olarak bağlantılanmıştır.",
   "hero_caveat": "Orijinal kaynak deposu kopyaları ve alıntılar tam olarak doğrulanmamıştır. pass dahil saklanan kararlar kaynak kodu incelemesi gerektirir. Hiçbir eklenti çalışma zamanı, CPU veya pil ölçümü yapılmamıştır.",
   "hero_eyebrow": "Kod, bulgular ve düzeltmeler",

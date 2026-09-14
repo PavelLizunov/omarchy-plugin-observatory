@@ -4,7 +4,7 @@
 
 A collection of **3,086 historical static-review records** about Omarchy Quattro plugins, with **10,310 reported evidence anchors**. Use it to find examples of timers, system commands, parsing and localization, then check the relevant source. The companion [agent skill](https://github.com/PavelLizunov/omarchy-plugin-patterns) provides guides for writing and reviewing your own plugins.
 
-Current version: **`v1.0.1-rc.1`**, a local release candidate. [Methodology](METHODOLOGY.md) · [Corrections](docs/corrections.md) · [Source notes](docs/source-notes.md) · [Contributing](CONTRIBUTING.md)
+Current version: **`v1.0.1-rc.1`**, a release candidate. [Methodology](METHODOLOGY.md) · [Corrections](docs/corrections.md) · [Source notes](docs/source-notes.md) · [Contributing](CONTRIBUTING.md)
 
 The records come from automated static analysis. Original checkouts and quotations have not been independently verified across the corpus, and no plugin runtime, CPU or battery measurements were made. The counts describe saved reports, not an ecosystem census or safety ranking.
 

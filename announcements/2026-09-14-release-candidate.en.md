@@ -1,20 +1,29 @@
 # X announcement — EN, long post
 
-Draft. Publish after the corresponding commits have been pushed to both repositories. Gemini attribution comes from the research author's report. Example sources: [README](../README.md) and [source notes](../docs/source-notes.md).
+Draft for posting after both repositories are updated. Gemini attribution and the account of the work come from the author. The figure 3,086 corresponds to stored reports; it does not establish independent verification of that many unique repositories. Count definition and example sources: [README](../README.md), [methodology](../METHODOLOGY.md) and [source notes](../docs/source-notes.md).
 
 ---
 
-Before building my own Omarchy Quattro plugin, I used Gemini 3.8 Flash to assemble 3,086 static-review records. That work became two projects: an open dataset with 10,310 stored source references and observations, and a skill for AI agents writing and reviewing plugins.
+I made Omarchy Plugin Patterns, a skill for writing and reviewing Omarchy plugins with an AI agent. I collected the reviews behind its recommendations in Omarchy Plugin Observatory, where you can see how other developers approach similar tasks and follow the links to their source code.
 
-The examples have details worth following. A media widget's two-second timer requests seven playerctl processes, but some results also feed the bar tooltip while the popup is closed. Another widget takes a system password in its own UI. A mail-checker component receives events through a Unix socket, with reconnection logic and a notification process still part of its work. Those details give a review somewhere to start: which background updates are needed, who handles the password, and which queries could be replaced by events?
+It started with preparations for my own Omarchy plugin. I wanted to put together a skill for the agent first, so I used Gemini 3.8 Flash to look through the code of 3,086 plugins.
 
-The automated review made mistakes too. Files reported as missing from Omarkey exist at the cited commit. A pacman hook described as running user code as root actually runs a command to create a symlink. The dataset keeps the original assessments alongside separate, sourced corrections so readers can trace the reasoning.
+A few examples from the research:
 
-Translation is another useful thread. Localized copies of plugins need to stay in sync with upstream. Shared catalogs can reduce that work; the skill covers translation readiness, message context, plurals and interface checks against the installed shell's capabilities.
+One media widget has a two-second timer that requests seven playerctl processes. Some results feed the bar tooltip even when the widget's popup is closed. A rule like “close the popup, stop all updates” would overlook the bar's own use of that data.
 
-I'm sharing a release candidate. The dataset helps locate examples, and the skill provides a structure for reviewing current code. Source checkouts and quotations have not been fully verified across the corpus; no plugins were run, and CPU or battery use was not measured. Stored verdicts still need source review.
+In wg-omarchy, the system password is entered directly in the widget and passed through stdin to sudo -S. The user initiates the connection, but the plugin's code still has access to the password.
 
-Research: https://github.com/PavelLizunov/omarchy-plugin-observatory
-Skill: https://github.com/PavelLizunov/omarchy-plugin-patterns
+A component in omarchy-thunderbird-mail-checker receives events through a Unix socket. Observatory links to that implementation as an example of exchanging events between components.
 
-If a finding about your plugin is wrong, send the record ID, commit and relevant code. The project has a correction ledger for those reports.
+Translation caught my attention too. Omarchy has localized copies of plugins, where maintaining a translation also means maintaining a separate copy of the code and bringing over changes from the original. The skill covers separating translations from logic and keeping them in one repository, using the mechanisms the shell supports.
+
+Omarchy Plugin Observatory:
+https://github.com/PavelLizunov/omarchy-plugin-observatory
+
+Omarchy Plugin Patterns:
+https://github.com/PavelLizunov/omarchy-plugin-patterns
+
+This is AI-assisted code analysis, without running the plugins. Some findings have been checked, and errors in the analysis are documented separately with corrections and links to the source.
+
+If you use Omarchy plugins or write your own, what problems do you run into? I'd like to add the experiences of users and authors to the reviews and recommendations.

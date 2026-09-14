@@ -10,7 +10,7 @@
   "flow_claims": "counts and how they were checked",
   "flow_evidence": "stored source references and interpretations",
   "flow_plugins": "historical plugin report records",
-  "footer": "v1.0.1-rc.1 · Local release candidate. Prepared for review; not yet published.",
+  "footer": "v1.0.1-rc.1 · Release candidate. Prepared for review.",
   "hero_body": "Read historical static-review records for Omarchy plugins and use the companion skill when writing or reviewing your own. The counts below come from the exported records; selected source checks and corrections are linked separately.",
   "hero_caveat": "Original source checkouts and quotations have not been fully verified. Stored verdicts, including pass, need source review. No plugin runtime, CPU or battery measurements were made.",
   "hero_eyebrow": "Code, findings and corrections",

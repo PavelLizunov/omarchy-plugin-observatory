@@ -10,7 +10,7 @@
   "flow_claims": "contagens e como foram verificadas",
   "flow_evidence": "referências de fontes e interpretações armazenadas",
   "flow_plugins": "registros de relatórios históricos de plugins",
-  "footer": "v1.0.1-rc.1 · Release candidate local. Preparado para revisão; ainda não publicado.",
+  "footer": "v1.0.1-rc.1 · Release candidate. Preparado para revisão.",
   "hero_body": "Consulte registros históricos de revisão estática para plugins Omarchy e use a skill complementar ao escrever ou revisar os seus. As contagens abaixo vêm dos registros exportados; verificações de fontes selecionadas e correções estão vinculadas separadamente.",
   "hero_caveat": "Os checkouts do código-fonte original e as citações não foram totalmente verificados. Os vereditos armazenados, incluindo pass, exigem revisão do código-fonte. Nenhuma medição de tempo de execução, CPU ou bateria de plugins foi realizada.",
   "hero_eyebrow": "Código, constatações e correções",

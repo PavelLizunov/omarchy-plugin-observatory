@@ -255,7 +255,8 @@ test("Browser and Server Integration Suite", async (t) => {
         // Footer
         const footerText = await page.$eval("footer", (el) => el.textContent);
         assert.match(footerText, /release candidate/i);
-        assert.match(footerText, /not yet published/i);
+        assert.match(footerText, /prepared for review/i);
+        assert.doesNotMatch(footerText, /not yet published|local release candidate/i);
         assert.doesNotMatch(footerText, /social post/i);
 
         // Stats
