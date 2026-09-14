@@ -23,7 +23,7 @@ Release candidate correcting the interpretation and verification contract of the
 
 ### Tooling
 
-- Require strict JSON, relational checks, mandatory inventory and checksum validation; distinguish stdlib checks from optional full JSON Schema validation.
+- Require strict JSON, relational checks, manifest inventory and checksum validation; distinguish stdlib checks from optional full JSON Schema validation.
 - Add deterministic statistics/checksum rebuilding and regression tests for malformed inputs, unsafe paths, links, schema references and migration.
 - Fix viewer metadata consumption, asynchronous language changes and loading/error/empty states; add desktop/mobile browser tests.
 - Align release metadata and citation with a release candidate, without asserting that a tag or publication already exists.

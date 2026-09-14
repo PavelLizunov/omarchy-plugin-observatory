@@ -18,7 +18,7 @@ Keep source observations, interpretations and hypotheses separate. A corrected r
 
 Original plugin/evidence fields normally remain historical; add corrected interpretations in [corrections.jsonl](data/corrections.jsonl), source references in [sources.jsonl](data/sources.jsonl) and reciprocal links on the records. Describe the inspected scope, source hashes, license information and unknowns. Never infer a license from public GitHub visibility.
 
-The release-repair migration is a guarded one-time transition: it refuses conflicting already-migrated review fields rather than overwriting subsequent editorial work. For later ledger additions, update the corresponding review/source/evidence links explicitly and verify them.
+The release-repair migration is a guarded one-time transition: it refuses conflicting already-migrated review fields rather than overwriting subsequent review entries. For later ledger additions, update the corresponding review/source/evidence links explicitly and verify them.
 
 ```bash
 python3 tools/rebuild_release.py

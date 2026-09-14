@@ -1,6 +1,6 @@
 # Observatory Interpretative Corrections
 
-This document records the four mandatory static-interpretation corrections applied to the historical dataset of the Omarchy Plugin Observatory (`v1.0.1-rc.1`, 2026-09-14).
+This document records four static-interpretation corrections applied to the historical dataset of the Omarchy Plugin Observatory (`v1.0.1-rc.1`, 2026-09-14).
 
 ## Architecture & Principles
 
@@ -11,7 +11,7 @@ This document records the four mandatory static-interpretation corrections appli
 
 ---
 
-## Pinned Mandatory Corrections
+## Pinned Corrections
 
 ### 1. Omarkey — Missing Files Rationale Disproven
 

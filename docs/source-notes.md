@@ -1,16 +1,14 @@
 # Source Inspection & Provenance Notes
 
-This document describes the methodology, scope, and catalog of pinned source repositories in `data/sources.jsonl` for the Omarchy Plugin Observatory (`v1.0.1-rc.1`, 2026-09-14).
+The [source ledger](../data/sources.jsonl) records the files inspected for Omarchy Plugin Observatory `v1.0.1-rc.1` (2026-09-14). This page explains the revision labels and lists the hashes and license notices.
 
 ## 1. Scope & Verification Boundaries
 
 The Omarchy Plugin Observatory dataset contains 3,086 historical static-analysis records and 10,310 evidence anchors. The historical audit was performed via automated static analysis and did not establish independent checkout provenance for the full corpus.
 
-The source ledger follows these boundaries:
-1. **Targeted Pinned Inspection**: Only specific repositories subject to formal review, contested findings, or highlighted illustrative examples have been fetched, inspected at exact revisions, and recorded in `data/sources.jsonl` (9 plugin sources and 2 external context references).
-2. **Preservation of Static Uncertainty**: All third-party sources not explicitly checked stay unknown. We refuse to invent or extrapolate full-corpus repository mappings from local directory cache names. All 3,086 plugin records retain historical `revision_verified: false` and `verdict.runtime_verified: false`.
-3. **Exact Revision Relations**: A source entry's `revision_relation` is set to `reported-registry-reference` exactly when the plugin's historical `registry_commit` matches the inspected `revision`. When `registry_commit` is null or differs, it is marked `current-reference`.
-4. **No Blanket Claims**: Source inspection of selected files confirms the presence or structure of specific patterns at a single commit; it does not certify runtime safety, execution performance, or whole-codebase correctness.
+The ledger covers 9 plugin sources and 2 external context references selected for corrections or examples. Files were fetched and inspected at the listed revisions. Other source mappings remain unknown; local cache names are not enough to establish them. All 3,086 plugin records retain historical `revision_verified: false` and `verdict.runtime_verified: false`.
+
+The `revision_relation` field explains how a later inspection relates to the saved report. It is `reported-registry-reference` when the inspected `revision` matches the plugin's historical `registry_commit`, and `current-reference` when that value is null or differs. Inspecting selected files establishes their contents at that commit, not the original checkout or the plugin's runtime safety, performance or overall correctness.
 
 ---
 

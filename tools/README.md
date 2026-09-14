@@ -30,7 +30,7 @@ python3 -m venv .venv
 
 Use a **trusted explicit root and a quiescent tree**: no concurrent modifications by an untrusted process. These tools are not a sandbox for an attacker who can race the filesystem or alter the verifier itself.
 
-- Mandatory inputs and public file inventory are checked for symlinks/nonregular files before reading their contents. Symlink components, raw dot/dotdot, absolute and noncanonical manifest paths are rejected.
+- Required inputs and public file inventory are checked for symlinks/nonregular files before reading their contents. Symlink components, raw dot/dotdot, absolute and noncanonical manifest paths are rejected.
 - The manifest must exactly cover the included public files. It excludes its own checksum, `.git`, `.dsh`, tests, `.venv`, `node_modules`, Python/tool caches and temporary editor artifacts. Public dotfiles are otherwise included. Run verification in a clean release checkout, not a directory containing unrelated private files.
 - A limited pattern detects common private-machine path prefixes in included text. It is **not** a complete secret scanner or a guarantee that every sensitive value is removed.
 - Source permalinks/hashes are structurally checked, not retrieved. Historical `source_report` labels are intentionally unavailable; they are not followed as local file references. Reported source behavior and quotation rights remain outside automatic verification.
@@ -55,7 +55,7 @@ python3 tools/migrate_review_records.py --validate
 python3 tools/migrate_review_records.py
 ```
 
-This is a guarded migration for the original 3,086/10,310 snapshot, not a general importer. `sources.jsonl` and `corrections.jsonl` are canonical ledgers. All transformations are validated before writes; existing inconsistent review additions are refused rather than overwritten. `--dry-run` and `--validate` perform no writes. There is no multi-file crash-atomic transaction: use version control and a quiescent tree to recover from an interrupted write. Later editorial additions should update reciprocal links explicitly, then use the verifier.
+This is a guarded migration for the original 3,086/10,310 snapshot, not a general importer. `sources.jsonl` and `corrections.jsonl` are canonical ledgers. All transformations are validated before writes; existing inconsistent review additions are refused rather than overwritten. `--dry-run` and `--validate` perform no writes. There is no multi-file crash-atomic transaction: use version control and a quiescent tree to recover from an interrupted write. Later review additions should update reciprocal links explicitly, then use the verifier.
 
 ## Tests
 
@@ -79,4 +79,4 @@ node --test tests/browser.test.cjs
 
 Installation needs network access and the browser's platform libraries. If already installed, set `PLAYWRIGHT_MODULE` to that installation and use its matching browser cache. Tests serve allowlisted local files through an ephemeral loopback server, exercise the actual page and close browser/server on completion. Screenshots go to ignored `.dsh/viewer-work/`. They do not start or replace a production server. Remove the disposable test-tools directory when no longer needed.
 
-Browser coverage includes loading, empty/malformed statistics, language changes, request ordering, error recovery, text injection, local links, keyboard controls, 320px layout in EN/RU/DE/JA and declared palette contrast. This is not a complete accessibility audit, all-language linguistic review, or plugin runtime test.
+Browser coverage includes loading, empty/malformed statistics, language changes, request ordering, error recovery, text injection, local links, keyboard controls, 320px layout in all ten shipped locales and declared palette contrast. This is not a complete accessibility audit, all-language linguistic review, or plugin runtime test.

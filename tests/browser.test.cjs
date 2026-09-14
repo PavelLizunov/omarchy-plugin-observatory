@@ -255,7 +255,7 @@ test("Browser and Server Integration Suite", async (t) => {
         // Footer
         const footerText = await page.$eval("footer", (el) => el.textContent);
         assert.match(footerText, /release candidate/i);
-        assert.match(footerText, /not a publication event/i);
+        assert.match(footerText, /not yet published/i);
         assert.doesNotMatch(footerText, /social post/i);
 
         // Stats
@@ -647,7 +647,7 @@ test("Browser and Server Integration Suite", async (t) => {
     });
 
     // 10. Mobile 320px viewport test without global overflow masking
-    for (const locale of ["en", "ru", "de", "ja"]) {
+    for (const locale of ["en", "ru", "de", "ja", "es", "fr", "ko", "pt-BR", "tr", "zh-CN"]) {
       await t.test(`Mobile 320px responsive & bounding rects without clipping for ${locale}`, async () => {
         const page = await browser.newPage();
         try {
