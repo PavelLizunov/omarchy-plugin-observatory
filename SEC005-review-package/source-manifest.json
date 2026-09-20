@@ -1,0 +1,21 @@
+{
+  "baseline_commit": "8968782f574c9d235d8f67ceb41c665c46483cd7",
+  "current_branch": "main",
+  "tools": {
+    "python": "3.12.3",
+    "pillow": "12.3.0",
+    "cryptography": "41.0.7"
+  },
+  "file_hashes_sha256": {
+    "tools/helpers/fetch_remote_image.py": "0c5afecad73d1c3974c85a1a0200233fe11e2a1add9562f2142311b5ae2274ca",
+    "tests/test_fetch_remote_image.py": "73223aa570ce79e743220fcbaa61ee0a35604bec311ce1c91983b904127f8160",
+    "docs/specs/sec005-webp-profile.md": "59e9c0545a6382f9753067ab21ffb18f3c097bc6979a5b5462c02bd952499b53",
+    "docs/marketplace-acceptance-guide.md": "9e912850df6270ca1a5a08e7621cc259dfa915f0bc9455cfb5794cd7e9afcd9d",
+    "docs/rule-matrix-specification.md": "034fbc7419f135e86c907fdb2440f01c291e08d27103699d39fee61bcd883802",
+    "tools/check_marketplace_readiness.py": "4c0c0112f0d29ad15da493da9ef544586f8cf31803f648f056016d570c7b7475"
+  },
+  "test_commands": [
+    "python3 -m unittest tests/test_fetch_remote_image.py -v",
+    "python3 -m unittest discover -s tests -p 'test_*.py' -v"
+  ]
+}

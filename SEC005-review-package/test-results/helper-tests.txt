@@ -1,0 +1,109 @@
+test_cache_creation_mode_with_permissive_umask (tests.test_fetch_remote_image.TestFetchRemoteImage.test_cache_creation_mode_with_permissive_umask)
+Cache directory must be created private immediately, even with permissive umask 000. ... ok
+test_connect_budget_then_real_tls_handshake_bounded (tests.test_fetch_remote_image.TestFetchRemoteImage.test_connect_budget_then_real_tls_handshake_bounded)
+Connect delay followed by stalled TLS handshake must terminate within overall budget. ... ok
+test_descriptor_ownership_single_owner_clean_lifecycle (tests.test_fetch_remote_image.TestFetchRemoteImage.test_descriptor_ownership_single_owner_clean_lifecycle)
+Watchdog socket must be closed exactly once by its single owner, never closing reused descriptors. ... ok
+test_destination_symlink_hijacking_prevented (tests.test_fetch_remote_image.TestFetchRemoteImage.test_destination_symlink_hijacking_prevented)
+If destination file in cache is a pre-existing symlink, it must be unlinked and replaced. ... ok
+test_dimension_bomb_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_dimension_bomb_rejected)
+Image exceeding dimension bounds (e.g. 10000x1 PNG) must be rejected. ... ok
+test_dup_failure_fails_closed_immediately (tests.test_fetch_remote_image.TestFetchRemoteImage.test_dup_failure_fails_closed_immediately)
+If os.dup() fails, fetch_remote_image must fail-closed immediately without slow I/O. ... ok
+test_eof_crossing_deadline_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_eof_crossing_deadline_rejected)
+If data transfer crosses the deadline, even if it returns EOF, it must be rejected. ... ok
+test_fake_or_truncated_png_headers_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_fake_or_truncated_png_headers_rejected)
+Fake PNG headers, zero-size PNGs, and truncated headers must be rejected. ... ok
+test_gif_frame_dimension_bomb_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_gif_frame_dimension_bomb_rejected)
+GIF with logical screen (0,0) or (1,1) but frame (10000,1) must be rejected. ... ok
+test_gif_truncated_descriptor_safe_rejection (tests.test_fetch_remote_image.TestFetchRemoteImage.test_gif_truncated_descriptor_safe_rejection)
+Truncated GIF image descriptor must raise ImageFetchSecurityError, not IndexError. ... ok
+test_gif_truncated_subblock_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_gif_truncated_subblock_rejected)
+GIF with sub-block declared length exceeding file bytes must be rejected. ... ok
+test_gif_without_frames_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_gif_without_frames_rejected)
+GIF with logical screen but zero image frame descriptors must be rejected. ... ok
+test_http_error_cleanup_closes_connection (tests.test_fetch_remote_image.TestFetchRemoteImage.test_http_error_cleanup_closes_connection)
+HTTP error response (e.g. 503) must ensure connection and socket are explicitly closed. ... ok
+test_insecure_scheme_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_insecure_scheme_rejected)
+Non-HTTPS URLs must be rejected before any network resolution. ... ok
+test_ip_validation_cgnat_and_site_local_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_ip_validation_cgnat_and_site_local_rejected)
+Carrier-Grade NAT (100.64.0.0/10) and site-local (fec0::/10) must be rejected. ... ok
+test_ip_validation_loopback_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_ip_validation_loopback_rejected)
+Loopback IPv4 and IPv6 must be rejected. ... ok
+test_ip_validation_private_rfc1918_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_ip_validation_private_rfc1918_rejected)
+RFC 1918 private IPv4 addresses must be rejected. ... ok
+test_ip_validation_public_addresses (tests.test_fetch_remote_image.TestFetchRemoteImage.test_ip_validation_public_addresses)
+Public IPv4 and IPv6 addresses must be accepted. ... ok
+test_jpeg_sof_without_scan_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_jpeg_sof_without_scan_rejected)
+JPEG with SOF but no Start of Scan (SOS) marker must be rejected. ... ok
+test_jpeg_sos_without_data_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_jpeg_sos_without_data_rejected)
+JPEG with SOF marker followed immediately by SOS without data must be rejected. ... ok
+test_non_image_payload_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_non_image_payload_rejected)
+HTML or arbitrary non-image payload must be rejected. ... ok
+test_png_adam7_rgb1x1_filter5_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_png_adam7_rgb1x1_filter5_rejected)
+Adam7 PNG with invalid filter type 5 must be rejected. ... ok
+test_png_adam7_rgb1x1_two_raster_bytes_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_png_adam7_rgb1x1_two_raster_bytes_rejected)
+Adam7 interlaced RGB 1x1 PNG with only 2 raster bytes (requires 4) must be rejected. ... ok
+test_png_corruption_after_1024_bytes_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_png_corruption_after_1024_bytes_rejected)
+PNG with valid CRC but corrupted deflate stream after 1024 bytes must be rejected. ... ok
+test_png_decompression_bomb_budget_bounded (tests.test_fetch_remote_image.TestFetchRemoteImage.test_png_decompression_bomb_budget_bounded)
+Decompression bomb exceeding 64 MiB pixel ceiling must be rejected without unbounded memory allocation. ... ok
+test_png_empty_scanlines_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_png_empty_scanlines_rejected)
+PNG that decompresses to empty scanlines must be rejected. ... ok
+test_png_incomplete_zlib_header_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_png_incomplete_zlib_header_rejected)
+PNG with incomplete zlib header in IDAT must be rejected. ... ok
+test_png_invalid_interlace2_short_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_png_invalid_interlace2_short_rejected)
+PNG with invalid interlace method 2 (only 0 or 1 allowed) must be rejected. ... ok
+test_png_only_filter_byte_no_pixel_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_png_only_filter_byte_no_pixel_rejected)
+PNG containing only filter byte without pixel payload must be rejected. ... ok
+test_png_rgb1x1_invalid_filter5_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_png_rgb1x1_invalid_filter5_rejected)
+PNG scanline starting with invalid filter type 5 (must be 0..4) must be rejected. ... ok
+test_png_rgb1x1_only_two_scanline_bytes_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_png_rgb1x1_only_two_scanline_bytes_rejected)
+RGB 1x1 PNG with only 2 scanline bytes (requires 4: 1 filter + 3 RGB) must be rejected. ... ok
+test_png_rgb_illegal_depth1_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_png_rgb_illegal_depth1_rejected)
+PNG RGB (color type 2) with illegal bit depth 1 (only 8, 16 allowed) must be rejected. ... ok
+test_png_valid_crc_invalid_deflate_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_png_valid_crc_invalid_deflate_rejected)
+PNG with valid chunk CRCs but invalid zlib compressed IDAT data must be rejected. ... ok
+test_private_cache_dir_permissions_and_symlink_rejection (tests.test_fetch_remote_image.TestFetchRemoteImage.test_private_cache_dir_permissions_and_symlink_rejection)
+Cache directory must have mode 0700 and reject symlinks. ... ok
+test_slow_dns_deadline_interrupted (tests.test_fetch_remote_image.TestFetchRemoteImage.test_slow_dns_deadline_interrupted)
+DNS resolution taking longer than total_timeout must be interrupted. ... ok
+test_valid_image_dimensions_parsed (tests.test_fetch_remote_image.TestFetchRemoteImage.test_valid_image_dimensions_parsed)
+Valid PNG within 4096x4096 bounds must be accepted. ... ok
+test_valid_png_adam7_rgb1x1_accepted (tests.test_fetch_remote_image.TestFetchRemoteImage.test_valid_png_adam7_rgb1x1_accepted)
+Valid Adam7 interlaced RGB 1x1 PNG (4 scanline bytes) must be accepted. ... ok
+test_valid_png_grayscale1bit_accepted (tests.test_fetch_remote_image.TestFetchRemoteImage.test_valid_png_grayscale1bit_accepted)
+Valid 1-bit grayscale PNG (2 scanline bytes for 1x1) must be accepted. ... ok
+test_valid_png_multi_idat_accepted (tests.test_fetch_remote_image.TestFetchRemoteImage.test_valid_png_multi_idat_accepted)
+Valid PNG split across multiple IDAT chunks must decompress and parse successfully. ... ok
+test_valid_png_rgb1x1_accepted (tests.test_fetch_remote_image.TestFetchRemoteImage.test_valid_png_rgb1x1_accepted)
+Valid 8-bit RGB 1x1 PNG (4 scanline bytes: 1 filter + 3 RGB) must be accepted. ... ok
+test_valid_webp_animated_anmf_accepted (tests.test_fetch_remote_image.TestFetchRemoteImage.test_valid_webp_animated_anmf_accepted)
+Valid animated WebP with matching canvas, ANMF frame, and VP8L bitstream must be accepted. ... ok
+test_watchdog_socket_constructor_failure_leaked_count_zero (tests.test_fetch_remote_image.TestFetchRemoteImage.test_watchdog_socket_constructor_failure_leaked_count_zero)
+If socket constructor fails after os.dup(), the dup fd must be closed and not leaked. ... ok
+test_webp_anim_without_frame_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_webp_anim_without_frame_rejected)
+WebP with VP8X and ANIM chunk but without actual frame must be rejected. ... ok
+test_webp_anmf_alpha_only_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_webp_anmf_alpha_only_rejected)
+WebP with ANMF sub-chunk containing only ALPH transparency and no color bitstream must be rejected. ... ok
+test_webp_anmf_fourcc_only_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_webp_anmf_fourcc_only_rejected)
+WebP with ANMF sub-chunk containing only a bare 4-byte FourCC without length or payload must be rejected. ... ok
+test_webp_anmf_frame_size_mismatches_bitstream_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_webp_anmf_frame_size_mismatches_bitstream_rejected)
+WebP ANMF frame size (1x1) mismatching embedded VP8L bitstream dimensions (10000x1) must be rejected. ... ok
+test_webp_anmf_one_byte_vp8l_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_webp_anmf_one_byte_vp8l_rejected)
+WebP ANMF frame with truncated 1-byte VP8L sub-chunk must be rejected. ... ok
+test_webp_anmf_truncated_subchunk_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_webp_anmf_truncated_subchunk_rejected)
+WebP ANMF frame where sub-chunk declares length exceeding frame data must be rejected. ... ok
+test_webp_canvas_without_bitstream_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_webp_canvas_without_bitstream_rejected)
+WebP with VP8X extended header but no image bitstream chunk must be rejected. ... ok
+test_webp_frame_header_without_raster_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_webp_frame_header_without_raster_rejected)
+WebP with ANMF 16-byte header but no raster bitstream sub-chunk must be rejected. ... ok
+test_webp_large_first_raster_small_second_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_webp_large_first_raster_small_second_rejected)
+WebP with conflicting/multiple top-level raster chunks (10000x1 then 1x1) must be rejected. ... ok
+test_webp_truncated_riff_file_size_rejected (tests.test_fetch_remote_image.TestFetchRemoteImage.test_webp_truncated_riff_file_size_rejected)
+WebP with RIFF header declaring larger size than available payload must be rejected. ... ok
+
+----------------------------------------------------------------------
+Ran 52 tests in 0.618s
+
+OK

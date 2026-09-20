@@ -313,7 +313,7 @@ Empirical static analysis across 242 Wave 3 community repositories identified ad
   4. **Resource bounding:** Enforces a hard byte download limit (e.g. ≤5 MiB), decode dimension cap (e.g. ≤4096×4096 pixels), and connection/transfer timeouts.
   5. **Private cache:** Stores the verified asset into a private, mode `0700` cache directory under `$XDG_CACHE_HOME` and supplies the resulting verified local `file://` URI to QML.
   6. **Local Image Asynchronous Decoding:** For local images, specify `asynchronous: true` to prevent main-thread decoding stalls on large bitmaps.
-- **Reference Implementation:** A complete, self-contained Python helper implementing this verification and IP-pinning contract is available at [`tools/helpers/fetch_remote_image.py`](../tools/helpers/fetch_remote_image.py).
+- **Reference Implementation:** A complete, self-contained Python helper implementing this verification, IP-pinning, and dual-level decode-gate contract is available at [`tools/helpers/fetch_remote_image.py`](../tools/helpers/fetch_remote_image.py). The canonical WebP container and decoding profile is formally specified in [`docs/specs/sec005-webp-profile.md`](specs/sec005-webp-profile.md).
 
 ### 5.8 Dynamic Evaluation Sinks (`SEC-006`)
 - **Vulnerability:** Passing non-literal strings to `Qt.createQmlObject()`.
