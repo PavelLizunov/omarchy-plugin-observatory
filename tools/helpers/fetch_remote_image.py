@@ -439,6 +439,10 @@ def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, in
 
     # 4. WebP: RIFF....WEBP
     elif len(data) >= 12 and data[:4] == b"RIFF" and data[8:12] == b"WEBP":
+        riff_file_size = struct.unpack("<I", data[4:8])[0] + 8
+        if len(data) < riff_file_size:
+            raise ImageFetchSecurityError(f"Truncated WebP file: received {len(data)} bytes, expected {riff_file_size} from RIFF header")
+
         idx = 12
         canvas_w, canvas_h = 0, 0
         is_extended = False
@@ -450,16 +454,22 @@ def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, in
         while idx + 8 <= len(data):
             chunk_type = data[idx:idx + 4]
             chunk_len = struct.unpack("<I", data[idx + 4:idx + 8])[0]
+            if idx + 8 + chunk_len > len(data):
+                tag_name = chunk_type.decode("latin1", "replace")
+                raise ImageFetchSecurityError(f"Truncated WebP chunk '{tag_name}': declares {chunk_len} bytes, available {len(data) - idx - 8}")
+
             chunk_data = data[idx + 8:idx + 8 + chunk_len]
 
             if chunk_type == b"VP8X":
                 is_extended = True
                 if len(chunk_data) < 10:
-                    raise ImageFetchSecurityError("Truncated VP8X header")
+                    raise ImageFetchSecurityError("Truncated VP8X header (must be at least 10 bytes)")
                 flags = chunk_data[0]
                 is_animated = bool(flags & 0x02)
                 canvas_w = 1 + struct.unpack("<I", chunk_data[4:7] + b"\x00")[0]
                 canvas_h = 1 + struct.unpack("<I", chunk_data[7:10] + b"\x00")[0]
+                if canvas_w > MAX_IMAGE_WIDTH or canvas_h > MAX_IMAGE_HEIGHT or (canvas_w * canvas_h) > MAX_IMAGE_PIXELS:
+                    raise ImageFetchSecurityError(f"WebP canvas dimensions ({canvas_w}x{canvas_h}) exceed permitted limits")
                 max_observed_w = max(max_observed_w, canvas_w)
                 max_observed_h = max(max_observed_h, canvas_h)
 
@@ -469,6 +479,10 @@ def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, in
                     raise ImageFetchSecurityError("Invalid or truncated VP8 chunk header")
                 raw_w, raw_h = struct.unpack("<HH", chunk_data[6:10])
                 w, h = raw_w & 0x3FFF, raw_h & 0x3FFF
+                if w <= 0 or h <= 0:
+                    raise ImageFetchSecurityError(f"Invalid VP8 dimensions ({w}x{h}): must be positive")
+                if w > MAX_IMAGE_WIDTH or h > MAX_IMAGE_HEIGHT or (w * h) > MAX_IMAGE_PIXELS:
+                    raise ImageFetchSecurityError(f"WebP VP8 dimensions ({w}x{h}) exceed permitted limits")
                 max_observed_w = max(max_observed_w, w)
                 max_observed_h = max(max_observed_h, h)
 
@@ -479,29 +493,63 @@ def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, in
                 b0, b1, b2, b3 = chunk_data[1:5]
                 w = 1 + (((b1 & 0x3F) << 8) | b0)
                 h = 1 + (((b3 & 0x0F) << 10) | (b2 << 2) | ((b1 & 0xC0) >> 6))
+                if w <= 0 or h <= 0:
+                    raise ImageFetchSecurityError(f"Invalid VP8L dimensions ({w}x{h}): must be positive")
+                if w > MAX_IMAGE_WIDTH or h > MAX_IMAGE_HEIGHT or (w * h) > MAX_IMAGE_PIXELS:
+                    raise ImageFetchSecurityError(f"WebP VP8L dimensions ({w}x{h}) exceed permitted limits")
                 max_observed_w = max(max_observed_w, w)
                 max_observed_h = max(max_observed_h, h)
 
             elif chunk_type == b"ANMF":
                 if not is_animated:
-                    raise ImageFetchSecurityError("ANMF chunk present in non-animated WebP")
-                if len(chunk_data) <= 16:
-                    raise ImageFetchSecurityError("Empty ANMF frame header without sub-chunks (missing image bitstream chunk)")
+                    raise ImageFetchSecurityError("ANMF frame chunk present in non-animated WebP")
+                if len(chunk_data) < 16:
+                    raise ImageFetchSecurityError("Truncated ANMF frame header (must be at least 16 bytes)")
+
+                frame_x = 2 * struct.unpack("<I", chunk_data[0:3] + b"\x00")[0]
+                frame_y = 2 * struct.unpack("<I", chunk_data[3:6] + b"\x00")[0]
+                frame_w = 1 + struct.unpack("<I", chunk_data[6:9] + b"\x00")[0]
+                frame_h = 1 + struct.unpack("<I", chunk_data[9:12] + b"\x00")[0]
+
+                if frame_w > MAX_IMAGE_WIDTH or frame_h > MAX_IMAGE_HEIGHT or (frame_w * frame_h) > MAX_IMAGE_PIXELS:
+                    raise ImageFetchSecurityError(f"WebP ANMF frame dimensions ({frame_w}x{frame_h}) exceed permitted limits")
+                if canvas_w > 0 and (frame_x + frame_w > canvas_w or frame_y + frame_h > canvas_h):
+                    raise ImageFetchSecurityError(f"WebP ANMF frame ({frame_x}+{frame_w}x{frame_y}+{frame_h}) exceeds canvas bounds ({canvas_w}x{canvas_h})")
+
+                max_observed_w = max(max_observed_w, frame_x + frame_w)
+                max_observed_h = max(max_observed_h, frame_y + frame_h)
+
                 sub_idx = 16
                 has_sub_raster = False
                 while sub_idx + 8 <= len(chunk_data):
                     stag = chunk_data[sub_idx:sub_idx + 4]
                     slen = struct.unpack("<I", chunk_data[sub_idx + 4:sub_idx + 8])[0]
+                    if sub_idx + 8 + slen > len(chunk_data):
+                        sub_name = stag.decode("latin1", "replace")
+                        raise ImageFetchSecurityError(f"Truncated sub-chunk '{sub_name}' in ANMF frame")
                     sdata = chunk_data[sub_idx + 8:sub_idx + 8 + slen]
-                    if stag == b"VP8L":
-                        if slen < 5 or sdata[0] != 0x2F:
-                            raise ImageFetchSecurityError("Invalid or truncated VP8L in ANMF frame (missing image bitstream chunk)")
+
+                    if stag == b"VP8 ":
+                        if len(sdata) < 10 or sdata[3:6] != b"\x9d\x01\x2a":
+                            raise ImageFetchSecurityError("Invalid or truncated VP8 in ANMF frame")
+                        raw_sw, raw_sh = struct.unpack("<HH", sdata[6:10])
+                        sw, sh = raw_sw & 0x3FFF, raw_sh & 0x3FFF
+                        if sw != frame_w or sh != frame_h:
+                            raise ImageFetchSecurityError(f"WebP ANMF frame size ({frame_w}x{frame_h}) mismatches VP8 bitstream size ({sw}x{sh})")
                         has_sub_raster = True
-                    elif stag == b"VP8 ":
-                        if slen < 10 or sdata[3:6] != b"\x9d\x01\x2a":
-                            raise ImageFetchSecurityError("Invalid or truncated VP8 in ANMF frame (missing image bitstream chunk)")
+
+                    elif stag == b"VP8L":
+                        if len(sdata) < 5 or sdata[0] != 0x2F:
+                            raise ImageFetchSecurityError("Invalid or truncated VP8L in ANMF frame")
+                        sb0, sb1, sb2, sb3 = sdata[1:5]
+                        sw = 1 + (((sb1 & 0x3F) << 8) | sb0)
+                        sh = 1 + (((sb3 & 0x0F) << 10) | (sb2 << 2) | ((sb1 & 0xC0) >> 6))
+                        if sw != frame_w or sh != frame_h:
+                            raise ImageFetchSecurityError(f"WebP ANMF frame size ({frame_w}x{frame_h}) mismatches VP8L bitstream size ({sw}x{sh})")
                         has_sub_raster = True
+
                     sub_idx += 8 + slen + (slen & 1)
+
                 if not has_sub_raster:
                     raise ImageFetchSecurityError("ANMF frame has no valid color bitstream sub-chunk (missing image bitstream chunk)")
                 raster_chunks_count += 1

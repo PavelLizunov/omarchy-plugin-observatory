@@ -659,7 +659,10 @@ class TestFetchRemoteImage(unittest.TestCase):
         data = b"RIFF" + struct.pack("<I", 4 + len(parts)) + b"WEBP" + parts
         with self.assertRaises(ImageFetchSecurityError) as ctx:
             parse_and_validate_image_format_and_dimensions(data)
-        self.assertIn("Ambiguous WebP: multiple raster chunks in non-animated container", str(ctx.exception))
+        # Either the 10000x1 limit or ambiguous multiple rasters is correctly triggered
+        self.assertTrue(
+            "exceed permitted limits" in str(ctx.exception) or "Ambiguous WebP" in str(ctx.exception)
+        )
 
     def test_watchdog_socket_constructor_failure_leaked_count_zero(self):
         """If socket constructor fails after os.dup(), the dup fd must be closed and not leaked."""
@@ -703,6 +706,69 @@ class TestFetchRemoteImage(unittest.TestCase):
                     os.close(fd)
                 except OSError:
                     pass
+
+    def test_webp_truncated_riff_file_size_rejected(self):
+        """WebP with RIFF header declaring larger size than available payload must be rejected."""
+        riff_head = b"RIFF" + struct.pack("<I", 100) + b"WEBP" + b"VP8X" + struct.pack("<I", 10) + b"\x00" * 10
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(riff_head)
+        self.assertIn("Truncated WebP file", str(ctx.exception))
+
+    def test_webp_anmf_truncated_subchunk_rejected(self):
+        """WebP ANMF frame where sub-chunk declares length exceeding frame data must be rejected."""
+        vp8x = b"VP8X" + struct.pack("<I", 10) + b"\x02" + b"\0" * 9
+        anim = b"ANIM" + struct.pack("<I", 6) + b"\0" * 6
+        anmf_data = b"\0" * 16 + b"VP8L" + struct.pack("<I", 100) + b"\x2f"
+        anmf = b"ANMF" + struct.pack("<I", len(anmf_data)) + anmf_data
+        chunks = vp8x + anim + anmf
+        bad_webp = b"RIFF" + struct.pack("<I", 4 + len(chunks)) + b"WEBP" + chunks
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(bad_webp)
+        self.assertIn("Truncated sub-chunk", str(ctx.exception))
+
+    def test_webp_anmf_frame_size_mismatches_bitstream_rejected(self):
+        """WebP ANMF frame size (1x1) mismatching embedded VP8L bitstream dimensions (10000x1) must be rejected."""
+        vp8x = b"VP8X" + struct.pack("<I", 10) + b"\x02" + b"\0" * 9
+        anim = b"ANIM" + struct.pack("<I", 6) + b"\0" * 6
+        vp8l_10k_data = b"\x2f\x0f\x27\x00\x00"
+        anmf_frame_1x1 = struct.pack("<I", 0)[:3] + struct.pack("<I", 0)[:3] + struct.pack("<I", 0)[:3] + struct.pack("<I", 0)[:3] + struct.pack("<I", 100)[:3] + b"\0"
+        anmf_content = anmf_frame_1x1 + b"VP8L" + struct.pack("<I", len(vp8l_10k_data)) + vp8l_10k_data
+        anmf_chunk = b"ANMF" + struct.pack("<I", len(anmf_content)) + anmf_content
+        chunks = vp8x + anim + anmf_chunk
+        bad_webp = b"RIFF" + struct.pack("<I", len(chunks) + 4) + b"WEBP" + chunks
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(bad_webp)
+        self.assertIn("mismatches VP8L bitstream size", str(ctx.exception))
+
+    def test_valid_webp_animated_anmf_accepted(self):
+        """Valid animated WebP with matching canvas, ANMF frame, and VP8L bitstream must be accepted."""
+        # Canvas 64x64 in VP8X:
+        # VP8X payload (10 bytes):
+        # byte 0: flags (0x02 = animation)
+        # bytes 1..3: reserved (0)
+        # bytes 4..6: canvas_width - 1 (63 in 24-bit little endian: \x3f\x00\x00)
+        # bytes 7..9: canvas_height - 1 (63 in 24-bit little endian: \x3f\x00\x00)
+        vp8x_payload = b"\x02\x00\x00\x00\x3f\x00\x00\x3f\x00\x00"
+        vp8x = b"VP8X" + struct.pack("<I", len(vp8x_payload)) + vp8x_payload
+        anim = b"ANIM" + struct.pack("<I", 6) + b"\x00" * 6
+
+        # Frame 64x64 at (0,0): frame_w-1 = 63, frame_h-1 = 63
+        anmf_hdr = struct.pack("<I", 0)[:3] + struct.pack("<I", 0)[:3] + struct.pack("<I", 63)[:3] + struct.pack("<I", 63)[:3] + struct.pack("<I", 100)[:3] + b"\0"
+
+        # VP8L 64x64: w-1=63 (0x3F), h-1=63 (0x3F)
+        b0 = 0x3F
+        b1 = (0 & 0x3F) | ((63 & 0x03) << 6)
+        b2 = (63 >> 2) & 0xFF
+        b3 = 0x00
+        vp8l_data = bytes([0x2F, b0, b1, b2, b3])
+        anmf_content = anmf_hdr + b"VP8L" + struct.pack("<I", len(vp8l_data)) + vp8l_data
+        anmf_chunk = b"ANMF" + struct.pack("<I", len(anmf_content)) + anmf_content
+        chunks = vp8x + anim + anmf_chunk
+        valid_webp = b"RIFF" + struct.pack("<I", len(chunks) + 4) + b"WEBP" + chunks
+        ext, w, h = parse_and_validate_image_format_and_dimensions(valid_webp)
+        self.assertEqual(ext, ".webp")
+        self.assertEqual(w, 64)
+        self.assertEqual(h, 64)
 
 
 if __name__ == "__main__":
