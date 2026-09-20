@@ -348,52 +348,101 @@ class TestFetchRemoteImage(unittest.TestCase):
             parse_and_validate_image_format_and_dimensions(bad_gif)
         self.assertIn("Truncated GIF data sub-block", str(ctx.exception))
 
-    def test_descriptor_ownership_no_close_of_reused_fd(self):
-        """Watchdog duplicate fd must not close the original socket or a reused fd upon cleanup."""
+    def test_valid_png_multi_idat_accepted(self):
+        """Valid PNG split across multiple IDAT chunks must decompress and parse successfully."""
+        w, h = 256, 256
+        raw = (b"\0" + b"\0" * (w * 3)) * h
+        packed = zlib.compress(raw)
+        split = len(packed) // 2
+        chunks = [packed[:split], packed[split:]]
+
+        ihdr = struct.pack("!I", 13) + b"IHDR" + struct.pack("!IIBBBBB", w, h, 8, 2, 0, 0, 0)
+        ihdr_crc = struct.pack("!I", zlib.crc32(b"IHDR" + struct.pack("!IIBBBBB", w, h, 8, 2, 0, 0, 0)) & 0xFFFFFFFF)
+        idat1 = struct.pack("!I", len(chunks[0])) + b"IDAT" + chunks[0] + struct.pack("!I", zlib.crc32(b"IDAT" + chunks[0]) & 0xFFFFFFFF)
+        idat2 = struct.pack("!I", len(chunks[1])) + b"IDAT" + chunks[1] + struct.pack("!I", zlib.crc32(b"IDAT" + chunks[1]) & 0xFFFFFFFF)
+        iend = struct.pack("!I", 0) + b"IEND" + struct.pack("!I", zlib.crc32(b"IEND") & 0xFFFFFFFF)
+
+        two_idat_png = b"\x89PNG\r\n\x1a\n" + ihdr + ihdr_crc + idat1 + idat2 + iend
+        ext, pw, ph = parse_and_validate_image_format_and_dimensions(two_idat_png)
+        self.assertEqual(ext, ".png")
+        self.assertEqual(pw, 256)
+        self.assertEqual(ph, 256)
+
+    def test_png_only_filter_byte_no_pixel_rejected(self):
+        """PNG containing only filter byte without pixel payload must be rejected."""
+        ihdr = struct.pack("!I", 13) + b"IHDR" + struct.pack("!IIBBBBB", 1, 1, 8, 2, 0, 0, 0)
+        ihdr_crc = struct.pack("!I", zlib.crc32(b"IHDR" + struct.pack("!IIBBBBB", 1, 1, 8, 2, 0, 0, 0)) & 0xFFFFFFFF)
+        packed = zlib.compress(b"\0") # only filter byte
+        idat = struct.pack("!I", len(packed)) + b"IDAT" + packed + struct.pack("!I", zlib.crc32(b"IDAT" + packed) & 0xFFFFFFFF)
+        iend = struct.pack("!I", 0) + b"IEND" + struct.pack("!I", zlib.crc32(b"IEND") & 0xFFFFFFFF)
+        bad_png = b"\x89PNG\r\n\x1a\n" + ihdr + ihdr_crc + idat + iend
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(bad_png)
+        self.assertIn("Truncated PNG image data", str(ctx.exception))
+
+    def test_webp_frame_header_without_raster_rejected(self):
+        """WebP with ANMF 16-byte header but no raster bitstream sub-chunk must be rejected."""
+        vp8x = b"VP8X" + struct.pack("<I", 10) + b"\x02" + b"\0" * 9
+        anim = b"ANIM" + struct.pack("<I", 6) + b"\0" * 6
+        anmf = b"ANMF" + struct.pack("<I", 16) + b"\0" * 16 # empty header
+        chunks = vp8x + anim + anmf
+        bad_webp = b"RIFF" + struct.pack("<I", 4 + len(chunks)) + b"WEBP" + chunks
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(bad_webp)
+        self.assertIn("missing image bitstream chunk", str(ctx.exception))
+
+    def test_png_decompression_bomb_budget_bounded(self):
+        """Decompression bomb exceeding 64 MiB pixel ceiling must be rejected without unbounded memory allocation."""
+        compressor = zlib.compressobj()
+        blocks = []
+        for _ in range(65):
+            blocks.append(compressor.compress(b"\0" * (1024 * 1024)))
+        blocks.append(compressor.flush())
+        packed_bomb = b"".join(blocks)
+
+        ihdr = struct.pack("!I", 13) + b"IHDR" + struct.pack("!IIBBBBB", 1, 1, 8, 2, 0, 0, 0)
+        ihdr_crc = struct.pack("!I", zlib.crc32(b"IHDR" + struct.pack("!IIBBBBB", 1, 1, 8, 2, 0, 0, 0)) & 0xFFFFFFFF)
+        idat = struct.pack("!I", len(packed_bomb)) + b"IDAT" + packed_bomb + struct.pack("!I", zlib.crc32(b"IDAT" + packed_bomb) & 0xFFFFFFFF)
+        iend = struct.pack("!I", 0) + b"IEND" + struct.pack("!I", zlib.crc32(b"IEND") & 0xFFFFFFFF)
+        bomb_png = b"\x89PNG\r\n\x1a\n" + ihdr + ihdr_crc + idat + iend
+
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(bomb_png)
+        self.assertIn("exceeds maximum permitted pixel capacity", str(ctx.exception))
+
+    def test_descriptor_ownership_single_owner_clean_lifecycle(self):
+        """Watchdog socket must be closed exactly once by its single owner, never closing reused descriptors."""
         left, right = socket.socketpair()
-        fd = left.fileno()
-        sentinel = -1
+        raw_fd = left.fileno()
+        dup_fd = os.dup(raw_fd)
+        watchdog_sock = socket.socket(fileno=dup_fd)
+
+        opened_sentinels = []
         try:
-            dup_fd = os.dup(fd)
-            dup_sock = socket.socket(fileno=dup_fd)
-            dup_sock.shutdown(socket.SHUT_RDWR)
-            dup_sock.close()
+            # Watchdog callback only shuts down, never closes
+            watchdog_sock.shutdown(socket.SHUT_RDWR)
 
-            # Ensure left is still open
-            try:
-                os.fstat(fd)
-                original_fd_closed = False
-            except OSError:
-                original_fd_closed = True
+            # dup_fd must still be open
+            os.fstat(dup_fd)
 
-            sentinel = os.open(os.devnull, os.O_RDONLY)
-            reused = (sentinel == fd)
+            # Open a sentinel fd; it must not reuse dup_fd
+            for _ in range(8):
+                sfd = os.open(os.devnull, os.O_RDONLY)
+                opened_sentinels.append(sfd)
+                self.assertNotEqual(sfd, dup_fd, "Sentinel must not reuse unclosed dup_fd")
 
-            try:
-                left.close()
-                close_error = None
-            except OSError as e:
-                close_error = str(e)
+            # Main thread single-owner close in finally
+            watchdog_sock.close()
 
-            try:
-                os.fstat(sentinel)
-                sentinel_closed = False
-            except OSError:
-                sentinel_closed = True
-
-            self.assertFalse(original_fd_closed, "Original fd must not be closed by watchdog temporary socket")
-            self.assertFalse(reused, "Sentinel must not reuse the original fd before it is closed")
-            self.assertFalse(sentinel_closed, "Sentinel must not be closed when original owner closes")
-            self.assertIsNone(close_error, "Original owner must close without error")
+            # Sentinels must remain completely unharmed
+            for sfd in opened_sentinels:
+                os.fstat(sfd)
         finally:
-            try:
-                left.close()
-            except OSError:
-                pass
+            left.close()
             right.close()
-            if sentinel >= 0:
+            for sfd in opened_sentinels:
                 try:
-                    os.close(sentinel)
+                    os.close(sfd)
                 except OSError:
                     pass
 

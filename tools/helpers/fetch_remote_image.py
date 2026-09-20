@@ -12,14 +12,15 @@ Implements the complete 6-point SEC-005 hardening contract:
    preventing Time-of-Check to Time-of-Use (TOCTOU) DNS rebinding attacks.
 4. Structural & Dimension Bounding: Validates format structure and enforces decode dimension caps
    (width and height > 0, <= 4096x4096 pixels, max 16 MP):
-   - PNG: Validates signature, IHDR length/CRC, chunk CRCs, required IDAT and IEND, complete zlib
-     deflate stream with checksum verification and uncompressed scanline byte minimum.
+   - PNG: Validates signature, IHDR length/CRC, chunk CRCs, required IDAT and IEND, streaming zlib
+     deflate verification preserving unconsumed_tail across IDAT chunks, strictly bounded output
+     ceiling (preventing decompression bombs), and minimum scanline raster bytes.
    - GIF: Validates Logical Screen Descriptor, all frame descriptors (0x2C) with bounds checks,
-     frame sub-block data, and requires at least one valid image frame.
-   - JPEG: Validates SOI, SOF marker dimensions, and requires Start of Scan (SOS, 0xDA) with entropy data.
-   - WebP: Validates RIFF/WEBP structure, chunk bounds, and requires valid image bitstream chunk (VP8, VP8L, or ANMF).
+     frame sub-block data, and requires at least one valid image frame with sub-blocks.
+   - JPEG: Validates SOI, SOF marker dimensions, and requires Start of Scan (SOS, 0xDA) with entropy scan data.
+   - WebP: Validates RIFF/WEBP structure, chunk bounds, and requires valid image bitstream chunk (VP8, VP8L, or ANMF with frame payload).
 5. End-to-End Operation Deadline: Strict overall deadline (default 30s) bounding DNS wait, TCP connect,
-   TLS handshake, HTTP headers, and data transfer via clean descriptor-duplicate watchdog shutdown.
+   TLS handshake, HTTP headers, and data transfer via single-owner descriptor-duplicate watchdog shutdown.
 6. Private Cache Storage: Caches verified images in an owner-verified mode 0700 private user cache
    directory created with umask 077, symlink rejection, atomic mkstemp, and content-addressed SHA-256 filenames.
 """
@@ -195,26 +196,53 @@ def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, in
         if not (has_idat and has_iend):
             raise ImageFetchSecurityError("Incomplete PNG: missing required IDAT or IEND chunk")
 
-        # Full stream verification of IDAT chunks with resource ceiling
+        # Full stream verification of IDAT chunks with resource ceiling and unconsumed_tail handling
         max_scanline_bytes = min(MAX_IMAGE_PIXELS * 4 + 4096, 64 * 1024 * 1024)
         try:
             decompressor = zlib.decompressobj()
             decompressed_total = 0
+
             for chunk in idat_chunks:
-                out = decompressor.decompress(chunk, 65536)
+                input_data = chunk
+                while input_data:
+                    budget_left = max_scanline_bytes - decompressed_total
+                    if budget_left <= 0:
+                        raise ImageFetchSecurityError("Decompressed PNG exceeds maximum permitted pixel capacity")
+
+                    step_limit = min(65536, budget_left + 1)
+                    out = decompressor.decompress(input_data, step_limit)
+                    decompressed_total += len(out)
+                    if decompressed_total > max_scanline_bytes:
+                        raise ImageFetchSecurityError("Decompressed PNG exceeds maximum permitted pixel capacity")
+
+                    input_data = decompressor.unconsumed_tail
+                    if not out and input_data == chunk:
+                        break
+
+            # Handle remaining buffered data in decompressor without unbounded flush
+            while not decompressor.eof:
+                budget_left = max_scanline_bytes - decompressed_total
+                if budget_left <= 0:
+                    raise ImageFetchSecurityError("Decompressed PNG exceeds maximum permitted pixel capacity")
+                step_limit = min(65536, budget_left + 1)
+                out = decompressor.decompress(decompressor.unconsumed_tail, step_limit)
+                if not out:
+                    out = decompressor.flush(step_limit)
+                    if not out:
+                        break
                 decompressed_total += len(out)
                 if decompressed_total > max_scanline_bytes:
                     raise ImageFetchSecurityError("Decompressed PNG exceeds maximum permitted pixel capacity")
-            out = decompressor.flush()
-            decompressed_total += len(out)
-            if decompressed_total > max_scanline_bytes:
-                raise ImageFetchSecurityError("Decompressed PNG exceeds maximum permitted pixel capacity")
 
             if not decompressor.eof:
                 raise ImageFetchSecurityError("Incomplete or truncated PNG deflate stream in IDAT")
 
-            if decompressed_total < h:
-                raise ImageFetchSecurityError(f"Truncated PNG image data: decompressed {decompressed_total} bytes, expected at least {h} scanline bytes")
+            # Must have at least 1 filter byte + 1 data byte per scanline
+            min_required_bytes = h * 2
+            if decompressed_total < min_required_bytes:
+                raise ImageFetchSecurityError(
+                    f"Truncated PNG image data: decompressed {decompressed_total} bytes, expected at least {min_required_bytes} scanline bytes"
+                )
         except zlib.error as e:
             raise ImageFetchSecurityError(f"Corrupted or invalid PNG compressed image stream (IDAT): {e}") from e
 
@@ -362,8 +390,11 @@ def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, in
                     w = 1 + struct.unpack("<I", chunk_data[4:7] + b"\x00")[0]
                     h = 1 + struct.unpack("<I", chunk_data[7:10] + b"\x00")[0]
             elif chunk_type == b"ANMF":
-                if len(chunk_data) >= 16:
-                    has_bitstream = True
+                # Animation frame must have frame header (16 bytes) plus actual payload sub-chunk
+                if len(chunk_data) > 16:
+                    sub_type = chunk_data[16:20]
+                    if sub_type in (b"VP8 ", b"VP8L", b"ALPH"):
+                        has_bitstream = True
             idx += 8 + chunk_len + (chunk_len & 1)
 
         if not has_bitstream or w <= 0 or h <= 0:
@@ -477,7 +508,7 @@ def fetch_remote_image(
         raw_sock = socket.create_connection((pinned_ip, port), timeout=step_timeout)
         tls_sock = None
         conn = None
-        dup_fd = -1
+        watchdog_sock = None
 
         try:
             # Check remaining deadline after TCP connect
@@ -485,37 +516,24 @@ def fetch_remote_image(
             if remaining_time <= 0:
                 raise ImageFetchSecurityError(f"Operation exceeded overall deadline of {total_timeout}s after TCP connect")
 
-            # Duplicate file descriptor for independent watchdog shutdown without stealing socket ownership
+            # Duplicate file descriptor for single-owner watchdog shutdown without stealing socket ownership
             try:
                 raw_sock_fd = raw_sock.fileno()
                 if isinstance(raw_sock_fd, int) and raw_sock_fd >= 0:
                     dup_fd = os.dup(raw_sock_fd)
+                    watchdog_sock = socket.socket(fileno=dup_fd)
             except (OSError, TypeError):
-                dup_fd = -1
+                watchdog_sock = None
 
             is_timeout_aborted = threading.Event()
 
             def _watchdog_abort():
                 is_timeout_aborted.set()
-                if dup_fd >= 0:
+                if watchdog_sock is not None:
                     try:
-                        s = socket.socket(fileno=dup_fd)
-                        s.shutdown(socket.SHUT_RDWR)
-                        s.close()
+                        watchdog_sock.shutdown(socket.SHUT_RDWR)
                     except Exception:
                         pass
-                try:
-                    conn.close()
-                except Exception:
-                    pass
-                try:
-                    tls_sock.close()
-                except Exception:
-                    pass
-                try:
-                    raw_sock.close()
-                except Exception:
-                    pass
 
             watchdog_interval = max(0.001, deadline - time.monotonic())
             watchdog = threading.Timer(watchdog_interval, _watchdog_abort)
@@ -591,12 +609,12 @@ def fetch_remote_image(
             finally:
                 watchdog.cancel()
         finally:
-            if conn:
+            if conn is not None:
                 try:
                     conn.close()
                 except Exception:
                     pass
-            if tls_sock:
+            if tls_sock is not None:
                 try:
                     tls_sock.close()
                 except Exception:
@@ -605,10 +623,10 @@ def fetch_remote_image(
                 raw_sock.close()
             except Exception:
                 pass
-            if dup_fd >= 0:
+            if watchdog_sock is not None:
                 try:
-                    os.close(dup_fd)
-                except OSError:
+                    watchdog_sock.close()
+                except Exception:
                     pass
     else:
         raise ImageFetchSecurityError(f"Exceeded maximum redirect limit of {max_redirects} hops")
