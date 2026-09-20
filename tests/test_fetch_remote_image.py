@@ -5,6 +5,7 @@ import io
 import ipaddress
 import os
 import socket
+import ssl
 import struct
 import tempfile
 import threading
@@ -286,6 +287,160 @@ class TestFetchRemoteImage(unittest.TestCase):
                 with self.assertRaises(ImageFetchSecurityError) as ctx:
                     fetch_remote_image("https://example.com/img.png", cache_dir=Path(td), total_timeout=0.05)
                 self.assertIn("exceeded overall deadline", str(ctx.exception))
+
+    def test_png_incomplete_zlib_header_rejected(self):
+        """PNG with incomplete zlib header in IDAT must be rejected."""
+        ihdr = struct.pack("!I", 13) + b"IHDR" + struct.pack("!IIBBBBB", 1, 1, 8, 2, 0, 0, 0)
+        ihdr_crc = struct.pack("!I", zlib.crc32(b"IHDR" + struct.pack("!IIBBBBB", 1, 1, 8, 2, 0, 0, 0)) & 0xFFFFFFFF)
+        idat_payload = b"\x78\x9c"
+        idat = struct.pack("!I", len(idat_payload)) + b"IDAT" + idat_payload + struct.pack("!I", zlib.crc32(b"IDAT" + idat_payload) & 0xFFFFFFFF)
+        iend = struct.pack("!I", 0) + b"IEND" + struct.pack("!I", zlib.crc32(b"IEND") & 0xFFFFFFFF)
+        bad_png = b"\x89PNG\r\n\x1a\n" + ihdr + ihdr_crc + idat + iend
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(bad_png)
+        self.assertIn("Incomplete or truncated PNG deflate stream", str(ctx.exception))
+
+    def test_png_empty_scanlines_rejected(self):
+        """PNG that decompresses to empty scanlines must be rejected."""
+        ihdr = struct.pack("!I", 13) + b"IHDR" + struct.pack("!IIBBBBB", 1, 1, 8, 2, 0, 0, 0)
+        ihdr_crc = struct.pack("!I", zlib.crc32(b"IHDR" + struct.pack("!IIBBBBB", 1, 1, 8, 2, 0, 0, 0)) & 0xFFFFFFFF)
+        idat_payload = zlib.compress(b"")
+        idat = struct.pack("!I", len(idat_payload)) + b"IDAT" + idat_payload + struct.pack("!I", zlib.crc32(b"IDAT" + idat_payload) & 0xFFFFFFFF)
+        iend = struct.pack("!I", 0) + b"IEND" + struct.pack("!I", zlib.crc32(b"IEND") & 0xFFFFFFFF)
+        bad_png = b"\x89PNG\r\n\x1a\n" + ihdr + ihdr_crc + idat + iend
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(bad_png)
+        self.assertIn("Truncated PNG image data", str(ctx.exception))
+
+    def test_png_corruption_after_1024_bytes_rejected(self):
+        """PNG with valid CRC but corrupted deflate stream after 1024 bytes must be rejected."""
+        ihdr = struct.pack("!I", 13) + b"IHDR" + struct.pack("!IIBBBBB", 1, 512, 8, 2, 0, 0, 0)
+        ihdr_crc = struct.pack("!I", zlib.crc32(b"IHDR" + struct.pack("!IIBBBBB", 1, 512, 8, 2, 0, 0, 0)) & 0xFFFFFFFF)
+        scanlines = b"\x00" * 2048
+        stream = bytearray(zlib.compress(scanlines))
+        stream[-1] ^= 1
+        idat = struct.pack("!I", len(stream)) + b"IDAT" + bytes(stream) + struct.pack("!I", zlib.crc32(b"IDAT" + bytes(stream)) & 0xFFFFFFFF)
+        iend = struct.pack("!I", 0) + b"IEND" + struct.pack("!I", zlib.crc32(b"IEND") & 0xFFFFFFFF)
+        bad_png = b"\x89PNG\r\n\x1a\n" + ihdr + ihdr_crc + idat + iend
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(bad_png)
+        self.assertIn("Corrupted or invalid PNG compressed image stream", str(ctx.exception))
+
+    def test_webp_anim_without_frame_rejected(self):
+        """WebP with VP8X and ANIM chunk but without actual frame must be rejected."""
+        chunks = b"VP8X" + struct.pack("<I", 10) + b"\x02" + b"\x00" * 9 + b"ANIM" + struct.pack("<I", 6) + b"\x00" * 6
+        bad_webp = b"RIFF" + struct.pack("<I", 4 + len(chunks)) + b"WEBP" + chunks
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(bad_webp)
+        self.assertIn("missing image bitstream chunk", str(ctx.exception))
+
+    def test_jpeg_sos_without_data_rejected(self):
+        """JPEG with SOF marker followed immediately by SOS without data must be rejected."""
+        bad_jpeg = b"\xff\xd8\xff\xc0" + struct.pack(">H", 17) + b"\x08" + struct.pack(">HH", 1, 1) + b"\x03\x01\x11\x00\x02\x11\x00\x03\x11\x00\xff\xda"
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(bad_jpeg)
+        self.assertIn("Truncated JPEG SOS marker", str(ctx.exception))
+
+    def test_gif_truncated_subblock_rejected(self):
+        """GIF with sub-block declared length exceeding file bytes must be rejected."""
+        bad_gif = b"GIF89a" + struct.pack("<HH", 1, 1) + b"\x80\x00\x00\x00\x00\x00\xff\xff\xff" + b"," + struct.pack("<HHHH", 0, 0, 1, 1) + b"\x00\x02\xff\x00"
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(bad_gif)
+        self.assertIn("Truncated GIF data sub-block", str(ctx.exception))
+
+    def test_descriptor_ownership_no_close_of_reused_fd(self):
+        """Watchdog duplicate fd must not close the original socket or a reused fd upon cleanup."""
+        left, right = socket.socketpair()
+        fd = left.fileno()
+        sentinel = -1
+        try:
+            dup_fd = os.dup(fd)
+            dup_sock = socket.socket(fileno=dup_fd)
+            dup_sock.shutdown(socket.SHUT_RDWR)
+            dup_sock.close()
+
+            # Ensure left is still open
+            try:
+                os.fstat(fd)
+                original_fd_closed = False
+            except OSError:
+                original_fd_closed = True
+
+            sentinel = os.open(os.devnull, os.O_RDONLY)
+            reused = (sentinel == fd)
+
+            try:
+                left.close()
+                close_error = None
+            except OSError as e:
+                close_error = str(e)
+
+            try:
+                os.fstat(sentinel)
+                sentinel_closed = False
+            except OSError:
+                sentinel_closed = True
+
+            self.assertFalse(original_fd_closed, "Original fd must not be closed by watchdog temporary socket")
+            self.assertFalse(reused, "Sentinel must not reuse the original fd before it is closed")
+            self.assertFalse(sentinel_closed, "Sentinel must not be closed when original owner closes")
+            self.assertIsNone(close_error, "Original owner must close without error")
+        finally:
+            try:
+                left.close()
+            except OSError:
+                pass
+            right.close()
+            if sentinel >= 0:
+                try:
+                    os.close(sentinel)
+                except OSError:
+                    pass
+
+    def test_http_error_cleanup_closes_connection(self):
+        """HTTP error response (e.g. 503) must ensure connection and socket are explicitly closed."""
+        left, right = socket.socketpair()
+        resp = MagicMock(status=503, reason="Service Unavailable")
+        conn = MagicMock()
+        conn.getresponse.return_value = resp
+        ctx = MagicMock()
+        ctx.wrap_socket.side_effect = lambda s, server_hostname: s
+
+        try:
+            with patch("tools.helpers.fetch_remote_image.resolve_and_validate_host", return_value="93.184.216.34"), \
+                 patch("tools.helpers.fetch_remote_image.socket.create_connection", return_value=left), \
+                 patch("tools.helpers.fetch_remote_image.ssl.create_default_context", return_value=ctx), \
+                 patch("tools.helpers.fetch_remote_image.http.client.HTTPSConnection", return_value=conn):
+                with self.assertRaises(ImageFetchSecurityError):
+                    fetch_remote_image("https://example.com/error.png")
+            self.assertTrue(conn.close.called, "conn.close() must be explicitly called on HTTP error")
+        finally:
+            left.close()
+            right.close()
+
+    def test_connect_budget_then_real_tls_handshake_bounded(self):
+        """Connect delay followed by stalled TLS handshake must terminate within overall budget."""
+        left, right = socket.socketpair()
+        ctx = ssl.create_default_context()
+
+        def connect_delay(addr, timeout):
+            time.sleep(0.08)  # 80ms of 100ms budget
+            left.settimeout(timeout)
+            return left
+
+        start = time.monotonic()
+        try:
+            with patch("tools.helpers.fetch_remote_image.resolve_and_validate_host", return_value="93.184.216.34"), \
+                 patch("tools.helpers.fetch_remote_image.socket.create_connection", side_effect=connect_delay), \
+                 patch("tools.helpers.fetch_remote_image.ssl.create_default_context", return_value=ctx):
+                with self.assertRaises(ImageFetchSecurityError) as ctx_err:
+                    fetch_remote_image("https://fixture.invalid/img.png", total_timeout=0.10, socket_timeout=1.0)
+                self.assertIn("overall deadline", str(ctx_err.exception))
+        finally:
+            left.close()
+            right.close()
+        elapsed = time.monotonic() - start
+        self.assertLess(elapsed, 0.15, "Handshake timeout must not exceed overall budget")
 
 
 if __name__ == "__main__":

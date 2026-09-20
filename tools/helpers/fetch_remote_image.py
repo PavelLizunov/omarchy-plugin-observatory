@@ -2,22 +2,24 @@
 """fetch_remote_image.py - Reference implementation for SEC-005: Safe remote image retrieval.
 
 Implements the complete 6-point SEC-005 hardening contract:
-1. Destination Validation: HTTPS only. Resolves DNS and validates all resolved IPs against
-   RFC 1918 private, loopback, link-local, multicast, site-local (fec0::/10), carrier-grade NAT
-   (100.64.0.0/10), benchmarking (198.18.0.0/15), and all non-global ranges across both IPv4 and IPv6,
-   including IPv4-mapped IPv6 (::ffff:0:0/96).
+1. Destination Validation: HTTPS only. Resolves DNS with bounded timeout and validates all
+   resolved IPs against RFC 1918 private, loopback, link-local, multicast, site-local (fec0::/10),
+   carrier-grade NAT (100.64.0.0/10), benchmarking (198.18.0.0/15), and all non-global ranges
+   across both IPv4 and IPv6, including IPv4-mapped IPv6 (::ffff:0:0/96).
 2. Redirect Revalidation: Re-validates scheme, hostname, and resolved IP at every redirect hop (<= 3 hops).
 3. IP Pinning with SNI Preservation: Connects directly to the pre-validated IP while setting
    TLS Server Name Indication (SNI) and hostname verification to the original domain,
    preventing Time-of-Check to Time-of-Use (TOCTOU) DNS rebinding attacks.
 4. Structural & Dimension Bounding: Validates format structure and enforces decode dimension caps
    (width and height > 0, <= 4096x4096 pixels, max 16 MP):
-   - PNG: Validates signature, IHDR length/CRC, chunk CRCs, required IDAT and IEND, and checks IDAT DEFLATE stream.
-   - GIF: Validates Logical Screen Descriptor, all Image Descriptors (0x2C), requires at least one image frame.
-   - JPEG: Validates SOI, SOF marker dimensions, and requires Start of Scan (SOS, 0xDA).
-   - WebP: Validates RIFF/WEBP structure and requires valid image bitstream chunk (VP8, VP8L, or ANMF).
-5. Overall Operation Deadline: Strict end-to-end deadline (default 30s) bounding DNS resolution wait,
-   TLS handshake, redirects, header reception, and data transfer via active socket watchdog.
+   - PNG: Validates signature, IHDR length/CRC, chunk CRCs, required IDAT and IEND, complete zlib
+     deflate stream with checksum verification and uncompressed scanline byte minimum.
+   - GIF: Validates Logical Screen Descriptor, all frame descriptors (0x2C) with bounds checks,
+     frame sub-block data, and requires at least one valid image frame.
+   - JPEG: Validates SOI, SOF marker dimensions, and requires Start of Scan (SOS, 0xDA) with entropy data.
+   - WebP: Validates RIFF/WEBP structure, chunk bounds, and requires valid image bitstream chunk (VP8, VP8L, or ANMF).
+5. End-to-End Operation Deadline: Strict overall deadline (default 30s) bounding DNS wait, TCP connect,
+   TLS handshake, HTTP headers, and data transfer via clean descriptor-duplicate watchdog shutdown.
 6. Private Cache Storage: Caches verified images in an owner-verified mode 0700 private user cache
    directory created with umask 077, symlink rejection, atomic mkstemp, and content-addressed SHA-256 filenames.
 """
@@ -136,7 +138,6 @@ def resolve_and_validate_host(hostname: str, port: int, timeout: float = DEFAULT
     for entry in resolved_entries:
         sockaddr = entry[4]
         ip_str = sockaddr[0]
-        # Validate each resolved address
         normalize_and_validate_ip(ip_str)
         valid_ips.append(ip_str)
 
@@ -157,7 +158,6 @@ def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, in
         if len(data) < 33:
             raise ImageFetchSecurityError("Truncated PNG header (must be at least 33 bytes for valid IHDR)")
         
-        # Verify first chunk is strictly IHDR with length 13
         ihdr_len = struct.unpack(">I", data[8:12])[0]
         ihdr_type = data[12:16]
         if ihdr_len != 13 or ihdr_type != b"IHDR":
@@ -167,13 +167,11 @@ def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, in
         if w <= 0 or h <= 0:
             raise ImageFetchSecurityError(f"Invalid PNG dimensions ({w}x{h}): width and height must be positive")
 
-        # Verify IHDR CRC
         expected_crc = struct.unpack(">I", data[29:33])[0]
         actual_crc = zlib.crc32(data[12:29]) & 0xFFFFFFFF
         if actual_crc != expected_crc:
             raise ImageFetchSecurityError("Corrupted PNG IHDR chunk CRC")
 
-        # Scan chunks to verify basic structure: must contain IDAT and IEND
         idx = 8
         has_idat = False
         has_iend = False
@@ -197,12 +195,27 @@ def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, in
         if not (has_idat and has_iend):
             raise ImageFetchSecurityError("Incomplete PNG: missing required IDAT or IEND chunk")
 
-        # Verify IDAT compressed stream is valid zlib deflate data
+        # Full stream verification of IDAT chunks with resource ceiling
+        max_scanline_bytes = min(MAX_IMAGE_PIXELS * 4 + 4096, 64 * 1024 * 1024)
         try:
             decompressor = zlib.decompressobj()
-            combined = b"".join(idat_chunks)
-            decompressor.decompress(combined, 1024)
-        except Exception as e:
+            decompressed_total = 0
+            for chunk in idat_chunks:
+                out = decompressor.decompress(chunk, 65536)
+                decompressed_total += len(out)
+                if decompressed_total > max_scanline_bytes:
+                    raise ImageFetchSecurityError("Decompressed PNG exceeds maximum permitted pixel capacity")
+            out = decompressor.flush()
+            decompressed_total += len(out)
+            if decompressed_total > max_scanline_bytes:
+                raise ImageFetchSecurityError("Decompressed PNG exceeds maximum permitted pixel capacity")
+
+            if not decompressor.eof:
+                raise ImageFetchSecurityError("Incomplete or truncated PNG deflate stream in IDAT")
+
+            if decompressed_total < h:
+                raise ImageFetchSecurityError(f"Truncated PNG image data: decompressed {decompressed_total} bytes, expected at least {h} scanline bytes")
+        except zlib.error as e:
             raise ImageFetchSecurityError(f"Corrupted or invalid PNG compressed image stream (IDAT): {e}") from e
 
         ext = ".png"
@@ -235,6 +248,8 @@ def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, in
                     idx += 1
                     if sub_len == 0:
                         break
+                    if idx + sub_len > len(data):
+                        raise ImageFetchSecurityError("Truncated GIF extension sub-block")
                     idx += sub_len
             elif block_type == 0x2C:  # Image Descriptor
                 if idx + 10 > len(data):
@@ -254,12 +269,18 @@ def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, in
                     raise ImageFetchSecurityError("Truncated GIF frame data")
                 min_code_size = data[idx]
                 idx += 1
+                has_frame_subblocks = False
                 while idx < len(data):
                     sub_len = data[idx]
                     idx += 1
                     if sub_len == 0:
                         break
+                    if idx + sub_len > len(data):
+                        raise ImageFetchSecurityError("Truncated GIF data sub-block")
                     idx += sub_len
+                    has_frame_subblocks = True
+                if not has_frame_subblocks:
+                    raise ImageFetchSecurityError("Truncated GIF: image frame contains no data sub-blocks")
             else:
                 idx += 1
 
@@ -275,6 +296,7 @@ def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, in
         w, h = 0, 0
         has_sof = False
         has_sos = False
+        scan_data_present = False
         while idx < len(data) - 1:
             if data[idx] != 0xFF:
                 idx += 1
@@ -288,7 +310,18 @@ def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, in
                 length = struct.unpack(">H", data[idx + 2:idx + 4])[0]
                 idx += 2 + length
             elif marker == 0xDA:  # SOS (Start of Scan)
+                if idx + 4 > len(data):
+                    raise ImageFetchSecurityError("Truncated JPEG SOS marker")
+                sos_length = struct.unpack(">H", data[idx + 2:idx + 4])[0]
                 has_sos = True
+                idx += 2 + sos_length
+                scan_start = idx
+                while idx < len(data) - 1:
+                    if data[idx] == 0xFF and data[idx + 1] not in (0x00, 0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7):
+                        break
+                    idx += 1
+                if idx > scan_start:
+                    scan_data_present = True
                 break
             elif marker == 0xD9:  # EOI
                 break
@@ -300,8 +333,8 @@ def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, in
                 length = struct.unpack(">H", data[idx + 2:idx + 4])[0]
                 idx += 2 + length
 
-        if not (has_sof and has_sos):
-            raise ImageFetchSecurityError("Invalid JPEG: missing Start of Frame (SOF) or Start of Scan (SOS)")
+        if not (has_sof and has_sos and scan_data_present):
+            raise ImageFetchSecurityError("Invalid JPEG: missing Start of Frame (SOF) or Start of Scan (SOS) data")
         ext = ".jpg"
 
     # 4. WebP: RIFF....WEBP
@@ -328,8 +361,9 @@ def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, in
                 if len(chunk_data) >= 10:
                     w = 1 + struct.unpack("<I", chunk_data[4:7] + b"\x00")[0]
                     h = 1 + struct.unpack("<I", chunk_data[7:10] + b"\x00")[0]
-            elif chunk_type in (b"ANIM", b"ANMF"):
-                has_bitstream = True
+            elif chunk_type == b"ANMF":
+                if len(chunk_data) >= 16:
+                    has_bitstream = True
             idx += 8 + chunk_len + (chunk_len & 1)
 
         if not has_bitstream or w <= 0 or h <= 0:
@@ -366,11 +400,9 @@ def get_private_cache_dir(custom_dir: Optional[Path] = None) -> Path:
             base = Path.home() / ".cache"
         cache_dir = base / "omarchy-images"
 
-    # Reject if path exists and is a symlink
     if cache_dir.is_symlink():
         raise ImageFetchSecurityError(f"Insecure cache directory: path is a symbolic link: {cache_dir}")
 
-    # Set umask during mkdir to ensure private creation immediately
     old_umask = os.umask(0o077)
     try:
         cache_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -388,7 +420,6 @@ def get_private_cache_dir(custom_dir: Optional[Path] = None) -> Path:
     if st.st_uid != os.getuid():
         raise ImageFetchSecurityError(f"Insecure cache directory ownership: UID {st.st_uid}, expected {os.getuid()}")
 
-    # Enforce mode 0700 without swallowing errors
     try:
         os.chmod(cache_dir, 0o700)
     except OSError as e:
@@ -442,127 +473,147 @@ def fetch_remote_image(
 
         step_timeout = min(socket_timeout, remaining_time)
 
-        # 2. Establish TLS connection with IP pinning and SNI preservation
-        ssl_ctx = ssl.create_default_context()
+        # 2. Establish connection with timeout bounded by remaining deadline
         raw_sock = socket.create_connection((pinned_ip, port), timeout=step_timeout)
+        tls_sock = None
+        conn = None
+        dup_fd = -1
+
         try:
-            # Wrap socket with TLS; server_hostname pins SNI and certificate verification to original domain
-            tls_sock = ssl_ctx.wrap_socket(raw_sock, server_hostname=hostname)
-        except Exception:
-            raw_sock.close()
-            raise
+            # Check remaining deadline after TCP connect
+            remaining_time = deadline - time.monotonic()
+            if remaining_time <= 0:
+                raise ImageFetchSecurityError(f"Operation exceeded overall deadline of {total_timeout}s after TCP connect")
 
-        conn = http.client.HTTPSConnection(hostname, port=port, timeout=step_timeout)
-        conn.sock = tls_sock
-
-        path_and_query = parsed.path or "/"
-        if parsed.query:
-            path_and_query += f"?{parsed.query}"
-
-        headers = {
-            "User-Agent": "Omarchy-Image-Fetcher/1.0",
-            "Accept": "image/png, image/jpeg, image/gif, image/webp",
-            "Connection": "close",
-        }
-
-        # 3. Active socket watchdog timer: actively aborts socket when deadline expires
-        fd = -1
-        try:
-            fd = tls_sock.fileno()
-        except Exception:
+            # Duplicate file descriptor for independent watchdog shutdown without stealing socket ownership
             try:
-                fd = raw_sock.fileno()
-            except Exception:
-                fd = -1
+                raw_sock_fd = raw_sock.fileno()
+                if isinstance(raw_sock_fd, int) and raw_sock_fd >= 0:
+                    dup_fd = os.dup(raw_sock_fd)
+            except (OSError, TypeError):
+                dup_fd = -1
 
-        is_timeout_aborted = threading.Event()
+            is_timeout_aborted = threading.Event()
 
-        def _watchdog_abort():
-            is_timeout_aborted.set()
-            if fd >= 0:
+            def _watchdog_abort():
+                is_timeout_aborted.set()
+                if dup_fd >= 0:
+                    try:
+                        s = socket.socket(fileno=dup_fd)
+                        s.shutdown(socket.SHUT_RDWR)
+                        s.close()
+                    except Exception:
+                        pass
                 try:
-                    socket.socket(fileno=fd).shutdown(socket.SHUT_RDWR)
+                    conn.close()
                 except Exception:
                     pass
+                try:
+                    tls_sock.close()
+                except Exception:
+                    pass
+                try:
+                    raw_sock.close()
+                except Exception:
+                    pass
+
+            watchdog_interval = max(0.001, deadline - time.monotonic())
+            watchdog = threading.Timer(watchdog_interval, _watchdog_abort)
+            watchdog.daemon = True
+            watchdog.start()
+
             try:
-                raw_sock.shutdown(socket.SHUT_RDWR)
-            except Exception:
-                pass
-            try:
-                tls_sock.shutdown(socket.SHUT_RDWR)
-            except Exception:
-                pass
-            try:
-                tls_sock.close()
-            except Exception:
-                pass
+                # Update socket timeout for TLS handshake
+                raw_sock.settimeout(min(socket_timeout, remaining_time))
+
+                # TLS handshake with SNI preservation
+                ssl_ctx = ssl.create_default_context()
+                tls_sock = ssl_ctx.wrap_socket(raw_sock, server_hostname=hostname)
+
+                remaining_time = deadline - time.monotonic()
+                if remaining_time <= 0 or is_timeout_aborted.is_set():
+                    raise ImageFetchSecurityError(f"Operation exceeded overall deadline of {total_timeout}s during TLS handshake")
+
+                conn = http.client.HTTPSConnection(hostname, port=port, timeout=min(socket_timeout, remaining_time))
+                conn.sock = tls_sock
+
+                path_and_query = parsed.path or "/"
+                if parsed.query:
+                    path_and_query += f"?{parsed.query}"
+
+                headers = {
+                    "User-Agent": "Omarchy-Image-Fetcher/1.0",
+                    "Accept": "image/png, image/jpeg, image/gif, image/webp",
+                    "Connection": "close",
+                }
+
+                conn.request("GET", path_and_query, headers=headers)
+                resp = conn.getresponse()
+
+                # Handle redirects safely
+                if resp.status in (301, 302, 303, 307, 308):
+                    location = resp.getheader("Location")
+                    if not location:
+                        raise ImageFetchSecurityError(f"HTTP {resp.status} redirect without Location header")
+                    current_url = urllib.parse.urljoin(current_url, location)
+                    hops += 1
+                    continue
+
+                if resp.status != 200:
+                    raise ImageFetchSecurityError(f"Remote server returned HTTP {resp.status}: {resp.reason}")
+
+                ctype = resp.getheader("Content-Type", "")
+                if not ctype or not ctype.lower().startswith("image/"):
+                    raise ImageFetchSecurityError(f"Rejected non-image Content-Type '{ctype}': expected image/*")
+
+                # Read response with byte limit bounding
+                data = bytearray()
+                while True:
+                    remaining_read_time = deadline - time.monotonic()
+                    if remaining_read_time <= 0 or is_timeout_aborted.is_set():
+                        raise ImageFetchSecurityError(f"Operation exceeded overall deadline of {total_timeout}s during transfer")
+
+                    chunk = resp.read(65536)
+                    if not chunk:
+                        break
+                    data.extend(chunk)
+                    if len(data) > max_bytes:
+                        raise ImageFetchSecurityError(f"Response exceeded maximum size limit of {max_bytes} bytes")
+
+                if is_timeout_aborted.is_set() or time.monotonic() > deadline:
+                    raise ImageFetchSecurityError(f"Operation exceeded overall deadline of {total_timeout}s during transfer")
+
+                break
+            except Exception as e:
+                if is_timeout_aborted.is_set() or time.monotonic() >= deadline:
+                    raise ImageFetchSecurityError(f"Operation exceeded overall deadline of {total_timeout}s during transfer") from e
+                raise
+            finally:
+                watchdog.cancel()
+        finally:
+            if conn:
+                try:
+                    conn.close()
+                except Exception:
+                    pass
+            if tls_sock:
+                try:
+                    tls_sock.close()
+                except Exception:
+                    pass
             try:
                 raw_sock.close()
             except Exception:
                 pass
-            try:
-                conn.close()
-            except Exception:
-                pass
-
-        time_until_deadline = max(0.001, deadline - time.monotonic())
-        if time_until_deadline <= 0.001 and time.monotonic() >= deadline:
-            raw_sock.close()
-            raise ImageFetchSecurityError(f"Operation exceeded overall deadline of {total_timeout}s")
-
-        watchdog = threading.Timer(time_until_deadline, _watchdog_abort)
-        watchdog.daemon = True
-        watchdog.start()
-
-        try:
-            conn.request("GET", path_and_query, headers=headers)
-            resp = conn.getresponse()
-
-            # Handle redirects safely
-            if resp.status in (301, 302, 303, 307, 308):
-                location = resp.getheader("Location")
-                if not location:
-                    raise ImageFetchSecurityError(f"HTTP {resp.status} redirect without Location header")
-                current_url = urllib.parse.urljoin(current_url, location)
-                hops += 1
-                conn.close()
-                continue
-
-            if resp.status != 200:
-                raise ImageFetchSecurityError(f"Remote server returned HTTP {resp.status}: {resp.reason}")
-
-            # Verify Content-Type: must be an explicit image MIME type
-            ctype = resp.getheader("Content-Type", "")
-            if not ctype or not ctype.lower().startswith("image/"):
-                raise ImageFetchSecurityError(f"Rejected non-image Content-Type '{ctype}': expected image/*")
-
-            # Read response with byte limit bounding
-            data = bytearray()
-            while True:
-                chunk = resp.read(65536)
-                if not chunk:
-                    break
-                data.extend(chunk)
-                if len(data) > max_bytes:
-                    raise ImageFetchSecurityError(f"Response exceeded maximum size limit of {max_bytes} bytes")
-                if is_timeout_aborted.is_set() or time.monotonic() > deadline:
-                    raise ImageFetchSecurityError(f"Operation exceeded overall deadline of {total_timeout}s during transfer")
-
-            if is_timeout_aborted.is_set() or time.monotonic() > deadline:
-                raise ImageFetchSecurityError(f"Operation exceeded overall deadline of {total_timeout}s during transfer")
-
-            conn.close()
-            break
-        except Exception as e:
-            if is_timeout_aborted.is_set() or time.monotonic() >= deadline:
-                raise ImageFetchSecurityError(f"Operation exceeded overall deadline of {total_timeout}s during transfer") from e
-            raise
-        finally:
-            watchdog.cancel()
+            if dup_fd >= 0:
+                try:
+                    os.close(dup_fd)
+                except OSError:
+                    pass
     else:
         raise ImageFetchSecurityError(f"Exceeded maximum redirect limit of {max_redirects} hops")
 
-    # 4. Inspect image headers and frame descriptors to validate format and bounded dimensions
+    # 4. Inspect image headers, chunks, and frame descriptors to validate format and bounded dimensions
     ext, width, height = parse_and_validate_image_format_and_dimensions(bytes(data))
 
     # 5. Cache into private directory with content-addressed SHA-256 hash using safe mkstemp
@@ -570,11 +621,9 @@ def fetch_remote_image(
     sha256_hash = hashlib.sha256(data).hexdigest()
     dest_file = target_cache_dir / f"{sha256_hash}{ext}"
 
-    # If destination exists and is a symlink, remove it to prevent destination symlink hijacking
     if dest_file.is_symlink():
         dest_file.unlink()
 
-    # Create safe temporary file in the verified cache directory
     fd, tmp_path_str = tempfile.mkstemp(dir=target_cache_dir, prefix=".tmp_img_")
     tmp_path = Path(tmp_path_str)
     try:

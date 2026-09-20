@@ -1027,9 +1027,9 @@ class PluginValidator:
                         )
         except OSError as e:
             self.report(
-                "MKT-002",
-                "symlink-in-plugin-tree",
-                "[MKT-COMPAT]",
+                "OBS-003",
+                "directory-walk-error",
+                "[OBS-REC]",
                 "HIGH",
                 "Deterministic",
                 self.plugin_dir,
