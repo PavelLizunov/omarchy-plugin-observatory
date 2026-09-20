@@ -198,7 +198,7 @@ def _iter_riff_chunks(data: bytes, start: int, end: int) -> Iterator[Tuple[bytes
     """Strictly iterate over RIFF chunks within [start, end) enforcing boundary integrity.
     
     Yields (chunk_type, chunk_payload, chunk_offset, chunk_total_bytes_with_padding).
-    Raises ImageFetchSecurityError on truncated headers or truncated payloads.
+    Raises ImageFetchSecurityError on truncated headers, truncated payloads, or invalid padding.
     """
     offset = start
     while offset < end:
@@ -214,7 +214,18 @@ def _iter_riff_chunks(data: bytes, start: int, end: int) -> Iterator[Tuple[bytes
                 f"Truncated sub-chunk '{tag_name}': declares {chunk_len} bytes, available {end - payload_start} (missing image bitstream chunk)"
             )
         padding = chunk_len & 1
-        if padding and payload_end < end:
+        if padding:
+            if payload_end >= end:
+                tag_name = tag.decode("latin1", "replace")
+                raise ImageFetchSecurityError(
+                    f"Missing required padding byte for RIFF chunk '{tag_name}' (odd length {chunk_len}) (missing image bitstream chunk)"
+                )
+            pad_byte = data[payload_end]
+            if pad_byte != 0:
+                tag_name = tag.decode("latin1", "replace")
+                raise ImageFetchSecurityError(
+                    f"Invalid non-zero padding byte for RIFF chunk '{tag_name}' (value {pad_byte:#x}) (missing image bitstream chunk)"
+                )
             next_offset = payload_end + 1
         else:
             next_offset = payload_end
@@ -571,6 +582,8 @@ def _validate_webp(data: bytes) -> Tuple[str, int, int]:
         elif chunk_type == b"ANIM":
             if not is_animated:
                 raise ImageFetchSecurityError("ANIM chunk present in non-animated WebP")
+            if has_anim_chunk:
+                raise ImageFetchSecurityError("Multiple ANIM chunks in animated WebP are prohibited")
             if len(chunk_data) != 6:
                 raise ImageFetchSecurityError("Invalid ANIM chunk length (must be exactly 6 bytes)")
             has_anim_chunk = True
@@ -581,7 +594,7 @@ def _validate_webp(data: bytes) -> Tuple[str, int, int]:
             if not has_anim_chunk:
                 raise ImageFetchSecurityError("ANMF frame chunk appeared before ANIM header chunk")
             if len(chunk_data) < 16:
-                raise ImageFetchSecurityError("Truncated ANMF frame header (must be at least 16 bytes)")
+                raise ImageFetchSecurityError("Truncated ANMF frame header (must be at least 16 bytes) (missing image bitstream chunk)")
 
             frame_x = 2 * _read_uint24_le(chunk_data, 0)
             frame_y = 2 * _read_uint24_le(chunk_data, 3)
@@ -684,8 +697,9 @@ def _run_worker_decode() -> None:
         resource.setrlimit(resource.RLIMIT_CPU, (5, 5))
         mem_limit = 512 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (mem_limit, mem_limit))
-    except Exception:
-        pass
+    except Exception as e:
+        sys.stdout.write(json.dumps({"status": "error", "code": "IMAGE_DECODER_LIMITS_UNAVAILABLE", "error": f"Failed to enforce resource limits: {e}"}) + "\n")
+        sys.exit(2)
 
     try:
         from PIL import Image, features
@@ -712,18 +726,26 @@ def _run_worker_decode() -> None:
 
         try:
             while True:
+                if frames_count >= MAX_ANIM_FRAMES:
+                    sys.stdout.write(json.dumps({"status": "error", "error": f"Image exceeds frame limit ({frames_count + 1} > {MAX_ANIM_FRAMES})"}) + "\n")
+                    sys.exit(1)
+                if total_pixels + (canvas_w * canvas_h) > MAX_DECODE_PIXELS_TOTAL:
+                    sys.stdout.write(json.dumps({"status": "error", "error": f"Total decoded pixels exceed limit ({total_pixels + canvas_w * canvas_h} > {MAX_DECODE_PIXELS_TOTAL})"}) + "\n")
+                    sys.exit(1)
                 img.load()
                 frames_count += 1
                 total_pixels += canvas_w * canvas_h
-                if frames_count > MAX_ANIM_FRAMES:
-                    sys.stdout.write(json.dumps({"status": "error", "error": f"Image exceeds frame limit ({frames_count} > {MAX_ANIM_FRAMES})"}) + "\n")
-                    sys.exit(1)
-                if total_pixels > MAX_DECODE_PIXELS_TOTAL:
-                    sys.stdout.write(json.dumps({"status": "error", "error": f"Total decoded pixels exceed limit ({total_pixels} > {MAX_DECODE_PIXELS_TOTAL})"}) + "\n")
-                    sys.exit(1)
-                img.seek(img.tell() + 1)
-        except EOFError:
-            pass
+                try:
+                    img.seek(img.tell() + 1)
+                except EOFError:
+                    break
+        except Exception as e:
+            sys.stdout.write(json.dumps({"status": "error", "error": f"{type(e).__name__}: {e}"}) + "\n")
+            sys.exit(1)
+
+        if frames_count < 1:
+            sys.stdout.write(json.dumps({"status": "error", "error": "Decoded image contains zero frames"}) + "\n")
+            sys.exit(1)
 
         result = {
             "status": "ok",
@@ -760,9 +782,11 @@ def _validate_image_with_decoder(data: bytes, expected_ext: str, expected_w: int
         try:
             res = json.loads(stdout_data.decode("utf-8"))
             err_msg = res.get("error", "IMAGE_DECODER_UNAVAILABLE")
+            err_code = res.get("code", "IMAGE_DECODER_UNAVAILABLE")
         except Exception:
             err_msg = "Pillow with WebP codec support is required"
-        raise ImageFetchSecurityError(f"IMAGE_DECODER_UNAVAILABLE: {err_msg}")
+            err_code = "IMAGE_DECODER_UNAVAILABLE"
+        raise ImageFetchSecurityError(f"{err_code}: {err_msg}")
 
     if proc.returncode != 0:
         try:
@@ -780,12 +804,28 @@ def _validate_image_with_decoder(data: bytes, expected_ext: str, expected_w: int
     if res.get("status") != "ok":
         raise ImageFetchSecurityError(f"Image decoder rejected payload: {res.get('error')}")
 
+    # Reconcile format
+    fmt = (res.get("format") or "").lower()
+    expected_fmt = {
+        ".png": "png",
+        ".jpg": "jpeg",
+        ".jpeg": "jpeg",
+        ".gif": "gif",
+        ".webp": "webp",
+    }.get(expected_ext.lower(), "")
+    if expected_fmt and fmt != expected_fmt:
+        raise ImageFetchSecurityError(f"Decoded format '{fmt}' mismatches expected '{expected_ext}'")
+
     dec_w = res.get("width")
     dec_h = res.get("height")
     if dec_w != expected_w or dec_h != expected_h:
         raise ImageFetchSecurityError(
             f"Decoded dimensions ({dec_w}x{dec_h}) mismatch verified structural dimensions ({expected_w}x{expected_h})"
         )
+
+    dec_frames = res.get("frames", 0)
+    if dec_frames < 1:
+        raise ImageFetchSecurityError(f"Decoded frame count ({dec_frames}) must be at least 1")
 
 
 def get_private_cache_dir(custom_dir: Optional[Path] = None) -> Path:
@@ -1025,8 +1065,13 @@ def fetch_remote_image(
     ext, width, height = parse_and_validate_image_format_and_dimensions(bytes(data))
 
     # 5. Level B Verification: full decode gate in resource-bounded worker process
-    decode_timeout = max(0.5, min(5.0, deadline - time.monotonic()))
+    remaining_before_decode = deadline - time.monotonic()
+    if remaining_before_decode <= 0:
+        raise ImageFetchSecurityError(f"Operation exceeded overall deadline of {total_timeout}s before decode verification")
+    decode_timeout = min(5.0, remaining_before_decode)
     _validate_image_with_decoder(bytes(data), expected_ext=ext, expected_w=width, expected_h=height, timeout=decode_timeout)
+    if time.monotonic() > deadline:
+        raise ImageFetchSecurityError(f"Operation exceeded overall deadline of {total_timeout}s after decode verification")
 
     # 6. Cache into private directory with content-addressed SHA-256 hash using safe mkstemp
     target_cache_dir = get_private_cache_dir(cache_dir)

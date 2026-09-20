@@ -716,10 +716,13 @@ class TestFetchRemoteImage(unittest.TestCase):
 
     def test_webp_anmf_truncated_subchunk_rejected(self):
         """WebP ANMF frame where sub-chunk declares length exceeding frame data must be rejected."""
+        def riffchunk(kind, data):
+            return kind + struct.pack("<I", len(data)) + data + (b"\0" if len(data) % 2 else b"")
         vp8x = b"VP8X" + struct.pack("<I", 10) + b"\x02" + b"\0" * 9
         anim = b"ANIM" + struct.pack("<I", 6) + b"\0" * 6
-        anmf_data = b"\0" * 16 + b"VP8L" + struct.pack("<I", 100) + b"\x2f"
-        anmf = b"ANMF" + struct.pack("<I", len(anmf_data)) + anmf_data
+        sub_broken = b"VP8L" + struct.pack("<I", 100) + b"\x2f"
+        anmf_data = b"\0" * 16 + sub_broken
+        anmf = riffchunk(b"ANMF", anmf_data)
         chunks = vp8x + anim + anmf
         bad_webp = b"RIFF" + struct.pack("<I", 4 + len(chunks)) + b"WEBP" + chunks
         with self.assertRaises(ImageFetchSecurityError) as ctx:
@@ -728,12 +731,15 @@ class TestFetchRemoteImage(unittest.TestCase):
 
     def test_webp_anmf_frame_size_mismatches_bitstream_rejected(self):
         """WebP ANMF frame size (1x1) mismatching embedded VP8L bitstream dimensions (10000x1) must be rejected."""
+        def riffchunk(kind, data):
+            return kind + struct.pack("<I", len(data)) + data + (b"\0" if len(data) % 2 else b"")
         vp8x = b"VP8X" + struct.pack("<I", 10) + b"\x02" + b"\0" * 9
         anim = b"ANIM" + struct.pack("<I", 6) + b"\0" * 6
         vp8l_10k_data = b"\x2f\x0f\x27\x00\x00"
+        vp8l_chunk = riffchunk(b"VP8L", vp8l_10k_data)
         anmf_frame_1x1 = struct.pack("<I", 0)[:3] + struct.pack("<I", 0)[:3] + struct.pack("<I", 0)[:3] + struct.pack("<I", 0)[:3] + struct.pack("<I", 100)[:3] + b"\0"
-        anmf_content = anmf_frame_1x1 + b"VP8L" + struct.pack("<I", len(vp8l_10k_data)) + vp8l_10k_data
-        anmf_chunk = b"ANMF" + struct.pack("<I", len(anmf_content)) + anmf_content
+        anmf_content = anmf_frame_1x1 + vp8l_chunk
+        anmf_chunk = riffchunk(b"ANMF", anmf_content)
         chunks = vp8x + anim + anmf_chunk
         bad_webp = b"RIFF" + struct.pack("<I", len(chunks) + 4) + b"WEBP" + chunks
         with self.assertRaises(ImageFetchSecurityError) as ctx:
@@ -741,31 +747,17 @@ class TestFetchRemoteImage(unittest.TestCase):
         self.assertIn("mismatches VP8L bitstream size", str(ctx.exception))
 
     def test_valid_webp_animated_anmf_accepted(self):
-        """Valid animated WebP with matching canvas, ANMF frame, and VP8L bitstream must be accepted."""
-        # Canvas 64x64 in VP8X:
-        # VP8X payload (10 bytes):
-        # byte 0: flags (0x02 = animation)
-        # bytes 1..3: reserved (0)
-        # bytes 4..6: canvas_width - 1 (63 in 24-bit little endian: \x3f\x00\x00)
-        # bytes 7..9: canvas_height - 1 (63 in 24-bit little endian: \x3f\x00\x00)
-        vp8x_payload = b"\x02\x00\x00\x00\x3f\x00\x00\x3f\x00\x00"
-        vp8x = b"VP8X" + struct.pack("<I", len(vp8x_payload)) + vp8x_payload
-        anim = b"ANIM" + struct.pack("<I", 6) + b"\x00" * 6
-
-        # Frame 64x64 at (0,0): frame_w-1 = 63, frame_h-1 = 63
-        anmf_hdr = struct.pack("<I", 0)[:3] + struct.pack("<I", 0)[:3] + struct.pack("<I", 63)[:3] + struct.pack("<I", 63)[:3] + struct.pack("<I", 100)[:3] + b"\0"
-
-        # VP8L 64x64: w-1=63 (0x3F), h-1=63 (0x3F)
-        b0 = 0x3F
-        b1 = (0 & 0x3F) | ((63 & 0x03) << 6)
-        b2 = (63 >> 2) & 0xFF
-        b3 = 0x00
-        vp8l_data = bytes([0x2F, b0, b1, b2, b3])
-        anmf_content = anmf_hdr + b"VP8L" + struct.pack("<I", len(vp8l_data)) + vp8l_data
-        anmf_chunk = b"ANMF" + struct.pack("<I", len(anmf_content)) + anmf_content
-        chunks = vp8x + anim + anmf_chunk
-        valid_webp = b"RIFF" + struct.pack("<I", len(chunks) + 4) + b"WEBP" + chunks
-        ext, w, h = parse_and_validate_image_format_and_dimensions(valid_webp)
+        """Valid animated WebP with matching canvas, ANMF frame, and VP8L bitstream must be accepted and decoded."""
+        # Real decodable 2-frame 64x64 animated WebP
+        valid_anim_webp = (
+            b"RIFF\x84\x00\x00\x00WEBPVP8X\n\x00\x00\x00\x02\x00\x00\x00?\x00\x00?\x00\x00"
+            b"ANIM\x06\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+            b"ANMF(\x00\x00\x00\x00\x00\x00\x00\x00\x00?\x00\x00?\x00\x00d\x00\x00\x02"
+            b"VP8L\x0f\x00\x00\x00/?\xc0\x0f\x00\x07\x10\xfd\x8f\xfe\x07\"\xa2\xff\x01\x00"
+            b"ANMF(\x00\x00\x00\x00\x00\x00\x00\x00\x00?\x00\x00?\x00\x00d\x00\x00\x00"
+            b"VP8L\x0f\x00\x00\x00/?\xc0\x0f\x00\x07\xd0\xff\x88\xfe\x07\"\xa2\xff\x01\x00"
+        )
+        ext, w, h = parse_and_validate_image_format_and_dimensions(valid_anim_webp)
         self.assertEqual(ext, ".webp")
         self.assertEqual(w, 64)
         self.assertEqual(h, 64)

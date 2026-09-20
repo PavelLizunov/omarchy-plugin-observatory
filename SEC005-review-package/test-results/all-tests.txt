@@ -171,7 +171,7 @@ Valid PNG split across multiple IDAT chunks must decompress and parse successful
 test_valid_png_rgb1x1_accepted (test_fetch_remote_image.TestFetchRemoteImage.test_valid_png_rgb1x1_accepted)
 Valid 8-bit RGB 1x1 PNG (4 scanline bytes: 1 filter + 3 RGB) must be accepted. ... ok
 test_valid_webp_animated_anmf_accepted (test_fetch_remote_image.TestFetchRemoteImage.test_valid_webp_animated_anmf_accepted)
-Valid animated WebP with matching canvas, ANMF frame, and VP8L bitstream must be accepted. ... ok
+Valid animated WebP with matching canvas, ANMF frame, and VP8L bitstream must be accepted and decoded. ... ok
 test_watchdog_socket_constructor_failure_leaked_count_zero (test_fetch_remote_image.TestFetchRemoteImage.test_watchdog_socket_constructor_failure_leaked_count_zero)
 If socket constructor fails after os.dup(), the dup fd must be closed and not leaked. ... ok
 test_webp_anim_without_frame_rejected (test_fetch_remote_image.TestFetchRemoteImage.test_webp_anim_without_frame_rejected)
@@ -219,6 +219,6 @@ test_stale_output_does_not_control_provenance (test_regressions.ReleaseRegressio
 test_unlinked_source_requires_explicit_external_context (test_regressions.ReleaseRegressions.test_unlinked_source_requires_explicit_external_context) ... ok
 
 ----------------------------------------------------------------------
-Ran 137 tests in 9.594s
+Ran 137 tests in 9.905s
 
 OK
