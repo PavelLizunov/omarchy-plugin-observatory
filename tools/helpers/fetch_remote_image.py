@@ -12,16 +12,17 @@ Implements the complete 6-point SEC-005 hardening contract:
    preventing Time-of-Check to Time-of-Use (TOCTOU) DNS rebinding attacks.
 4. Structural & Dimension Bounding: Validates format structure and enforces decode dimension caps
    (width and height > 0, <= 4096x4096 pixels, max 16 MP):
-   - PNG: Validates signature, IHDR length/CRC, chunk CRCs, required IDAT and IEND, streaming zlib
-     deflate verification without unbounded flush, exact expected scanline bytes calculation based on
-     color type and bit depth, and filter type validation (0..4).
+   - PNG: Validates signature, IHDR (depth/color type legality, comp=0, filt=0, inter in 0..1), chunk CRCs,
+     required IDAT and IEND, streaming zlib deflate verification without unbounded flush, exact expected
+     scanline bytes calculation for both standard and Adam7 interlacing, and filter type validation (0..4).
    - GIF: Validates Logical Screen Descriptor, all frame descriptors (0x2C) with bounds checks,
      frame sub-block data, and requires at least one valid image frame with sub-blocks.
    - JPEG: Validates SOI, SOF marker dimensions, and requires Start of Scan (SOS, 0xDA) with entropy scan data.
-   - WebP: Validates RIFF/WEBP structure, chunk bounds, and requires valid image bitstream chunk (VP8, VP8L, or ANMF with frame payload).
+   - WebP: Validates RIFF/WEBP structure, rejects ambiguous multi-raster containers, verifies VP8/VP8L headers
+     and ANMF frame sub-chunks, ensuring verified dimensions match the actual rendered raster.
 5. End-to-End Operation Deadline: Strict overall deadline (default 30s) bounding DNS wait, TCP connect,
    TLS handshake, HTTP headers, and data transfer via single-owner descriptor-duplicate watchdog shutdown
-   (failing closed if watchdog creation fails).
+   (failing closed and immediately cleaning duplicate descriptors on error).
 6. Private Cache Storage: Caches verified images in an owner-verified mode 0700 private user cache
    directory created with umask 077, symlink rejection, atomic mkstemp, and content-addressed SHA-256 filenames.
 """
@@ -66,6 +67,15 @@ DISALLOWED_NETWORKS = [
     ipaddress.ip_network("2001:db8::/32"),     # RFC 3849 Documentation
     ipaddress.ip_network("64:ff9b:1::/48"),    # RFC 8215 Local-Use IPv4/IPv6 Translation
 ]
+
+# Legitimate PNG bit-depths per color-type (ISO/IEC 15948:2004 Table 1)
+ALLOWED_PNG_DEPTHS = {
+    0: (1, 2, 4, 8, 16),  # Grayscale
+    2: (8, 16),          # Truecolor RGB
+    3: (1, 2, 4, 8),      # Indexed color
+    4: (8, 16),          # Grayscale with alpha
+    6: (8, 16),          # Truecolor with alpha RGBA
+}
 
 
 class ImageFetchSecurityError(Exception):
@@ -146,6 +156,30 @@ def resolve_and_validate_host(hostname: str, port: int, timeout: float = DEFAULT
     return valid_ips[0]
 
 
+def calculate_adam7_expected_bytes(w: int, h: int, bits_per_pixel: int) -> Tuple[int, List[Tuple[int, int]]]:
+    """Calculate total expected scanline bytes and pass dimensions for Adam7 interlaced PNG."""
+    passes = [
+        (0, 0, 8, 8),
+        (4, 0, 8, 8),
+        (0, 4, 4, 8),
+        (2, 0, 4, 4),
+        (0, 2, 2, 4),
+        (1, 0, 2, 2),
+        (0, 1, 1, 2),
+    ]
+    total_bytes = 0
+    pass_specs = []
+    for (xs, ys, xstep, ystep) in passes:
+        pw = (w - xs + xstep - 1) // xstep if w > xs else 0
+        ph = (h - ys + ystep - 1) // ystep if h > ys else 0
+        if pw > 0 and ph > 0:
+            row_bytes = (pw * bits_per_pixel + 7) // 8
+            pass_bytes = ph * (1 + row_bytes)
+            total_bytes += pass_bytes
+            pass_specs.append((ph, 1 + row_bytes))
+    return total_bytes, pass_specs
+
+
 def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, int, int]:
     """Inspect image magic bytes, header chunks, and frame descriptors to validate format and bounded dimensions.
     
@@ -169,9 +203,18 @@ def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, in
         if w <= 0 or h <= 0:
             raise ImageFetchSecurityError(f"Invalid PNG dimensions ({w}x{h}): width and height must be positive")
 
-        channels = {0: 1, 2: 3, 3: 1, 4: 2, 6: 4}.get(color)
-        if not channels:
-            raise ImageFetchSecurityError(f"Unsupported PNG color type {color}")
+        if comp != 0:
+            raise ImageFetchSecurityError(f"Invalid PNG compression method {comp} (only 0 is permitted)")
+        if filt != 0:
+            raise ImageFetchSecurityError(f"Invalid PNG filter method {filt} (only 0 is permitted)")
+        if inter not in (0, 1):
+            raise ImageFetchSecurityError(f"Invalid PNG interlace method {inter} (only 0 or 1 is permitted)")
+
+        allowed_depths = ALLOWED_PNG_DEPTHS.get(color)
+        if not allowed_depths or depth not in allowed_depths:
+            raise ImageFetchSecurityError(f"Invalid PNG bit depth {depth} for color type {color}")
+
+        channels = {0: 1, 2: 3, 3: 1, 4: 2, 6: 4}[color]
 
         expected_crc = struct.unpack(">I", data[29:33])[0]
         actual_crc = zlib.crc32(data[12:29]) & 0xFFFFFFFF
@@ -244,11 +287,10 @@ def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, in
 
             decompressed_bytes = b"".join(decompressed_parts)
 
-            # Exact scanline raster verification for non-interlaced PNGs
+            # Exact scanline raster verification for standard and Adam7 interlaced PNGs
             bits_per_pixel = depth * channels
-            row_bytes = (w * bits_per_pixel + 7) // 8
-
             if inter == 0:
+                row_bytes = (w * bits_per_pixel + 7) // 8
                 expected_bytes = h * (1 + row_bytes)
                 if len(decompressed_bytes) != expected_bytes:
                     raise ImageFetchSecurityError(
@@ -260,8 +302,18 @@ def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, in
                     if filter_type > 4:
                         raise ImageFetchSecurityError(f"Invalid PNG filter type {filter_type} in row {row}")
             else:
-                if len(decompressed_bytes) < h * 2:
-                    raise ImageFetchSecurityError("Truncated interlaced PNG image data")
+                expected_bytes, pass_specs = calculate_adam7_expected_bytes(w, h, bits_per_pixel)
+                if len(decompressed_bytes) != expected_bytes:
+                    raise ImageFetchSecurityError(
+                        f"Truncated Adam7 PNG image data: decompressed {len(decompressed_bytes)} bytes, expected exactly {expected_bytes} for {w}x{h}"
+                    )
+                offset = 0
+                for ph, stride in pass_specs:
+                    for row in range(ph):
+                        filter_type = decompressed_bytes[offset + row * stride]
+                        if filter_type > 4:
+                            raise ImageFetchSecurityError(f"Invalid PNG filter type {filter_type} in Adam7 pass")
+                    offset += ph * stride
 
         except zlib.error as e:
             raise ImageFetchSecurityError(f"Corrupted or invalid PNG compressed image stream (IDAT): {e}") from e
@@ -388,44 +440,80 @@ def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, in
     # 4. WebP: RIFF....WEBP
     elif len(data) >= 12 and data[:4] == b"RIFF" and data[8:12] == b"WEBP":
         idx = 12
-        w, h = 0, 0
-        has_bitstream = False
+        canvas_w, canvas_h = 0, 0
+        is_extended = False
+        is_animated = False
+        raster_chunks_count = 0
+        max_observed_w = 0
+        max_observed_h = 0
+
         while idx + 8 <= len(data):
             chunk_type = data[idx:idx + 4]
             chunk_len = struct.unpack("<I", data[idx + 4:idx + 8])[0]
             chunk_data = data[idx + 8:idx + 8 + chunk_len]
-            if chunk_type == b"VP8 ":
-                if len(chunk_data) >= 10:
-                    raw_w, raw_h = struct.unpack("<HH", chunk_data[6:10])
-                    w, h = raw_w & 0x3FFF, raw_h & 0x3FFF
-                    has_bitstream = True
+
+            if chunk_type == b"VP8X":
+                is_extended = True
+                if len(chunk_data) < 10:
+                    raise ImageFetchSecurityError("Truncated VP8X header")
+                flags = chunk_data[0]
+                is_animated = bool(flags & 0x02)
+                canvas_w = 1 + struct.unpack("<I", chunk_data[4:7] + b"\x00")[0]
+                canvas_h = 1 + struct.unpack("<I", chunk_data[7:10] + b"\x00")[0]
+                max_observed_w = max(max_observed_w, canvas_w)
+                max_observed_h = max(max_observed_h, canvas_h)
+
+            elif chunk_type == b"VP8 ":
+                raster_chunks_count += 1
+                if len(chunk_data) < 10 or chunk_data[3:6] != b"\x9d\x01\x2a":
+                    raise ImageFetchSecurityError("Invalid or truncated VP8 chunk header")
+                raw_w, raw_h = struct.unpack("<HH", chunk_data[6:10])
+                w, h = raw_w & 0x3FFF, raw_h & 0x3FFF
+                max_observed_w = max(max_observed_w, w)
+                max_observed_h = max(max_observed_h, h)
+
             elif chunk_type == b"VP8L":
-                if len(chunk_data) >= 5:
-                    b0, b1, b2, b3 = chunk_data[1:5]
-                    w = 1 + (((b1 & 0x3F) << 8) | b0)
-                    h = 1 + (((b3 & 0x0F) << 10) | (b2 << 2) | ((b1 & 0xC0) >> 6))
-                    has_bitstream = True
-            elif chunk_type == b"VP8X":
-                if len(chunk_data) >= 10:
-                    w = 1 + struct.unpack("<I", chunk_data[4:7] + b"\x00")[0]
-                    h = 1 + struct.unpack("<I", chunk_data[7:10] + b"\x00")[0]
+                raster_chunks_count += 1
+                if len(chunk_data) < 5 or chunk_data[0] != 0x2F:
+                    raise ImageFetchSecurityError("Invalid or truncated VP8L chunk header")
+                b0, b1, b2, b3 = chunk_data[1:5]
+                w = 1 + (((b1 & 0x3F) << 8) | b0)
+                h = 1 + (((b3 & 0x0F) << 10) | (b2 << 2) | ((b1 & 0xC0) >> 6))
+                max_observed_w = max(max_observed_w, w)
+                max_observed_h = max(max_observed_h, h)
+
             elif chunk_type == b"ANMF":
-                # Animation frame must have frame header (16 bytes) plus actual payload sub-chunk
-                if len(chunk_data) > 16:
-                    sub_idx = 16
-                    while sub_idx + 8 <= len(chunk_data):
-                        sub_tag = chunk_data[sub_idx:sub_idx + 4]
-                        sub_len = struct.unpack("<I", chunk_data[sub_idx + 4:sub_idx + 8])[0]
-                        if sub_idx + 8 + sub_len > len(chunk_data):
-                            raise ImageFetchSecurityError("Truncated WebP ANMF sub-chunk")
-                        if sub_tag in (b"VP8 ", b"VP8L") and sub_len > 0:
-                            has_bitstream = True
-                            break
-                        sub_idx += 8 + sub_len + (sub_len & 1)
+                if not is_animated:
+                    raise ImageFetchSecurityError("ANMF chunk present in non-animated WebP")
+                if len(chunk_data) <= 16:
+                    raise ImageFetchSecurityError("Empty ANMF frame header without sub-chunks (missing image bitstream chunk)")
+                sub_idx = 16
+                has_sub_raster = False
+                while sub_idx + 8 <= len(chunk_data):
+                    stag = chunk_data[sub_idx:sub_idx + 4]
+                    slen = struct.unpack("<I", chunk_data[sub_idx + 4:sub_idx + 8])[0]
+                    sdata = chunk_data[sub_idx + 8:sub_idx + 8 + slen]
+                    if stag == b"VP8L":
+                        if slen < 5 or sdata[0] != 0x2F:
+                            raise ImageFetchSecurityError("Invalid or truncated VP8L in ANMF frame (missing image bitstream chunk)")
+                        has_sub_raster = True
+                    elif stag == b"VP8 ":
+                        if slen < 10 or sdata[3:6] != b"\x9d\x01\x2a":
+                            raise ImageFetchSecurityError("Invalid or truncated VP8 in ANMF frame (missing image bitstream chunk)")
+                        has_sub_raster = True
+                    sub_idx += 8 + slen + (slen & 1)
+                if not has_sub_raster:
+                    raise ImageFetchSecurityError("ANMF frame has no valid color bitstream sub-chunk (missing image bitstream chunk)")
+                raster_chunks_count += 1
+
             idx += 8 + chunk_len + (chunk_len & 1)
 
-        if not has_bitstream or w <= 0 or h <= 0:
-            raise ImageFetchSecurityError("Invalid WebP: missing image bitstream chunk or valid dimensions")
+        if raster_chunks_count == 0:
+            raise ImageFetchSecurityError("WebP contains no image raster chunks (missing image bitstream chunk)")
+        if not is_animated and raster_chunks_count > 1:
+            raise ImageFetchSecurityError("Ambiguous WebP: multiple raster chunks in non-animated container")
+
+        w, h = max_observed_w, max_observed_h
         ext = ".webp"
 
     else:
@@ -539,12 +627,11 @@ def fetch_remote_image(
         watchdog = None
 
         try:
-            # Check remaining deadline after TCP connect
             remaining_time = deadline - time.monotonic()
             if remaining_time <= 0:
                 raise ImageFetchSecurityError(f"Operation exceeded overall deadline of {total_timeout}s after TCP connect")
 
-            # Duplicate file descriptor for single-owner watchdog shutdown without stealing socket ownership
+            # Duplicate file descriptor for single-owner watchdog shutdown; clean up dup_fd immediately if constructor fails
             raw_sock_fd = -1
             try:
                 raw_sock_fd = raw_sock.fileno()
@@ -552,10 +639,16 @@ def fetch_remote_image(
                 raw_sock_fd = -1
 
             if isinstance(raw_sock_fd, int) and raw_sock_fd >= 0:
+                dup_fd = -1
                 try:
                     dup_fd = os.dup(raw_sock_fd)
                     watchdog_sock = socket.socket(fileno=dup_fd)
                 except (OSError, TypeError) as e:
+                    if dup_fd >= 0:
+                        try:
+                            os.close(dup_fd)
+                        except OSError:
+                            pass
                     raw_sock.close()
                     raise ImageFetchSecurityError(f"Failed to create watchdog socket descriptor: {e}") from e
             else:

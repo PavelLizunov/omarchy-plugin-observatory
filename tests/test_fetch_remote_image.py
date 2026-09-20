@@ -578,6 +578,132 @@ class TestFetchRemoteImage(unittest.TestCase):
             left.close()
             right.close()
 
+    def test_png_adam7_rgb1x1_two_raster_bytes_rejected(self):
+        """Adam7 interlaced RGB 1x1 PNG with only 2 raster bytes (requires 4) must be rejected."""
+        ihdr = struct.pack("!IIBBBBB", 1, 1, 8, 2, 0, 0, 1)  # interlace = 1 (Adam7)
+        ihdr_chunk = struct.pack("!I", 13) + b"IHDR" + ihdr + struct.pack("!I", zlib.crc32(b"IHDR" + ihdr) & 0xFFFFFFFF)
+        packed = zlib.compress(b"\0\0")
+        idat_chunk = struct.pack("!I", len(packed)) + b"IDAT" + packed + struct.pack("!I", zlib.crc32(b"IDAT" + packed) & 0xFFFFFFFF)
+        iend_chunk = struct.pack("!I", 0) + b"IEND" + struct.pack("!I", zlib.crc32(b"IEND") & 0xFFFFFFFF)
+        data = b"\x89PNG\r\n\x1a\n" + ihdr_chunk + idat_chunk + iend_chunk
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(data)
+        self.assertIn("Truncated Adam7 PNG image data", str(ctx.exception))
+
+    def test_png_adam7_rgb1x1_filter5_rejected(self):
+        """Adam7 PNG with invalid filter type 5 must be rejected."""
+        ihdr = struct.pack("!IIBBBBB", 1, 1, 8, 2, 0, 0, 1)
+        ihdr_chunk = struct.pack("!I", 13) + b"IHDR" + ihdr + struct.pack("!I", zlib.crc32(b"IHDR" + ihdr) & 0xFFFFFFFF)
+        packed = zlib.compress(b"\5\0\0\0")
+        idat_chunk = struct.pack("!I", len(packed)) + b"IDAT" + packed + struct.pack("!I", zlib.crc32(b"IDAT" + packed) & 0xFFFFFFFF)
+        iend_chunk = struct.pack("!I", 0) + b"IEND" + struct.pack("!I", zlib.crc32(b"IEND") & 0xFFFFFFFF)
+        data = b"\x89PNG\r\n\x1a\n" + ihdr_chunk + idat_chunk + iend_chunk
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(data)
+        self.assertIn("Invalid PNG filter type 5", str(ctx.exception))
+
+    def test_png_rgb_illegal_depth1_rejected(self):
+        """PNG RGB (color type 2) with illegal bit depth 1 (only 8, 16 allowed) must be rejected."""
+        ihdr = struct.pack("!IIBBBBB", 1, 1, 1, 2, 0, 0, 0)
+        ihdr_chunk = struct.pack("!I", 13) + b"IHDR" + ihdr + struct.pack("!I", zlib.crc32(b"IHDR" + ihdr) & 0xFFFFFFFF)
+        packed = zlib.compress(b"\0\0")
+        idat_chunk = struct.pack("!I", len(packed)) + b"IDAT" + packed + struct.pack("!I", zlib.crc32(b"IDAT" + packed) & 0xFFFFFFFF)
+        iend_chunk = struct.pack("!I", 0) + b"IEND" + struct.pack("!I", zlib.crc32(b"IEND") & 0xFFFFFFFF)
+        data = b"\x89PNG\r\n\x1a\n" + ihdr_chunk + idat_chunk + iend_chunk
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(data)
+        self.assertIn("Invalid PNG bit depth 1", str(ctx.exception))
+
+    def test_png_invalid_interlace2_short_rejected(self):
+        """PNG with invalid interlace method 2 (only 0 or 1 allowed) must be rejected."""
+        ihdr = struct.pack("!IIBBBBB", 1, 1, 8, 2, 0, 0, 2)
+        ihdr_chunk = struct.pack("!I", 13) + b"IHDR" + ihdr + struct.pack("!I", zlib.crc32(b"IHDR" + ihdr) & 0xFFFFFFFF)
+        packed = zlib.compress(b"\0\0")
+        idat_chunk = struct.pack("!I", len(packed)) + b"IDAT" + packed + struct.pack("!I", zlib.crc32(b"IDAT" + packed) & 0xFFFFFFFF)
+        iend_chunk = struct.pack("!I", 0) + b"IEND" + struct.pack("!I", zlib.crc32(b"IEND") & 0xFFFFFFFF)
+        data = b"\x89PNG\r\n\x1a\n" + ihdr_chunk + idat_chunk + iend_chunk
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(data)
+        self.assertIn("Invalid PNG interlace method 2", str(ctx.exception))
+
+    def test_valid_png_adam7_rgb1x1_accepted(self):
+        """Valid Adam7 interlaced RGB 1x1 PNG (4 scanline bytes) must be accepted."""
+        ihdr = struct.pack("!IIBBBBB", 1, 1, 8, 2, 0, 0, 1)
+        ihdr_chunk = struct.pack("!I", 13) + b"IHDR" + ihdr + struct.pack("!I", zlib.crc32(b"IHDR" + ihdr) & 0xFFFFFFFF)
+        packed = zlib.compress(b"\0\0\0\0")
+        idat_chunk = struct.pack("!I", len(packed)) + b"IDAT" + packed + struct.pack("!I", zlib.crc32(b"IDAT" + packed) & 0xFFFFFFFF)
+        iend_chunk = struct.pack("!I", 0) + b"IEND" + struct.pack("!I", zlib.crc32(b"IEND") & 0xFFFFFFFF)
+        data = b"\x89PNG\r\n\x1a\n" + ihdr_chunk + idat_chunk + iend_chunk
+        ext, w, h = parse_and_validate_image_format_and_dimensions(data)
+        self.assertEqual(ext, ".png")
+        self.assertEqual(w, 1)
+        self.assertEqual(h, 1)
+
+    def test_webp_anmf_one_byte_vp8l_rejected(self):
+        """WebP ANMF frame with truncated 1-byte VP8L sub-chunk must be rejected."""
+        def riffchunk(kind, data):
+            return kind + struct.pack("<I", len(data)) + data + (b"\0" if len(data) % 2 else b"")
+        chunks = riffchunk(b"VP8X", b"\x02" + b"\0" * 9) + riffchunk(b"ANIM", b"\0" * 6) + riffchunk(b"ANMF", b"\0" * 16 + riffchunk(b"VP8L", b"\x2f"))
+        data = b"RIFF" + struct.pack("<I", 4 + len(chunks)) + b"WEBP" + chunks
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(data)
+        self.assertIn("Invalid or truncated VP8L in ANMF frame", str(ctx.exception))
+
+    def test_webp_large_first_raster_small_second_rejected(self):
+        """WebP with conflicting/multiple top-level raster chunks (10000x1 then 1x1) must be rejected."""
+        def riffchunk(kind, data):
+            return kind + struct.pack("<I", len(data)) + data + (b"\0" if len(data) % 2 else b"")
+        vp8_10k = riffchunk(b"VP8 ", b"\0" * 3 + b"\x9d\x01\x2a" + struct.pack("<HH", 10000, 1) + b"\0" * 100)
+        vp8l_1x1 = riffchunk(b"VP8L", b"\x2f\x00\x00\x00\x00")
+        parts = vp8_10k + vp8l_1x1
+        data = b"RIFF" + struct.pack("<I", 4 + len(parts)) + b"WEBP" + parts
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(data)
+        self.assertIn("Ambiguous WebP: multiple raster chunks in non-animated container", str(ctx.exception))
+
+    def test_watchdog_socket_constructor_failure_leaked_count_zero(self):
+        """If socket constructor fails after os.dup(), the dup fd must be closed and not leaked."""
+        left, right = socket.socketpair()
+        dup_list = []
+        realdup = os.dup
+        real_socket = socket.socket
+
+        def dup(fd):
+            out = realdup(fd)
+            dup_list.append(out)
+            return out
+
+        def factory(*args, **kwargs):
+            if kwargs.get("fileno") in dup_list:
+                raise OSError(12, "fault-injected watchdog socket constructor failure")
+            return real_socket(*args, **kwargs)
+
+        try:
+            with patch("tools.helpers.fetch_remote_image.resolve_and_validate_host", return_value="93.184.216.34"), \
+                 patch("tools.helpers.fetch_remote_image.socket.create_connection", return_value=left), \
+                 patch("tools.helpers.fetch_remote_image.os.dup", side_effect=dup), \
+                 patch("tools.helpers.fetch_remote_image.socket.socket", side_effect=factory):
+                with self.assertRaises(ImageFetchSecurityError) as ctx:
+                    fetch_remote_image("https://example.com/img.png", total_timeout=0.10)
+                self.assertIn("Failed to create watchdog socket descriptor", str(ctx.exception))
+
+            live = []
+            for fd in dup_list:
+                try:
+                    os.fstat(fd)
+                    live.append(fd)
+                except OSError:
+                    pass
+            self.assertEqual(len(live), 0, "No duplicate file descriptor should leak when constructor fails")
+        finally:
+            left.close()
+            right.close()
+            for fd in dup_list:
+                try:
+                    os.close(fd)
+                except OSError:
+                    pass
+
 
 if __name__ == "__main__":
     unittest.main()
