@@ -16,6 +16,7 @@ import unittest
 import zlib
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+from PIL import Image
 
 from tools.helpers.fetch_remote_image import (
     ImageFetchSecurityError,
@@ -824,6 +825,20 @@ class TestFetchRemoteImage(unittest.TestCase):
 
                     with self.assertRaises(ImageFetchSecurityError):
                         _validate_image_with_decoder(valid_png, expected_ext=".png", expected_w=2, expected_h=2, expected_frames=1)
+
+
+    def test_apng_multiframe_safely_rejected(self):
+        """Multi-frame Animated PNG (APNG) decodes to >1 frames and must be safely rejected under static PNG profile."""
+        out = io.BytesIO()
+        f1 = Image.new("RGBA", (8, 8), (255, 0, 0, 255))
+        f2 = Image.new("RGBA", (8, 8), (0, 255, 0, 255))
+        f1.save(out, format="PNG", save_all=True, append_images=[f2], duration=100)
+        apng_bytes = out.getvalue()
+
+        from tools.helpers.fetch_remote_image import _validate_image_with_decoder
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            _validate_image_with_decoder(apng_bytes, expected_ext=".png", expected_w=8, expected_h=8, expected_frames=1)
+        self.assertIn("mismatches structural profile frame count", str(ctx.exception))
 
 
 if __name__ == "__main__":

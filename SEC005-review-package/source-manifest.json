@@ -1,5 +1,6 @@
 {
-  "baseline_commit": "661c2c9a148696faa7dc8624a5e1e087f6ac5560",
+  "baseline_commit": "0cdcc1bed51250cc3c96de23126bcd4e48bb36a0",
+  "status": "ACCEPTED",
   "tools": {
     "python": "3.12.3",
     "pillow": "12.3.0",
@@ -7,11 +8,12 @@
   },
   "file_hashes_sha256": {
     "tools/helpers/fetch_remote_image.py": "4532d54a71d0ec61e6c88cef23d7d28450b3683b91ba68e4d85812fecfb2a62b",
-    "tests/test_fetch_remote_image.py": "40f407f6aa50d78c62f528fb132a22786b914453bfea07c8aaf0409e378e814b",
-    "docs/specs/sec005-webp-profile.md": "59e9c0545a6382f9753067ab21ffb18f3c097bc6979a5b5462c02bd952499b53",
+    "tests/test_fetch_remote_image.py": "ff954ffa693504feb00265fb1a5eb1d5de57c5f0bd06666d7f74dee533c41f24",
+    "docs/specs/sec005-webp-profile.md": "56f3169f9ab5191681bfa0e6a7001dede7bc59914063eaf7c70dc890b433a242",
     "docs/marketplace-acceptance-guide.md": "9e912850df6270ca1a5a08e7621cc259dfa915f0bc9455cfb5794cd7e9afcd9d",
     "docs/rule-matrix-specification.md": "034fbc7419f135e86c907fdb2440f01c291e08d27103699d39fee61bcd883802",
-    "tools/check_marketplace_readiness.py": "4c0c0112f0d29ad15da493da9ef544586f8cf31803f648f056016d570c7b7475"
+    "tools/check_marketplace_readiness.py": "4c0c0112f0d29ad15da493da9ef544586f8cf31803f648f056016d570c7b7475",
+    "SEC005-review-package/known-limitations.md": "604b838860ee0504908d95afd2dfea6e2a40c5b15acee1ba3e3dab230f3094f3"
   },
   "test_commands": [
     "python3 -m unittest tests/test_fetch_remote_image.py -v",

@@ -93,6 +93,7 @@ To protect the calling desktop shell process from native C library crashes, infi
 3. **Pixel Processing Ceiling:** Maximum cumulative decoded pixels across all animated frames $\le 67,108,864$ (64 MP).
 4. **Frame Count Ceiling:** Maximum number of animated frames $\le 128$.
 5. **Dimension Reconciliation:** The decoded image dimensions returned by the backend must match the Level A verified canvas dimensions exactly.
+6. **Frame Count Reconciliation:** The decoded frame count returned by the backend must match the Level A verified structural frame count exactly. For static formats (PNG, JPEG, static WebP, 1-frame GIF), `expected_frames = 1`. For animated WebP, `expected_frames` equals the exact count of verified `ANMF` chunks. (Note: Multi-frame Animated PNG (APNG) files decode to multiple frames and are safely rejected under the current static PNG profile; plugins requiring animation must use WebP or GIF).
 
 ---
 

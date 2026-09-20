@@ -90,6 +90,8 @@ test_validate_safe_rel_path_rejects_backslash (test_export.TestExportVerificatio
 test_validate_safe_rel_path_rejects_noncanonical_slashes (test_export.TestExportVerification.test_validate_safe_rel_path_rejects_noncanonical_slashes) ... ok
 test_validate_safe_rel_path_rejects_raw_dot (test_export.TestExportVerification.test_validate_safe_rel_path_rejects_raw_dot) ... ok
 test_validate_safe_rel_path_rejects_raw_traversal (test_export.TestExportVerification.test_validate_safe_rel_path_rejects_raw_traversal) ... ok
+test_apng_multiframe_safely_rejected (test_fetch_remote_image.TestFetchRemoteImage.test_apng_multiframe_safely_rejected)
+Multi-frame Animated PNG (APNG) decodes to >1 frames and must be safely rejected under static PNG profile. ... ok
 test_cache_creation_mode_with_permissive_umask (test_fetch_remote_image.TestFetchRemoteImage.test_cache_creation_mode_with_permissive_umask)
 Cache directory must be created private immediately, even with permissive umask 000. ... ok
 test_connect_budget_then_real_tls_handshake_bounded (test_fetch_remote_image.TestFetchRemoteImage.test_connect_budget_then_real_tls_handshake_bounded)
@@ -223,6 +225,6 @@ test_stale_output_does_not_control_provenance (test_regressions.ReleaseRegressio
 test_unlinked_source_requires_explicit_external_context (test_regressions.ReleaseRegressions.test_unlinked_source_requires_explicit_external_context) ... ok
 
 ----------------------------------------------------------------------
-Ran 139 tests in 10.016s
+Ran 140 tests in 10.631s
 
 OK
