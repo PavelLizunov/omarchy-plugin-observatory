@@ -37,6 +37,61 @@ This fixed ≥2-second debounce backoff is the minimal recovery policy; exponent
 
 **Controller obligations:** on disable/sleep stop retry, invalidate pending requests and request helper shutdown. Setting `running=false` sends SIGTERM; it is not proof of exit. Wait for actual termination before any new start, even across quick disable/enable. Bound graceful shutdown and handle an unresponsive *owned* helper according to the authorized policy; do not kill unrelated processes. Missing executables/start failure may not emit `exited`: use a bounded startup watchdog or visible manual-retry state, never install-on-failure. Destruction/config reload must not detach or orphan children. Test target-version stop/reaping behavior.
 
+### Process Watchdog & Bounded Lifecycle (`SEC-004`)
+
+When background `Process` elements execute external one-shot utilities or request-driven tasks:
+- Unmonitored process executions risk becoming stuck background tasks if the target program hangs on I/O, deadlocks, or network requests.
+- Implement a two-stage watchdog timer terminating unresponsive background helpers, ensuring **all timers are strictly cancelled on process exit** to avoid stale signals targeting subsequent invocations:
+
+```qml
+Process {
+    id: proc
+    command: ["/usr/bin/some-tool", "arg1"]
+    onRunningChanged: {
+        if (proc.running) {
+            // New invocation started: ensure stale escalation is stopped and arm watchdog
+            escalationTimer.stop();
+            watchdog.restart();
+        } else {
+            // Process terminated (naturally or killed): cancel both timers immediately
+            watchdog.stop();
+            escalationTimer.stop();
+        }
+    }
+}
+
+Timer {
+    id: watchdog
+    interval: 10000 // 10s execution budget for one-shot operation
+    repeat: false
+    onTriggered: {
+        if (proc.running) {
+            // Stage 1: Graceful SIGTERM via Quickshell running=false
+            proc.running = false;
+            escalationTimer.restart();
+        }
+    }
+}
+
+Timer {
+    id: escalationTimer
+    interval: 2000 // 2s grace period to allow graceful shutdown
+    repeat: false
+    onTriggered: {
+        // Only escalate if the same process invocation is still alive
+        if (proc.running) {
+            // Stage 2: Forceful SIGKILL via Quickshell signal API
+            proc.signal(9);
+        }
+    }
+}
+```
+
+*Lifecycle Notes:*
+- For **streaming/persistent helpers** (such as daemon monitoring bridges), a fixed 10-second timer is inappropriate; instead, use heartbeat or request/response deadline timers that reset on each successful data frame.
+- Keep admission closed (do not start a new invocation) until the previous invocation has genuinely exited (`onRunningChanged` fires with `proc.running === false`).
+- Quickshell's `running = false` issues `SIGTERM` to the child; the getter remains `true` until the operating system confirms process termination and SIGCHLD is reaped.
+
 **Transport contract:** newline-delimited UTF-8 JSON, at most 65536 bytes per frame including delimiter, bounded rate/queues and stderr, flushed records, schema, request IDs and EOF/error handling. The reviewed producer must enforce the bound before emission; an untrusted producer needs a native bounded transport **before** SplitParser accumulates output. Post-parser `line.length` is neither a buffering limit nor UTF-8 byte accounting. If that guarantee is unavailable, this recipe is unsuitable. Validate and bound outgoing requests before `helper.write(JSON.stringify(request) + "\n")`, only while ready; `write()` is not backpressure or authorization.
 
 ## C — Separate detail polling from status cadence

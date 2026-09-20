@@ -33,12 +33,12 @@ An absent observation is not proof of absence. Explain every not-applicable row.
 
 | Area | Investigate | Protective pattern | False-positive check |
 |---|---|---|---|
-| Delivery | Missing imports, assets or helpers | Verified manifest and packaged dependencies | Incomplete checkout or incompatible checker environment? |
-| Commands and privileges | Input reaching shell, credential UI, privileged writes | Validated argv/operands and operation-scoped authorization | User consent, effective policy, trusted helper and reachable caller? |
-| Scheduling and IPC | Repeated CLI work, overlap, tight retries | Supported service events or bounded/gated scheduling | Detail-only work, persistent status, animation or debounce? |
-| Input and recovery | Unbounded streams, parse/type/range errors | Bounds before buffering; validation and explicit stale/error state | Does the guard cover this input and failure path? |
+| Delivery | Missing imports, assets, helpers, unverified commit SHAs, reserved namespaces (`omarchy.*`), symlinks in plugin tree (`MKT-001`, `MKT-002`, `MKT-003`), AI agent directive files in checkout (`SEC-009`) | Strict manifest validation, packaged dependencies, 40-character hexadecimal update-request SHA, neutral `DEVELOPMENT.md` naming | Incomplete checkout or incompatible checker environment? |
+| Commands and privileges | Input reaching shell, credential UI, privileged writes, privileged kill from `/tmp` (`[MKT-BASE]`, `SEC-002`), unprivileged temp paths (`SEC-010`), ambient PATH (`SEC-008`) | Validated argv/operands, `#!/usr/bin/bash -p` with environment sanitization, operation-scoped authorization, `$XDG_RUNTIME_DIR` storage | User consent, effective policy, trusted helper and reachable caller? |
+| Scheduling and IPC | Repeated CLI work, overlap, tight retries, unmonitored processes (`SEC-004`), pipefail crashes (`SEC-001`) | Supported service events, bounded/gated scheduling, 2-stage watchdog timer with strict cancellation | Detail-only work, persistent status, animation or debounce? |
+| Input and recovery | Unbounded streams, parse/type/range errors, dynamic QML sinks (`SEC-006`), remote image URIs (`SEC-005`) | Bounds before buffering; validation and explicit stale/error state; static Loader; local asset caching | Does the guard cover this input and failure path? |
 | Ownership | Growing objects, queues, requests and callbacks | Owner, finite budget, eviction, cancellation and stale-result rejection | Parent teardown alone does not bound a long session. |
-| Displays and theme | Unprotected screen access, lifetime/scale assumptions | Guarded dereferences and verified host contracts | Are guards effective for this delegate and installed version? |
+| Displays and theme | Unprotected screen access, lifetime/scale assumptions, exclusive surface focus lockup (`SEC-007`), unescaped dynamic text markup (`SEC-003`) | Guarded dereferences, `WlrKeyboardFocus.OnDemand`, `Text.PlainText` markup guard | Are guards effective for this delegate and installed version? |
 | Localization and accessibility | Unrouted UI messages, broken placeholders/plurals | Supported catalogs, context, fallback and accessible states | Invariant identifier or genuine natural-language message? |
 
 Use corpus numbers only from an available, versioned, reproducible claim with

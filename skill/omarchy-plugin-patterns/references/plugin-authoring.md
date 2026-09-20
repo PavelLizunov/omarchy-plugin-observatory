@@ -36,6 +36,52 @@ Item {
 
 No plugin subprocess or polling timer. Null is unavailable, not muted/zero. The tracker binds node details; hotplug may temporarily remove the sink. For MPRIS use `Quickshell.Services.Mpris`; Hyprland uses **`Quickshell.Hyprland`**, not a guessed Services namespace. Read each actual service API. Do not copy a polling CLI fallback without explaining why the service cannot supply the feature.
 
+## Text and markup rendering safety (`SEC-003`)
+
+In Qt Quick, `Text` and `Label` components default to `Text.AutoText`. Qt Quick's text engine heuristically inspects strings for HTML tags and formatting:
+- If dynamic or untrusted text contains HTML elements (e.g. `<font color=...>`, `<b>`, `<img>`, or entities), Qt parses them as rich markup rather than literal text.
+- This creates layout displacement, visual corruption, and potential unintended network fetches (such as inline `<img src="http://...">` tags triggering remote HTTP connections).
+- Always specify explicit `textFormat: Text.PlainText` on any UI element rendering dynamic or external text:
+
+```qml
+Text {
+    text: root.dynamicMessage
+    textFormat: Text.PlainText
+}
+```
+
+## Remote asset handling and image loading (`SEC-005`)
+
+In Qt Quick, `Image` elements loading remote `http://` or `https://` URLs load asynchronously across the network. However, directly binding `Image.source` to untrusted or external remote URLs introduces privacy tracking (referrer/IP leakage), cache-poisoning risks, and unexpected network resource consumption. Furthermore, local images load synchronously by default, which can stall the QML render thread on large asset decodes unless explicitly decoupled.
+
+- **Local assets:** When loading local disk images, ensure paths are anchored to approved application directories and specify `asynchronous: true` to prevent main-thread decoding stalls on large bitmaps:
+  ```qml
+  Image {
+      source: "file://" + root.safeAssetPath
+      asynchronous: true
+  }
+  ```
+- **Remote images:** Never bind untrusted remote URIs directly into QML. Delegate remote fetching to an explicit, user-authorized background helper that enforces an enforceable security contract:
+  1. **Strict destination validation:** Requires `https://` schemes only. Resolves destination DNS and validates against non-public, loopback, and local-network ranges across both IPv4 (RFC 1918 private `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`; loopback `127.0.0.0/8`; link-local `169.254.0.0/16`) and IPv6 (loopback `::1`; link-local `fe80::/10`; unique local `fc00::/7`), explicitly normalizing and classifying IPv4-mapped IPv6 addresses (`::ffff:0:0/96`).
+  2. **Redirect revalidation:** Re-applies scheme, hostname, and resolved IP address validation at every redirect hop, with a strict maximum redirect ceiling (e.g. ≤3 hops).
+  3. **IP pinning with TLS hostname authentication:** To prevent time-of-check to time-of-use DNS rebinding, pin the connection directly to the pre-validated IP address while **strictly preserving the original hostname for TLS Server Name Indication (SNI) and X.509 certificate hostname verification** (e.g. using libcurl's `CURLOPT_RESOLVE`). Never disable CA or peer certificate verification.
+  4. **Resource bounding:** Enforces a hard byte download limit (e.g. ≤5 MiB), decode dimension cap (e.g. ≤4096×4096 pixels), and connection/transfer timeouts.
+  5. **Private cache:** Stores the verified asset into a private, mode `0700` cache directory under `$XDG_CACHE_HOME` and supplies the resulting verified local `file://` URI to QML.
+
+## Dynamic evaluation sinks (`SEC-006`)
+
+Never pass non-literal or dynamically formatted strings to `Qt.createQmlObject()`. Dynamic QML evaluation acts as an unconstrained script execution sink. Replace dynamic component creation with declarative `Loader` items referencing developer-controlled static component files, passing dynamic values strictly via properties:
+
+```qml
+Loader {
+    source: "components/DynamicCard.qml"
+    active: root.showCard
+    onLoaded: {
+        item.cardData = root.safeData;
+    }
+}
+```
+
 ## Parse, validate, preserve evidence
 
 Pure JS functions for already byte-bounded, complete frames. Put inside the owning QML component or a local JS module. `null` explicitly means unknown/unusable.

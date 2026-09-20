@@ -1,0 +1,2418 @@
+{
+  "total_issues_analyzed": 7732,
+  "chunks_processed": 600,
+  "distinct_issues_with_human_authored_blockers": 3765,
+  "type_distribution": {
+    "submission": 5281,
+    "verification_update": 2302,
+    "other": 120,
+    "bug_report": 12,
+    "discussion": 17
+  },
+  "outcome_distribution": {
+    "approved_published": 4971,
+    "rejected": 707,
+    "not_applicable": 201,
+    "needs_fixes_stalled": 1346,
+    "in_review": 507
+  },
+  "bot_validation_errors": {
+    "The plugin ID does not identify an existing community listing.": 71,
+    "Only the existing listed commit can be verified in this workflow.": 65,
+    "This repository is already listed in the marketplace.": 46,
+    "The issue title must start with `[Plugin]:` and include the plugin name.": 40,
+    "curl-pipe-shell": 27,
+    "remote-git-execution-unpinned": 25,
+    "The validation result could not be published to the issue.": 25,
+    "The submission fields are missing, reordered, or malformed.": 21,
+    "A license file is required in the repository root.": 16,
+    "The requested commit is already the marketplace listing snapshot.": 15,
+    "The repository URL must be a public GitHub repository root URL.": 14,
+    "The plugin manifest does not match the supported Quattro contract.": 14,
+    "Use the verification issue form without changing its headings.": 13,
+    "The automated security baseline did not complete.": 12,
+    "Select the currently listed snapshot action in the verification form.": 12,
+    "The repository HEAD changed or does not match the requested update commit. Update the issue to the current full SHA.": 11,
+    "Use the plugin verification issue form without changing its headings.": 11,
+    "New submissions require one plugin with manifest.json in the repository root.": 8,
+    "The repository does not match the existing listing.": 7,
+    "license-missing": 6,
+    "manifest-invalid": 6,
+    "A required submission checklist item is not confirmed: “The plugin does not overwrite user configuration without explicit consent.”": 5,
+    "The repository could not be reached.": 5,
+    "security-baseline-scan-limit": 4,
+    "A required submission checklist item is not confirmed: “I understand that approval is for listing and is not a security review.”": 4,
+    "A required submission checklist item is not confirmed: “The repository is public and contains installation and removal instructions.”": 4,
+    "Plugin updates cannot add, remove, or rename configured plugin IDs.": 4,
+    "New submissions require one plugin with `manifest.json` in the repository root.": 4,
+    "Validation failed: The validation result could not be published to the issue.": 3,
+    "Verification could not complete. Use the verification issue form without changing its headings.": 3,
+    "verification-could-not-complete": 3,
+    "The validation result could not be published to the issue": 3,
+    "cargo-git-unpinned": 2,
+    "verification-workflow-failed": 2,
+    "plugin-id-not-found": 2,
+    "Validation failed: This repository is already listed in the marketplace.": 2,
+    "The update security baseline did not complete.": 2,
+    "The submission must contain between one and three supported tags.": 2,
+    "Enter the full 40-character update commit SHA.": 2,
+    "Enter the exact existing plugin ID.": 2,
+    "The submission contains an unsupported tag.": 2,
+    "Plugin ID `ess.enteauth` was used by a previous marketplace listing and cannot be reused.": 2,
+    "The update commit did not pass marketplace compatibility validation.": 2,
+    "manifest-missing": 2,
+    "The repository exceeds the limits for a complete static scan.": 2,
+    "The issue title must start with [Plugin]: and include the plugin name.": 2,
+    "Confirm the plugin update acknowledgment.": 2,
+    "submission-invalid": 1,
+    "Plugin ID `mirador` is already listed.": 1,
+    "verification-form-malformed": 1,
+    "automated security baseline did not complete": 1,
+    "verification-could-not-complete: only existing listed commit can be verified": 1,
+    "Validation failed: The automated security baseline did not complete.": 1,
+    "manifest does not match the supported Quattro contract": 1,
+    "manifest-missing-in-root": 1,
+    "Snapshot approval failed: The current marketplace listing cannot be updated safely.": 1,
+    "The repository HEAD changed or does not match the requested update commit.": 1,
+    "The static scan could not safely process screenshots/install-card.png within its configured limits.": 1,
+    "reserved-plugin-id": 1,
+    "Enter the full 40-character listed commit SHA.": 1,
+    "The current marketplace listing cannot be updated safely.": 1,
+    "Standard installation changes are limited to one listed root plugin with a valid manual installation override.": 1,
+    "Verification could not complete. Enter the full 40-character listed commit SHA.": 1,
+    "verification-headings-modified": 1,
+    "The static scan could not safely process LmModel.js within its configured limits.": 1,
+    "Plugin ID `io.github.seyhunak.oma` was used by a previous marketplace listing and cannot be reused.": 1,
+    "target-commit-mismatch": 1,
+    "validation-failed-headings-malformed": 1,
+    "The issue title must start with '[Plugin]:' and include the plugin name.": 1,
+    "verification-form-invalid": 1,
+    "duplicate-plugin-id": 1,
+    "submission-fields-malformed": 1,
+    "Plugin ID io.github.varo6.screenshot-tooling is already listed.": 1,
+    "The selected category is not supported.": 1,
+    "Plugin ID `com.sovchat.omarchy` is already listed.": 1,
+    "Confirm that the listed root plugin supports standard installation.": 1,
+    "repository-exceeds-scan-limits": 1,
+    "repository-head-mismatch": 1,
+    "verification-action-unselected": 1,
+    "validation-failed-workflow-error": 1,
+    "validation-result-could-not-be-published": 1,
+    "Only the existing listed commit can be verified in this workflow": 1,
+    "A README file is required in the repository root.": 1,
+    "The static scan could not safely process `Config.js` within its configured limits.": 1,
+    "The static scan could not safely process assets/install-kernel-module.png within its configured limits.": 1,
+    "verification-form-headings-changed": 1,
+    "Baseline could not complete: The static scan could not safely process `apps/omarchy/dist/tui.mjs` within its configured limits.": 1,
+    "The plugin ID does not identify an existing community listing": 1,
+    "Snapshot approval failed — historical run report: The exact submitted commit could not be scanned completely during approval.": 1,
+    "The static scan could not safely process `preview/preview_install-review.png` within its configured limits.": 1,
+    "The static scan could not safely process `Panel.qml` within its configured limits.": 1,
+    "Validation failed: Use the plugin verification issue form without changing its headings.": 1,
+    "verification-target-mismatch": 1,
+    "marketplace-security-baseline-error:v4": 1,
+    "duplicate-submission-already-listed": 1,
+    "plugin-id-not-listed": 1,
+    "The static scan could not safely process Controller.qml within its configured limits.": 1
+  },
+  "bot_capabilities_flagged": {
+    "installer": 1479,
+    "privilege": 1399,
+    "package-manager": 1356,
+    "service-management": 1106,
+    "remote-build": 1046,
+    "bundled-executable-binary": 88,
+    "sudoers-modification": 57,
+    "curl-pipe-shell": 11,
+    "remote-git-execution-unpinned": 4
+  },
+  "manual_review_categories": {
+    "other": {
+      "blocker_instances": 2370,
+      "distinct_issues": 1888
+    },
+    "qml_wayland_quality": {
+      "blocker_instances": 1376,
+      "distinct_issues": 1187
+    },
+    "unapproved_scripts_or_binaries": {
+      "blocker_instances": 1294,
+      "distinct_issues": 1087
+    },
+    "agent_steering_files": {
+      "blocker_instances": 203,
+      "distinct_issues": 201
+    },
+    "undeclared_dependencies": {
+      "blocker_instances": 63,
+      "distinct_issues": 60
+    },
+    "licensing_or_assets": {
+      "blocker_instances": 22,
+      "distinct_issues": 22
+    },
+    "installer_or_permissions": {
+      "blocker_instances": 1,
+      "distinct_issues": 1
+    }
+  },
+  "reviewers_stats": {
+    "HANCORE-linux": {
+      "distinct_issues_reviewed": 3517,
+      "blockers_raised": 4702
+    },
+    "ryanrhughes": {
+      "distinct_issues_reviewed": 484,
+      "blockers_raised": 620
+    },
+    "rishadtharayil": {
+      "distinct_issues_reviewed": 1,
+      "blockers_raised": 2
+    },
+    "ollieedgeley": {
+      "distinct_issues_reviewed": 1,
+      "blockers_raised": 1
+    },
+    "AndyWeiBoan": {
+      "distinct_issues_reviewed": 1,
+      "blockers_raised": 1
+    }
+  },
+  "agent_steering_summary": {
+    "total_objection_instances": 203,
+    "distinct_issues_affected": 201,
+    "hancore_objections": 203
+  },
+  "agent_steering_entries": [
+    {
+      "issue_number": 209,
+      "comment_id": null,
+      "plugin_name": "Camera Preview",
+      "reviewer": "HANCORE-linux",
+      "detail": "Repository contained unrelated Entire agent hooks and configs.",
+      "resolution": "Author removed all unrelated Entire agent hooks and configuration from the repository."
+    },
+    {
+      "issue_number": 1683,
+      "comment_id": 5503180248,
+      "plugin_name": "Omakei",
+      "reviewer": "HANCORE-linux",
+      "detail": "Parent paths resolved before mkdir/rename/truncating writes without verified directory descriptors, loopback/Origin bypasses in API server, and root AGENTS.md present",
+      "resolution": "None in this issue; issue closed due to 7 days of inactivity"
+    },
+    {
+      "issue_number": 2035,
+      "comment_id": 5501457429,
+      "plugin_name": "chip402",
+      "reviewer": "HANCORE-linux",
+      "detail": "Current HEAD diverged significantly from validated commit, dropped the root manifest, and introduced .mcp.json auto-configuring remote MCP servers alongside an unreviewed payment daemon rewrite",
+      "resolution": "Unresolved; closed due to lack of response within 7 days"
+    },
+    {
+      "issue_number": 2296,
+      "comment_id": 5443778837,
+      "plugin_name": "Context Switcher",
+      "reviewer": "HANCORE-linux",
+      "detail": "plugin persistently linked bundled agent skills into .agents/skills, .claude/skills, .codex/skills, .pi/agent/skills, and .gemini/config/skills during installation, creating cross-tool agent trust expansion",
+      "resolution": "Removed automatic installation of agent skill links."
+    },
+    {
+      "issue_number": 2556,
+      "comment_id": 5501189919,
+      "plugin_name": "Bible",
+      "reviewer": "HANCORE-linux",
+      "detail": "Snapshot contained a root AGENTS.md with discoverable coding-agent instructions, which violates the marketplace trust boundary.",
+      "resolution": "Removed AGENTS.md from the distributed plugin root and added it to .gitignore."
+    },
+    {
+      "issue_number": 2610,
+      "comment_id": 5467319621,
+      "plugin_name": "OmaQuote",
+      "reviewer": "HANCORE-linux",
+      "detail": "Shipped a third-party agent instruction tree under .agents/skills/ with 37 SKILL.md files and shell scripts that would persist into user tool-discovery directories.",
+      "resolution": "Removed the .agents/ directory and all SKILL.md files from tracking."
+    },
+    {
+      "issue_number": 3030,
+      "comment_id": 5453250846,
+      "plugin_name": "Text Transform",
+      "reviewer": "HANCORE-linux",
+      "detail": "The repository publicly included .gstack/terminal-internal-token and local dev server artifacts in the submitted tree.",
+      "resolution": "Revoked the exposed token, purged .gstack directory from git tracking, and added .gstack to .gitignore."
+    },
+    {
+      "issue_number": 3081,
+      "comment_id": 5622987920,
+      "plugin_name": "VPN",
+      "reviewer": "HANCORE-linux",
+      "detail": "approval is blocked because the distributable root contains CLAUDE.md, an agent-control/instruction file with repository workflow, environment, command, testing, and operational guidance. Marketplace plugins must not ship agent steering files as plugin payload.",
+      "resolution": "Unresolved"
+    },
+    {
+      "issue_number": 3098,
+      "comment_id": 5732316818,
+      "plugin_name": "Omarchy Bitwarden",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root AGENTS.md was included in the marketplace plugin tree; additionally flagged unpinned workflow actions, unpinned mutable engine release downloads, and unbounded HTTP response reads.",
+      "resolution": "Relocated AGENTS.md to docs/agents/README.md, pinned workflows to 40-character commit SHAs, migrated from binary download scripts to system package management, and bounded network reads."
+    },
+    {
+      "issue_number": 3178,
+      "comment_id": 5500592694,
+      "plugin_name": "Omalaunch",
+      "reviewer": "HANCORE-linux",
+      "detail": "Please remove root automatic agent-instruction files from the distributable tree, trigger fresh validation for current HEAD, and request a full review of extension execution, provider/config state safety, file traversal/privacy, process/output bounds, dependencies, and asset provenance.",
+      "resolution": "None; issue closed due to inactivity after 7 days"
+    },
+    {
+      "issue_number": 3214,
+      "comment_id": 5500580406,
+      "plugin_name": "Bottom Launcher",
+      "reviewer": "HANCORE-linux",
+      "detail": "Distributable plugin contained root AGENTS.md agent-instruction file and validation commit didn't match HEAD",
+      "resolution": "Removed AGENTS.md from the repository and synchronized the commit"
+    },
+    {
+      "issue_number": 3252,
+      "comment_id": 5648112683,
+      "plugin_name": "Crashes",
+      "reviewer": "HANCORE-linux",
+      "detail": "Repository root contained `CLAUDE.md`, an agent-control/instruction file",
+      "resolution": "Removed `CLAUDE.md` from the distributable repository tree"
+    },
+    {
+      "issue_number": 3414,
+      "comment_id": 5672122602,
+      "plugin_name": "Tonearm",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root AGENTS.md was part of the published plugin tree, creating an unintended instruction trust boundary for coding agents.",
+      "resolution": "Removed root AGENTS.md from the distributed plugin repository snapshot."
+    },
+    {
+      "issue_number": 3420,
+      "comment_id": 5501921311,
+      "plugin_name": "Omatabs",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root AGENTS.md was distributed with the plugin and included an rsync --delete command targeting the live plugin directory.",
+      "resolution": "Removed root AGENTS.md from the distributed plugin repository."
+    },
+    {
+      "issue_number": 3445,
+      "comment_id": 5623005413,
+      "plugin_name": "DHH",
+      "reviewer": "HANCORE-linux",
+      "detail": "Repository contained AGENTS.md; marketplace plugin payloads must not ship agent steering files.",
+      "resolution": "Added AGENTS.md to .gitignore and removed it from tracking."
+    },
+    {
+      "issue_number": 3546,
+      "comment_id": 5502263116,
+      "plugin_name": "Better Omarchy",
+      "reviewer": "HANCORE-linux",
+      "detail": "Plugin auto-installed agent symlinks into ~/.agents, ~/.claude, ~/.codex, and ~/.pi without user consent, shipped root AGENTS.md and CLAUDE.md files, performed unverified path truncations on system files, and ran unbounded sync loops on load.",
+      "resolution": "None; issue closed due to inactivity after seven days without fixes."
+    },
+    {
+      "issue_number": 3598,
+      "comment_id": 5648216360,
+      "plugin_name": "Intermission",
+      "reviewer": "HANCORE-linux",
+      "detail": "Security review is categorically blocked because the distributed plugin root contains AGENTS.md, an automatically discoverable agent-control file not required for plugin runtime",
+      "resolution": ""
+    },
+    {
+      "issue_number": 3653,
+      "comment_id": 5741237325,
+      "plugin_name": "omatodolist",
+      "reviewer": "HANCORE-linux",
+      "detail": "Published tree contained root AGENTS.md and skills/omatodolist-agent/SKILL.md that turned user-controlled todo items into automatic agent commands, opening a prompt-injection vector.",
+      "resolution": "Removed AGENTS.md and moved the agent skill out of the repository."
+    },
+    {
+      "issue_number": 3666,
+      "comment_id": 5503278785,
+      "plugin_name": "CodexBar",
+      "reviewer": "HANCORE-linux",
+      "detail": "Distributable root shipped `AGENTS.md`, which automatically imposed repository-specific instructions on coding agents operating below the installed plugin path.",
+      "resolution": "Removed AGENTS.md from the distribution."
+    },
+    {
+      "issue_number": 3697,
+      "comment_id": 5500629845,
+      "plugin_name": "OmaRecorder",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root AGENTS.md embeds automatic coding-agent instructions unrelated to runtime and must be removed from the distributable plugin payload; branch HEAD had also drifted from validated commit.",
+      "resolution": "Untracked AGENTS.md at commit f9de89e, pinned default branch HEAD to tagged release v1.5.0 at commit 956667b, and re-ran validation."
+    },
+    {
+      "issue_number": 3806,
+      "comment_id": 5500646208,
+      "plugin_name": "On-screen keyboard",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root AGENTS.md contains automatic coding-agent instructions unrelated to runtime and must be removed.",
+      "resolution": "Removed root AGENTS.md from the repository."
+    },
+    {
+      "issue_number": 3934,
+      "comment_id": 5604352155,
+      "plugin_name": "kheetsheet",
+      "reviewer": "HANCORE-linux",
+      "detail": "submitted tree contains HANDOVER.md (92,184 bytes), whose opening lines explicitly instruct future Claude/coding agents to read it before doing anything else and acts as persistent agent-session operating instructions",
+      "resolution": "Removed HANDOVER.md from the payload and triggered fresh validation"
+    },
+    {
+      "issue_number": 3944,
+      "comment_id": 5501102361,
+      "plugin_name": "OpenDota",
+      "reviewer": "HANCORE-linux",
+      "detail": "Remove root AGENTS.md from the installed plugin payload; it is automatically interpreted as coding-agent instructions and is not runtime functionality",
+      "resolution": "Author claimed removal, but submission was closed due to review timeout before revalidation"
+    },
+    {
+      "issue_number": 3968,
+      "comment_id": 5500330258,
+      "plugin_name": "OmaBackup",
+      "reviewer": "HANCORE-linux",
+      "detail": "Repository shipped automatically discoverable coding-agent instruction files (AGENTS.md and .herdr/reviewer.md) into the distributable plugin tree.",
+      "resolution": "Untracked AGENTS.md and .herdr/reviewer.md from git."
+    },
+    {
+      "issue_number": 4074,
+      "comment_id": 5501116705,
+      "plugin_name": "Web3 Workstation",
+      "reviewer": "HANCORE-linux",
+      "detail": "The installer silently installed an automatically interpreted coding-agent skill under ~/.agents/skills without explicit opt-in; skill target lacked containment and ownership checks, and executable archives lacked extraction preflights",
+      "resolution": "Removed coding-agent skill from automatic installation (requiring explicit opt-in with strict destination/ownership checks) and added archive preflighting and transactional rollback"
+    },
+    {
+      "issue_number": 4076,
+      "comment_id": 5500726661,
+      "plugin_name": "Lomarchy Dock",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root AGENTS.md installs automatic coding-agent instructions persistently inside the user plugin tree. Remove this cross-tool instruction surface from the distributable artifact.",
+      "resolution": "Unresolved; author did not respond within 7 days and submission was closed."
+    },
+    {
+      "issue_number": 4078,
+      "comment_id": 5537111313,
+      "plugin_name": "SIA",
+      "reviewer": "HANCORE-linux",
+      "detail": "install.sh automatically installs a persistent Claude skill under ~/.claude/skills/sia without disclosure or explicit opt-in consent.",
+      "resolution": "Gated agent skill installation behind SIA_INSTALL_AGENT_SKILL=1 opt-in and added explicit disclosure in the UI setup screen."
+    },
+    {
+      "issue_number": 4094,
+      "comment_id": 5501686026,
+      "plugin_name": "Islands Bar",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root CLAUDE.md is auto-consumed coding-agent instruction persistence containing destructive commands (rsync --delete, git clean -fd).",
+      "resolution": "Removed CLAUDE.md from distribution and added it to .gitignore."
+    },
+    {
+      "issue_number": 4145,
+      "comment_id": 5734099058,
+      "plugin_name": "Seafile",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root AGENTS.md directed coding agents to deploy the plugin, restart the user shell, interact with live desktop, and run repo commands, creating an instruction-injection boundary.",
+      "resolution": "Removed root AGENTS.md from the distributed repository tree and moved contributor guidance to CONTRIBUTING.md."
+    },
+    {
+      "issue_number": 4197,
+      "comment_id": 5503261157,
+      "plugin_name": "CPU",
+      "reviewer": "HANCORE-linux",
+      "detail": "Marketplace snapshot shipped root CLAUDE.md containing executable agent-directed instructions, presenting an automatic prompt-injection surface.",
+      "resolution": "Removed CLAUDE.md from the distributed plugin and moved human developer documentation to docs/DEVELOPING.md."
+    },
+    {
+      "issue_number": 4198,
+      "comment_id": null,
+      "plugin_name": "GPU",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root CLAUDE.md shipped in distributed plugin.",
+      "resolution": "Moved notes to docs/DEVELOPMENT.md and stripped agent-specific instructions."
+    },
+    {
+      "issue_number": 4200,
+      "comment_id": 5502464108,
+      "plugin_name": "Synology Drive Control",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root CLAUDE.md included in distributable payload.",
+      "resolution": "Removed CLAUDE.md from the repository."
+    },
+    {
+      "issue_number": 4201,
+      "comment_id": 5502474532,
+      "plugin_name": "Sennheiser Momentum 4",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root CLAUDE.md shipped in repository payload.",
+      "resolution": "Moved CLAUDE.md, probes/, and tools/ off to a separate research branch."
+    },
+    {
+      "issue_number": 4237,
+      "comment_id": 5500941418,
+      "plugin_name": "Expose",
+      "reviewer": "HANCORE-linux",
+      "detail": "Requested removal or conversion of root CLAUDE.md to ordinary developer documentation",
+      "resolution": "Maintainer determined CLAUDE.md is inert documentation at runtime under the revised security-only policy"
+    },
+    {
+      "issue_number": 4250,
+      "comment_id": 5501287182,
+      "plugin_name": "Sticky Note",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root CLAUDE.md and sizeable .scratch review/agent artifacts shipped in the installable plugin tree, causing cross-tool instruction persistence.",
+      "resolution": "Unresolved; author declined full filesystem refactor and let the issue lapse."
+    },
+    {
+      "issue_number": 4252,
+      "comment_id": 5500442435,
+      "plugin_name": "GoalWatch",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root AGENTS.md automatically changed coding-agent behavior across local tools and directed synthetic fullscreen alert actions.",
+      "resolution": "Removed AGENTS.md from root and relocated contribution guidance to CONTRIBUTING.md."
+    },
+    {
+      "issue_number": 4253,
+      "comment_id": 5502384743,
+      "plugin_name": "Switchboard",
+      "reviewer": "HANCORE-linux",
+      "detail": "Distributable plugin root shipped AGENTS.md, imposing automated coding-agent instructions below the installed plugin path.",
+      "resolution": "Removed AGENTS.md and moved developer guidance to CONTRIBUTING.md."
+    },
+    {
+      "issue_number": 4287,
+      "comment_id": 5502028069,
+      "plugin_name": "OrderBell",
+      "reviewer": "HANCORE-linux",
+      "detail": "Distributable repository root contained AGENTS.md, supplying ambient instruction policy to unrelated agent runtimes",
+      "resolution": "Removed AGENTS.md and relocated contributor guidance into CONTRIBUTING.md with CI enforcement against agent steering files"
+    },
+    {
+      "issue_number": 4298,
+      "comment_id": 5503173627,
+      "plugin_name": "The Bible",
+      "reviewer": "HANCORE-linux",
+      "detail": "AGENTS.md is shipped at the plugin root and contains instructions aimed at coding agents. Remove agent-directed instruction files from the installable plugin tree or convert the necessary information into inert human documentation.",
+      "resolution": "Unresolved due to commit SHA mismatch on default branch."
+    },
+    {
+      "issue_number": 4312,
+      "comment_id": 5734393691,
+      "plugin_name": "Higgsfield Omagotchi",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root CLAUDE.md in plugin tree directs Claude Code to commit as a named human and strip AI co-author attribution",
+      "resolution": "Unresolved"
+    },
+    {
+      "issue_number": 4339,
+      "comment_id": 5505437437,
+      "plugin_name": "Rollback",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root AGENTS.md and CLAUDE.md shipped inside installable plugin containing coding-agent instructions, executable dev commands, and repo policy.",
+      "resolution": "Removed AGENTS.md and CLAUDE.md from the repository payload."
+    },
+    {
+      "issue_number": 4407,
+      "comment_id": 5533231835,
+      "plugin_name": "Mouse Odometer",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root AGENTS.md is an automatically discovered cross-tool instruction payload; missing output caps/deadlines/teardown in child processes; predictable .tmp write in write_atomic().",
+      "resolution": "Moved AGENTS.md to docs/DEVELOPING.md, added 64 KiB caps and 30s deadlines to child processes, and tightened atomic file operations."
+    },
+    {
+      "issue_number": 4505,
+      "comment_id": 5593147408,
+      "plugin_name": "Omapad",
+      "reviewer": "HANCORE-linux",
+      "detail": "Installed plugin tree contains repository-supplied agent instruction files under .claude/skills/*/SKILL.md",
+      "resolution": "Removed .claude directory and moved instructions to docs/procedures/pad-*.md, added test preventing agent steering files in repo"
+    },
+    {
+      "issue_number": 4518,
+      "comment_id": 5560990388,
+      "plugin_name": "Distraction space",
+      "reviewer": "HANCORE-linux",
+      "detail": "AGENTS.md and CLAUDE.md instructed coding agents to adopt Flow-Next task control and run external model routing (grok --always-approve ...), altering agent behavior inside plugin directory.",
+      "resolution": "Removed AGENTS.md, CLAUDE.md, and .flow/ directory from repository and added them to .gitignore."
+    },
+    {
+      "issue_number": 4530,
+      "comment_id": 5584316024,
+      "plugin_name": "Keyboard Settings",
+      "reviewer": "HANCORE-linux",
+      "detail": "AGENTS.md:1-63 shipped at plugin root changes coding agent behavior and creates cross-tool instruction persistence",
+      "resolution": "Excluded AGENTS.md and development files from distributed plugin tree"
+    },
+    {
+      "issue_number": 4585,
+      "comment_id": 5533251858,
+      "plugin_name": "ZMK keyboard",
+      "reviewer": "HANCORE-linux",
+      "detail": "The installed root contained AGENTS.md and CLAUDE.md in discovery locations, which coding agents automatically ingest.",
+      "resolution": "Removed AGENTS.md and CLAUDE.md from the root directory and moved development documentation into ARCHITECTURE.md."
+    },
+    {
+      "issue_number": 4600,
+      "comment_id": 5623167588,
+      "plugin_name": "e2b.bar",
+      "reviewer": "HANCORE-linux",
+      "detail": "The installable repository tree contains repository-supplied agent instruction files at .agents/skills/clawpatch-report-only/SKILL.md and .agents/skills/minimalist-ui/SKILL.md.",
+      "resolution": "Pending author fix (must remove .agents directory and all agent instructions)"
+    },
+    {
+      "issue_number": 4628,
+      "comment_id": 5532587819,
+      "plugin_name": "Omasend",
+      "reviewer": "HANCORE-linux",
+      "detail": "install.sh:154-190 automatically created or modified ~/.claude/CLAUDE.md and appended persistent agent instructions without explicit user opt-in, crossing the plugin's authority boundary.",
+      "resolution": "Made writing to ~/.claude/CLAUDE.md strictly opt-in via a CLI flag or interactive prompt, defaulting to skipped non-interactively."
+    },
+    {
+      "issue_number": 4629,
+      "comment_id": 5561076943,
+      "plugin_name": "Yandex Music",
+      "reviewer": "HANCORE-linux",
+      "detail": "AGENTS.md:1-14 directed coding agents to load .agents/*.md instructions, and installing the repository placed these agent-control files in the plugin directory.",
+      "resolution": "Removed AGENTS.md, .agents/, and .pi-tasks/ from the published repository checkout."
+    },
+    {
+      "issue_number": 4665,
+      "comment_id": 5561304119,
+      "plugin_name": "Overhead",
+      "reviewer": "HANCORE-linux",
+      "detail": "AGENTS.md present in root distributable repository could be automatically interpreted by compatible coding agents when the plugin is cloned.",
+      "resolution": "Removed AGENTS.md from repository snapshot and moved contributor instructions to docs/CONTRIBUTING.md."
+    },
+    {
+      "issue_number": 4670,
+      "comment_id": 5534648707,
+      "plugin_name": "Anker C200 Controls",
+      "reviewer": "HANCORE-linux",
+      "detail": "Distributable root contained AGENTS.md, an agent-steering file altering coding-agent behavior in cloned directories.",
+      "resolution": "Deleted AGENTS.md and added a release test rejecting root and nested AGENTS.md files."
+    },
+    {
+      "issue_number": 4677,
+      "comment_id": 5624091669,
+      "plugin_name": "Antigravity (AGY) Usage",
+      "reviewer": "HANCORE-linux",
+      "detail": "Default-branch HEAD differed from validated commit, and the current installable tree contained repository-supplied AGENTS.md.",
+      "resolution": "Unresolved; author must remove AGENTS.md from the plugin tree and rerun validation on an unchanged HEAD."
+    },
+    {
+      "issue_number": 4688,
+      "comment_id": 5624091418,
+      "plugin_name": "Systemd User Services",
+      "reviewer": "HANCORE-linux",
+      "detail": "The current installable tree contains repository-supplied AGENTS.md.",
+      "resolution": "Removed and untracked AGENTS.md from the distributed repository tree."
+    },
+    {
+      "issue_number": 4712,
+      "comment_id": 5646789929,
+      "plugin_name": "Omatalk",
+      "reviewer": "HANCORE-linux",
+      "detail": "The submitted plugin snapshot contains the agent-control file AGENTS.md and an associated docs/agents/ instruction set.",
+      "resolution": "Removed AGENTS.md and docs/agents/ from the distributed repository snapshot."
+    },
+    {
+      "issue_number": 4744,
+      "comment_id": 5642689162,
+      "plugin_name": "Candela",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root HANDOFF.md preserves multi-session agent continuation guidance and crosses payload trust boundaries for coding agents",
+      "resolution": "Pending removal of HANDOFF.md by author"
+    },
+    {
+      "issue_number": 4765,
+      "comment_id": 5561383894,
+      "plugin_name": "Omarchygram",
+      "reviewer": "HANCORE-linux",
+      "detail": "Repository root contained executable AGENTS.md and CLAUDE.md with coding-agent instructions that could steer or block coding agents operating in the installed plugin tree.",
+      "resolution": "Removed AGENTS.md and CLAUDE.md and converted notes into neutral DEVELOPMENT.md."
+    },
+    {
+      "issue_number": 4797,
+      "comment_id": 5593448806,
+      "plugin_name": "PYIN News",
+      "reviewer": "HANCORE-linux",
+      "detail": "Installable tree contained active agent instruction file at skills/journalistic-news-summary/SKILL.md directing agent behavior and format, which agent tooling can treat as trusted policy",
+      "resolution": "Deleted SKILL.md, replaced with assets/summary-format.json containing only integer limits and section IDs treated as untrusted runtime data, and added release CI checks against agent control files"
+    },
+    {
+      "issue_number": 4803,
+      "comment_id": 5561518935,
+      "plugin_name": "Workspace Layout",
+      "reviewer": "HANCORE-linux",
+      "detail": "README.md installs the complete repository root, including AGENTS.md with automatically interpreted agent instructions; remove or neutrally rename outside agent instruction mechanisms.",
+      "resolution": "moved to docs/development.md, added AGENTS.md, CLAUDE.md, and .cursorrules to .gitignore"
+    },
+    {
+      "issue_number": 4839,
+      "comment_id": 5556381786,
+      "plugin_name": "Omarchy RSS Client",
+      "reviewer": "HANCORE-linux",
+      "detail": "Repository contains a root-level AGENTS.md, which would be installed into the user plugin directory and influence agent behavior.",
+      "resolution": "Removed AGENTS.md from the repository tree."
+    },
+    {
+      "issue_number": 4881,
+      "comment_id": 5561624273,
+      "plugin_name": "Perfo",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root AGENTS.md:69-74,79-82 in installed plugin tree instructs coding agents to invoke/write memory tools and consult external repositories.",
+      "resolution": "Split repository into separate source repository (perfo-src) and distribution repository (perfo), completely excluding AGENTS.md and dev/build files from the published tree."
+    },
+    {
+      "issue_number": 4899,
+      "comment_id": 5561646908,
+      "plugin_name": "DropSpace",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root AGENTS.md defined binding instructions for AI coding agents that could be interpreted when installed into the user's plugin tree",
+      "resolution": "Removed AGENTS.md from the root of the published repository and replaced broad pgrep/pkill with PID validation"
+    },
+    {
+      "issue_number": 4946,
+      "comment_id": 5591629647,
+      "plugin_name": "Botty",
+      "reviewer": "HANCORE-linux",
+      "detail": "Model-derived proposals still allowed to mutate live agent instruction files (USER.md, MEMORY.md, and ~/.hermes/profiles/botty/skills/<name>/SKILL.md) following UI approval, creating an indirect prompt-injection persistence vector.",
+      "resolution": "Author staged approved proposals into an inert directory (~/.local/share/botti/approved_proposals/) instead of live agent instruction files and requested re-review."
+    },
+    {
+      "issue_number": 4948,
+      "comment_id": 5642709353,
+      "plugin_name": "Familiar",
+      "reviewer": "HANCORE-linux",
+      "detail": "Installable plugin tree contained repository-supplied agent and session control files (.context/.active-agent, .context/HANDOFF.md, .context/decisions.md).",
+      "resolution": "Completely removed the .context directory from the repository payload and added it to .gitignore."
+    },
+    {
+      "issue_number": 4968,
+      "comment_id": 5624144230,
+      "plugin_name": "Desktop Terrarium",
+      "reviewer": "HANCORE-linux",
+      "detail": "Repository root contains AGENTS.md, which can alter automated agent behavior during context inspection.",
+      "resolution": null
+    },
+    {
+      "issue_number": 4972,
+      "comment_id": 5592553940,
+      "plugin_name": "Antigravity",
+      "reviewer": "HANCORE-linux",
+      "detail": "The installed repository-root payload contains AGENTS.md (14,181 bytes)... distributing it creates persistent cross-tool agent instructions outside the plugin's declared behavior.",
+      "resolution": "Removed AGENTS.md from distributable root and moved developer instructions to docs/CONTRIBUTING.md."
+    },
+    {
+      "issue_number": 4992,
+      "comment_id": null,
+      "plugin_name": "Dayflow",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root-level AGENTS.md was present in the installable repository tree.",
+      "resolution": "Author removed AGENTS.md from the plugin tree and added it to .gitignore."
+    },
+    {
+      "issue_number": 5023,
+      "comment_id": 5568488195,
+      "plugin_name": "Konnectarchy",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root AGENTS.md was included in the distributed repository tree where users/agents can execute arbitrary instructions.",
+      "resolution": "Removed AGENTS.md from the distributed plugin tree and added it to .gitignore."
+    },
+    {
+      "issue_number": 5027,
+      "comment_id": 5585887606,
+      "plugin_name": "callme",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root-level `CLAUDE.md` found in the installable plugin tree, which can influence agent behavior when operating in plugin scope.",
+      "resolution": "Moved the plugin to a dedicated repository without `CLAUDE.md` or external agent runtime files."
+    },
+    {
+      "issue_number": 5062,
+      "comment_id": 5556306453,
+      "plugin_name": "T480 Batteries",
+      "reviewer": "HANCORE-linux",
+      "detail": "Repository contained a root-level `AGENTS.md` file that would be shipped into the user's plugin tree and affect local AI agent behavior.",
+      "resolution": "Removed `AGENTS.md` from the tracked git tree in patch release v1.0.1 and added it to .gitignore."
+    },
+    {
+      "issue_number": 5066,
+      "comment_id": 5556375680,
+      "plugin_name": "QuickFile",
+      "reviewer": "HANCORE-linux",
+      "detail": "the repository contains a root-level `AGENTS.md`. Since the marketplace installs this repository tree as the plugin, the instruction file would be shipped into the user plugin directory and can influence agent behavior in that scope.",
+      "resolution": "Removed AGENTS.md from the tracked repository and installable tree, keeping contributor instructions locally ignored."
+    },
+    {
+      "issue_number": 5098,
+      "comment_id": 5575963511,
+      "plugin_name": "FileBlade",
+      "reviewer": "HANCORE-linux",
+      "detail": "AGENTS.md at root acted as an instruction source for coding agents opened in the distributed plugin directory, crossing the agent trust boundary.",
+      "resolution": "Removed root AGENTS.md from the distributed plugin tree."
+    },
+    {
+      "issue_number": 5109,
+      "comment_id": 5556370804,
+      "plugin_name": "Omachords",
+      "reviewer": "HANCORE-linux",
+      "detail": "The repository contains a root-level AGENTS.md which gets shipped into the user plugin directory and can influence agent behavior.",
+      "resolution": "Removed AGENTS.md from the repository."
+    },
+    {
+      "issue_number": 5115,
+      "comment_id": 5593174306,
+      "plugin_name": "Omachat",
+      "reviewer": "HANCORE-linux",
+      "detail": "The installable plugin tree ships agent-control instruction files at `skills/web-search/SKILL.md` and `skills/writing-skills/SKILL.md`. Marketplace plugins must not place discoverable agent instructions in the installed tree.",
+      "resolution": "No response within seven days; closed by maintainer."
+    },
+    {
+      "issue_number": 5120,
+      "comment_id": 5556357732,
+      "plugin_name": "OmaDo Tasks",
+      "reviewer": "HANCORE-linux",
+      "detail": "Repository contains a root-level `AGENTS.md` which would be shipped into the user plugin directory and influence agent behavior.",
+      "resolution": "Author removed `AGENTS.md` and submitted commit b5f5861 (pending review)."
+    },
+    {
+      "issue_number": 5123,
+      "comment_id": 5589021080,
+      "plugin_name": "JotPin",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root-level `AGENTS.md` found in the plugin's installed tree.",
+      "resolution": "Author removed `AGENTS.md` and added packaging regression test preventing agent files from tracking."
+    },
+    {
+      "issue_number": 5133,
+      "comment_id": 5568541758,
+      "plugin_name": "Toggl Track",
+      "reviewer": "HANCORE-linux",
+      "detail": "The published repository tree includes the 21,536-byte root AGENTS.md, which could allow coding agents to automatically interpret submission-controlled instructions.",
+      "resolution": "Author removed AGENTS.md from main and gitignored it."
+    },
+    {
+      "issue_number": 5181,
+      "comment_id": 5568970186,
+      "plugin_name": "Hypertile",
+      "reviewer": "HANCORE-linux",
+      "detail": "Security review found a root AGENTS.md in the exact validated repository tree. omarchy plugin add installs the repository tree into plugin scope where coding agents may automatically interpret root agent instructions.",
+      "resolution": "Removed AGENTS.md from the distributed/installable tree and added a CI guard rejecting AGENTS.md, CLAUDE.md, and GEMINI.md."
+    },
+    {
+      "issue_number": 5200,
+      "comment_id": 5569027127,
+      "plugin_name": "Omapager",
+      "reviewer": "HANCORE-linux",
+      "detail": "Found root AGENTS.md in the validated tree, which coding agents would automatically load into ambient context upon plugin installation.",
+      "resolution": "Removed AGENTS.md from root and relocated documentation to docs/DEVELOPING.md with gitignored local symlinks."
+    },
+    {
+      "issue_number": 5215,
+      "comment_id": 5576114940,
+      "plugin_name": "Omarchy Plugin Sea",
+      "reviewer": "HANCORE-linux",
+      "detail": "Found root-level `AGENTS.md`, which ambiently injects repository-authored instructions into the context of users' coding agents.",
+      "resolution": "Author removed `AGENTS.md` and re-validated at commit `70db2a3`."
+    },
+    {
+      "issue_number": 5216,
+      "comment_id": 5569102515,
+      "plugin_name": "Corsair Headset Battery",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root `AGENTS.md` was included in the installable repository tree.",
+      "resolution": "Author removed `AGENTS.md` and re-submitted."
+    },
+    {
+      "issue_number": 5247,
+      "comment_id": 5592668189,
+      "plugin_name": "Garmin Glance",
+      "reviewer": "HANCORE-linux",
+      "detail": "Setup files generate prompts directing agents to fetch instructions from a mutable GitHub `main` branch URL (blob/main/docs/SETUP.md), introducing an unreviewed instruction supply-chain risk.",
+      "resolution": "None; submission was closed after 7 days of inactivity without a validated fix."
+    },
+    {
+      "issue_number": 5249,
+      "comment_id": 5585480137,
+      "plugin_name": "Omazork",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root CLAUDE.md and .claude/settings.json were included in the published plugin tree where coding agents could automatically execute them.",
+      "resolution": "Author moved coding agent files to a separate develop branch and used scripts/promote.sh to strip them on master."
+    },
+    {
+      "issue_number": 5253,
+      "comment_id": 5569311259,
+      "plugin_name": "Otter",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root AGENTS.md was detected in the installable repository tree.",
+      "resolution": "Author moved AGENTS.md to docs/CONTRIBUTING.md."
+    },
+    {
+      "issue_number": 5271,
+      "comment_id": 5569399168,
+      "plugin_name": "Grammachy",
+      "reviewer": "HANCORE-linux",
+      "detail": "`AGENTS.md:1` places operational coding-agent instructions in the published plugin root alongside `manifest.json`... Please remove `AGENTS.md` from the published plugin tree, or add a verifiable packaging exclusion that guarantees it is not distributed",
+      "resolution": "Removed/excluded AGENTS.md in pull request / commit update"
+    },
+    {
+      "issue_number": 5292,
+      "comment_id": 5583716753,
+      "plugin_name": "Keystroke",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root AGENTS.md explicitly instructed coding agents, extending trust from reviewed code into later agent sessions.",
+      "resolution": "Removed AGENTS.md and CLAUDE.md from the tree, moved contributor guidance to CONTRIBUTING.md, and added them to .gitignore."
+    },
+    {
+      "issue_number": 5303,
+      "comment_id": 5569660930,
+      "plugin_name": "Agent Notch",
+      "reviewer": "HANCORE-linux",
+      "detail": "`AGENTS.md:78-89` placed operational coding-agent instructions in the published plugin root alongside `manifest.json`.",
+      "resolution": "Deleted `AGENTS.md` from the repository root and added it to `.gitignore`."
+    },
+    {
+      "issue_number": 5323,
+      "comment_id": 5583840001,
+      "plugin_name": "Nextcloud Tasks",
+      "reviewer": "HANCORE-linux",
+      "detail": "root AGENTS.md:1-13 is shipped in the installable tree and contains agent directives, including commands to execute test/demo scripts and an opt-in real EDS write test. Marketplace installation exposes these publisher-controlled instructions to coding agents entering the plugin scope.",
+      "resolution": "Removed AGENTS.md from the shipped tree and moved guidance to CONTRIBUTING.md"
+    },
+    {
+      "issue_number": 5329,
+      "comment_id": 5583867284,
+      "plugin_name": "BetterPower",
+      "reviewer": "HANCORE-linux",
+      "detail": "The installable tree ships CLAUDE.md:1-25, which directs agents to execute scripts/run.sh and local commands, plus .claude/skills/done/SKILL.md:1-15 and .claude/skills/release/SKILL.md:1-12, which direct execution of .kit/run and commit/tag/push release actions. Agents operating in the installed plugin directory can automatically interpret these publisher-controlled instructions and mutate or push repositories.",
+      "resolution": "CLAUDE.md and .claude/ removed from repository tree and added to .gitignore"
+    },
+    {
+      "issue_number": 5343,
+      "comment_id": 5569911895,
+      "plugin_name": "Green Room",
+      "reviewer": "HANCORE-linux",
+      "detail": "The validated commit did not match repository HEAD, and root AGENTS.md had to be addressed or verifiably excluded from the installed plugin.",
+      "resolution": "Removed AGENTS.md and CLAUDE.md from the repository."
+    },
+    {
+      "issue_number": 5395,
+      "comment_id": 5584039011,
+      "plugin_name": "KeePass Picker",
+      "reviewer": "HANCORE-linux",
+      "detail": "CLAUDE.md:1-12 in root of shipped tree directed Claude Code to read contributor instructions, run tests, change versions, and push releases.",
+      "resolution": "Removed CLAUDE.md, CONTRIBUTING.md, and scripts/dev-install from the repository."
+    },
+    {
+      "issue_number": 5428,
+      "comment_id": 5584089463,
+      "plugin_name": "SmellyType for Omarchy",
+      "reviewer": "HANCORE-linux",
+      "detail": "shipped root AGENTS.md directs agents to follow a separate mutable core repository's AGENTS.md and install guide, exposing publisher-controlled and remotely mutable instructions to agents operating in the installed plugin scope",
+      "resolution": "None; submission closed after seven days of inactivity"
+    },
+    {
+      "issue_number": 5449,
+      "comment_id": 5593199404,
+      "plugin_name": "Omatoki",
+      "reviewer": "HANCORE-linux",
+      "detail": "Installable repository root contains AGENTS.md, which tools might treat as trusted operating instructions",
+      "resolution": "Removed AGENTS.md from installable tree and added local gitignore rules (commit 736c53a)"
+    },
+    {
+      "issue_number": 5473,
+      "comment_id": 5584403913,
+      "plugin_name": "Stargazer",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root AGENTS.md instructed automated coding agents to inspect shell files and apply rules outside the plugin runtime, risking unintended prompt injection.",
+      "resolution": "Removed AGENTS.md from the repository root and moved contributor instructions to CONTRIBUTING.md."
+    },
+    {
+      "issue_number": 5498,
+      "comment_id": 5584844845,
+      "plugin_name": "omaTrail",
+      "reviewer": "HANCORE-linux",
+      "detail": "Security review blocked because root contained AGENTS.md and CLAUDE.md, creating instruction-injection surfaces for coding agents scanning installed plugin directories.",
+      "resolution": "Author removed AGENTS.md and CLAUDE.md, added a recursive release check to prevent reintroduction, and resubmitted clean commit."
+    },
+    {
+      "issue_number": 5546,
+      "comment_id": 5580860756,
+      "plugin_name": "Android Dev",
+      "reviewer": "HANCORE-linux",
+      "detail": "The repository ships a 135 KB root AGENTS.md inside the plugin snapshot creating an unreviewed prompt/instruction injection surface.",
+      "resolution": "Removed root AGENTS.md and CLAUDE.md from the tree, converted reference to docs/reference.md, and added tests preventing agent instruction files."
+    },
+    {
+      "issue_number": 5585,
+      "comment_id": 5580985232,
+      "plugin_name": "OmaSpotify",
+      "reviewer": "HANCORE-linux",
+      "detail": "The published plugin tree contains root AGENTS.md and CLAUDE.md instruction files that can create an unreviewed prompt injection surface when scanned by coding agents.",
+      "resolution": "Removed AGENTS.md and CLAUDE.md from the repository and moved developer guidance into docs/DEVELOPMENT.md."
+    },
+    {
+      "issue_number": 5588,
+      "comment_id": 5587358534,
+      "plugin_name": "Sentinel",
+      "reviewer": "HANCORE-linux",
+      "detail": "The installable root contains AGENTS.md, CLAUDE.md, and agent role/prompt configuration under .grok/.",
+      "resolution": "Author removed AGENTS.md, CLAUDE.md, and the .grok/ directory in a new commit and requested re-review."
+    },
+    {
+      "issue_number": 5601,
+      "comment_id": 5581069664,
+      "plugin_name": "Notification Slideover",
+      "reviewer": "HANCORE-linux",
+      "detail": "Published plugin tree contained a root AGENTS.md, creating an instruction-injection attack surface for coding agents scanning the directory",
+      "resolution": "Author updated upstream to remove AGENTS.md, but issue remained closed"
+    },
+    {
+      "issue_number": 5603,
+      "comment_id": 5587334493,
+      "plugin_name": "Sentinel",
+      "reviewer": "HANCORE-linux",
+      "detail": "Repository contained root-level AGENTS.md, CLAUDE.md, and active prompt configurations under .grok/, exposing coding agents to untrusted instructions",
+      "resolution": "None; submission closed after 7 days without response"
+    },
+    {
+      "issue_number": 5620,
+      "comment_id": 5587299202,
+      "plugin_name": "OmaSeal",
+      "reviewer": "HANCORE-linux",
+      "detail": "Repository contained a root-level AGENTS.md, which cannot be shipped inside marketplace plugins",
+      "resolution": "Removed AGENTS.md from the installable repository tree and added to .gitignore"
+    },
+    {
+      "issue_number": 5639,
+      "comment_id": 5583908749,
+      "plugin_name": "Calendar Event",
+      "reviewer": "HANCORE-linux",
+      "detail": "The validated plugin root contains AGENTS.md, which would be installed with the plugin and can inject repository/agent instructions into later tooling. Please exclude that file from the installable plugin tree.",
+      "resolution": "Author untracked and git-ignored AGENTS.md, but the issue stalled before fresh validation and approval occurred"
+    },
+    {
+      "issue_number": 5653,
+      "comment_id": 5584418365,
+      "plugin_name": "App Workspaces",
+      "reviewer": "HANCORE-linux",
+      "detail": "Plugin included root-level agent instruction files (AGENTS.md, CLAUDE.md) that present instruction-injection surfaces for coding assistants.",
+      "resolution": "Removed AGENTS.md and CLAUDE.md from the distribution tree and added tests to prevent agent instruction files from being packaged."
+    },
+    {
+      "issue_number": 5693,
+      "comment_id": 5594964206,
+      "plugin_name": "Kidtimer",
+      "reviewer": "HANCORE-linux",
+      "detail": "submitted repository still ships agent-control payloads at AGENTS.md:1-13 and CLAUDE.md:1-2, which imports AGENTS.md.",
+      "resolution": "Removed AGENTS.md and CLAUDE.md from the submitted repository."
+    },
+    {
+      "issue_number": 5714,
+      "comment_id": 5588630503,
+      "plugin_name": "OmarKEYS",
+      "reviewer": "HANCORE-linux",
+      "detail": "the installed plugin tree contains a root AGENTS.md. Root agent-control files can inject repository-supplied instructions into coding agents operating in or above the plugin directory and are not permitted in marketplace plugin payloads.",
+      "resolution": "Removed AGENTS.md from the distributed tree and removed the in-panel remote git branch checkout mechanism."
+    },
+    {
+      "issue_number": 5715,
+      "comment_id": 5588616635,
+      "plugin_name": "Attention Required",
+      "reviewer": "HANCORE-linux",
+      "detail": "the installed plugin tree contains a root AGENTS.md. Root agent-control files can inject repository-supplied instructions into coding agents operating in or above the plugin directory and are not permitted in marketplace plugin payloads.",
+      "resolution": "Moved reference documentation from AGENTS.md to REFERENCE.md."
+    },
+    {
+      "issue_number": 5725,
+      "comment_id": 5591364853,
+      "plugin_name": "Agent Skills Manager",
+      "reviewer": "HANCORE-linux",
+      "detail": "this marketplace plugin is not read-only with respect to agent-control material; bin/agent-skills can rewrite another skill's SKILL.md description and move selected skill directories out of agent search roots.",
+      "resolution": "Removed SKILL.md write/reset and skill-removal operations to guarantee read-only handling of agent skills."
+    },
+    {
+      "issue_number": 5726,
+      "comment_id": 5589704678,
+      "plugin_name": "Omacapture",
+      "reviewer": "HANCORE-linux",
+      "detail": "The installable repository root contains .mcp.json, which configures compatible coding agents to launch omacapture mcp.",
+      "resolution": "Removed .mcp.json from the repository root and added CI rejection for agent config files."
+    },
+    {
+      "issue_number": 5743,
+      "comment_id": 5590100681,
+      "plugin_name": "MCP Server",
+      "reviewer": "HANCORE-linux",
+      "detail": "Shipped agent-control instruction files (`CLAUDE.md`, `.claude/skills/grilling/SKILL.md`, `.codex/skills/grilling/SKILL.md`) alongside a security-sensitive MCP server.",
+      "resolution": "Renamed `CLAUDE.md` to `CONTRIBUTING.md`, untracked and gitignored agent directories, and added a recursive `make agents` release check in CI."
+    },
+    {
+      "issue_number": 5764,
+      "comment_id": 5591842852,
+      "plugin_name": "OmaQ",
+      "reviewer": "HANCORE-linux",
+      "detail": "AGENTS.md found in installable payload, masquerading as automatic agent control instructions and creating agent-context injection surface",
+      "resolution": "Cleaned up or moved agent-steering instructions to standard non-operative documentation"
+    },
+    {
+      "issue_number": 5772,
+      "comment_id": 5593291438,
+      "plugin_name": "Gooey",
+      "reviewer": "HANCORE-linux",
+      "detail": "The exact validated installable tree contains a root AGENTS.md. It is an active coding-agent instruction source... Remove AGENTS.md and any equivalent agent-control file from all distributed or installed plugin contents",
+      "resolution": "Author deleted AGENTS.md and added exclusions to ignore rules."
+    },
+    {
+      "issue_number": 5800,
+      "comment_id": 5594009022,
+      "plugin_name": "Solitaire",
+      "reviewer": "HANCORE-linux",
+      "detail": "Found CLAUDE.md in the installed repository payload, which can influence coding agents operating around the plugin checkout.",
+      "resolution": "Author removed CLAUDE.md from the repository payload, added it to .gitignore, and requested re-validation."
+    },
+    {
+      "issue_number": 5801,
+      "comment_id": 5594093779,
+      "plugin_name": "Headroom",
+      "reviewer": "HANCORE-linux",
+      "detail": "Installable plugin tree contained an agent-control surface at .impeccable/surfaces/panel-qml.md giving instructions to steering or coding agents.",
+      "resolution": "Removed the .impeccable/ directory and associated documentation references from the plugin payload."
+    },
+    {
+      "issue_number": 5804,
+      "comment_id": 5594159785,
+      "plugin_name": "Keysmith",
+      "reviewer": "HANCORE-linux",
+      "detail": "Found CLAUDE.md in the installable repository tree, which could influence coding agents inspecting or modifying the installed plugin checkout",
+      "resolution": "Removed CLAUDE.md and added packaging regression test preventing agent-control instruction files from shipping in the installable tree"
+    },
+    {
+      "issue_number": 5822,
+      "comment_id": 5594996821,
+      "plugin_name": "OmaSDR",
+      "reviewer": "HANCORE-linux",
+      "detail": "root `AGENTS.md` defines behavioral and working instructions, and `CLAUDE.md:3` instructs agents to read and obey it before doing anything. Marketplace plugins must not ship repository-level AI-agent instruction payloads.",
+      "resolution": "None (issue closed due to 7 days of inactivity without a validated fix)"
+    },
+    {
+      "issue_number": 5834,
+      "comment_id": 5605274888,
+      "plugin_name": "Workspace Grid",
+      "reviewer": "HANCORE-linux",
+      "detail": "AGENTS.md explicitly targeted AI agents to direct architecture, edit behavior, and instruct execution of shell restarts, journal reads, Hyprland IPC, and plugin enable/disable commands.",
+      "resolution": "Removed AGENTS.md from the installable root, renamed it to DEVELOPMENT.md, and reframed it as contributor documentation without agent steering."
+    },
+    {
+      "issue_number": 5838,
+      "comment_id": 5605275175,
+      "plugin_name": "Claude Bridge",
+      "reviewer": "HANCORE-linux",
+      "detail": "SETUP.md explicitly addressed an AI coding agent instructing it to edit Hyprland config, create backups, and follow Claude Code skills.",
+      "resolution": "Removed SETUP.md and stripped the README callout referencing the agent setup file."
+    },
+    {
+      "issue_number": 5841,
+      "comment_id": 5605351032,
+      "plugin_name": "openHAB",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root AGENTS.md explicitly directed agents on architecture, tokens, network invariants, IPC rules, and testing commands.",
+      "resolution": "Renamed AGENTS.md to DEVELOPING.md and added a recursive CI release guard rejecting agent-control filenames."
+    },
+    {
+      "issue_number": 5910,
+      "comment_id": 5605823741,
+      "plugin_name": "Instant Replay",
+      "reviewer": "HANCORE-linux",
+      "detail": "the installed checkout contains root AGENTS.md and docs/agents/ with active instructions for coding agents, including directions to create, comment on, label, close, and otherwise mutate GitHub issues and pull requests.",
+      "resolution": "Author pushed commit 155b0bb01b5eea88dfc5ec290ba74787772163df to remove AGENTS.md and docs/agents/."
+    },
+    {
+      "issue_number": 5914,
+      "comment_id": 5605837754,
+      "plugin_name": "Desktop Modes",
+      "reviewer": "HANCORE-linux",
+      "detail": "the installable repository root contains AGENTS.md, an active agent-control instruction file with repository rules and commands for coding agents.",
+      "resolution": "Removed AGENTS.md from the repository root and revalidated."
+    },
+    {
+      "issue_number": 5923,
+      "comment_id": 5605867481,
+      "plugin_name": "Omagihu",
+      "reviewer": "HANCORE-linux",
+      "detail": "the installable payload contains agent-control content in skill/SKILL.md and skill/recipes.md, and cmd/omagihu-setup/skill.go explicitly installs it into ~/.claude/skills and ~/.agents/skills.",
+      "resolution": "Removed all skill files, deleted the skill installer command, and moved functionality into plugin-scoped MCP tools."
+    },
+    {
+      "issue_number": 5935,
+      "comment_id": 5653854906,
+      "plugin_name": "Hardwarchy",
+      "reviewer": "HANCORE-linux",
+      "detail": "the published repository tree contains a root CLAUDE.md. Marketplace installation places that file in the plugin root, where compatible coding agents automatically treat it as repository instructions, making submission-authored content ambient agent context for users working in the installed checkout.",
+      "resolution": "The root CLAUDE.md was removed and notes moved to docs/CONTRIBUTING.md"
+    },
+    {
+      "issue_number": 5950,
+      "comment_id": 5605913904,
+      "plugin_name": "Omarchy Minimize",
+      "reviewer": "HANCORE-linux",
+      "detail": "the installable repository root contains AGENTS.md, an active instruction file for coding agents that can influence agents in the user's plugin tree",
+      "resolution": "removed AGENTS.md from the installable repository"
+    },
+    {
+      "issue_number": 5956,
+      "comment_id": 5609111122,
+      "plugin_name": "Learn Omarchy",
+      "reviewer": "HANCORE-linux",
+      "detail": "Service.qml bundles and launches instructions for the user's coding agent, asking it to inspect installed plugin and propose/apply updates",
+      "resolution": "none (author closed the submission)"
+    },
+    {
+      "issue_number": 5959,
+      "comment_id": 5634909643,
+      "plugin_name": "Sparks",
+      "reviewer": "HANCORE-linux",
+      "detail": "spark-review/SKILL.md authorizes the launched agent to install packages, reload daemons, or register compositor state without obtaining user's explicit approval",
+      "resolution": "none"
+    },
+    {
+      "issue_number": 5970,
+      "comment_id": 5633717324,
+      "plugin_name": "Omastorm",
+      "reviewer": "HANCORE-linux",
+      "detail": "the installable repository contains root AGENTS.md, an agent-facing instruction/control file that can alter coding-agent behavior in or above the installed plugin tree",
+      "resolution": "Removed root AGENTS.md from the distributed repository"
+    },
+    {
+      "issue_number": 5982,
+      "comment_id": 5624616013,
+      "plugin_name": "Omackey",
+      "reviewer": "HANCORE-linux",
+      "detail": "Security review blocker: the installable repository contains a root AGENTS.md, an active agent-control instruction file.",
+      "resolution": "Removed AGENTS.md from the repository root."
+    },
+    {
+      "issue_number": 5983,
+      "comment_id": 5618666279,
+      "plugin_name": "Omapluginstats",
+      "reviewer": "HANCORE-linux",
+      "detail": "Security review blocker at validated commit 1fc4e3e: the installable repository contains a root CLAUDE.md, an active instruction file for coding agents.",
+      "resolution": "Removed CLAUDE.md from the repository."
+    },
+    {
+      "issue_number": 6013,
+      "comment_id": 5635071126,
+      "plugin_name": "Momovox",
+      "reviewer": "HANCORE-linux",
+      "detail": "install.sh:39-46 is an installer that recursively removes paths under ~/.agents/skills. Marketplace plugins must not install, alter, or delete agent-control/skill directories; this is a categorical blocker.",
+      "resolution": ""
+    },
+    {
+      "issue_number": 6015,
+      "comment_id": 5722373180,
+      "plugin_name": "Binary Clock",
+      "reviewer": "HANCORE-linux",
+      "detail": "Published plugin tree contains root AGENTS.md and bin/setup invokes bin/link-agent-config exposing CLAUDE.md and linking agent skills.",
+      "resolution": ""
+    },
+    {
+      "issue_number": 6042,
+      "comment_id": 5633709605,
+      "plugin_name": "Sleepwalker",
+      "reviewer": "HANCORE-linux",
+      "detail": "Repository contained root CLAUDE.md, which can steer coding agents operating in or above the installed plugin directory.",
+      "resolution": "Removed root CLAUDE.md from the tree and relocated contributor guidance to docs/CONTRIBUTING.md."
+    },
+    {
+      "issue_number": 6050,
+      "comment_id": 5646742243,
+      "plugin_name": "VoxClaude",
+      "reviewer": "HANCORE-linux",
+      "detail": "Plugin installed global agent hooks in ~/.claude/settings.json influencing all Claude Code sessions on the machine, violating marketplace agent boundaries.",
+      "resolution": "Removed global hooks installer and configuration modifications, scoping hooks solely to plugin-initiated background sessions."
+    },
+    {
+      "issue_number": 6052,
+      "comment_id": 5624706765,
+      "plugin_name": "Panel Notes",
+      "reviewer": "HANCORE-linux",
+      "detail": "the installable repository contains root `.impeccable.md`, an agent-facing instruction/control file. Because the complete checkout becomes the plugin payload, it can influence coding agents operating in the user’s plugin tree",
+      "resolution": "Removed `.impeccable.md` from repository and added to `.gitignore`"
+    },
+    {
+      "issue_number": 6057,
+      "comment_id": 5620695344,
+      "plugin_name": "Breadcrumb",
+      "reviewer": "HANCORE-linux",
+      "detail": "AGENTS.md is included at the repository root and therefore in the installable plugin payload. Agent-control/instruction files can alter the behavior of AI coding tools that later operate in or above the installed plugin directory.",
+      "resolution": "Removed AGENTS.md entirely from the installable tree and added a recursive regression check to prevent agent instruction paths"
+    },
+    {
+      "issue_number": 6071,
+      "comment_id": 5671111801,
+      "plugin_name": "VMware Workstation",
+      "reviewer": "HANCORE-linux",
+      "detail": "Remove the installed root AGENTS.md, which is automatically interpreted by coding agents when they work inside the installed plugin tree.",
+      "resolution": "Author agreed to remove AGENTS.md, but credential exposure remained an unresolved blocker."
+    },
+    {
+      "issue_number": 6091,
+      "comment_id": 5621635186,
+      "plugin_name": "Docker Services",
+      "reviewer": "HANCORE-linux",
+      "detail": "install-extras.sh installs bundled skills/local-docker-services/SKILL.md into ~/.agents/skills, broadening agent authorization for Docker daemon control",
+      "resolution": "Removed the bundled agent skill and ~/.agents modifications in v1.0.1"
+    },
+    {
+      "issue_number": 6101,
+      "comment_id": 5624763044,
+      "plugin_name": "cOMtrol",
+      "reviewer": "HANCORE-linux",
+      "detail": "Reviewed tree includes an agent-control rule at .cursor/rules/no-layout-dir.mdc and the validated commit diverged from HEAD",
+      "resolution": ""
+    },
+    {
+      "issue_number": 6110,
+      "comment_id": 5645155446,
+      "plugin_name": "Matrix Rain",
+      "reviewer": "HANCORE-linux",
+      "detail": "The repository contained root AGENTS.md and CLAUDE.md files, which are strictly disallowed in marketplace payloads.",
+      "resolution": "Author removed the files and added a local check script to prevent tracking them."
+    },
+    {
+      "issue_number": 6114,
+      "comment_id": 5641721099,
+      "plugin_name": "PIA VPN for Omarchy",
+      "reviewer": "HANCORE-linux",
+      "detail": "The repository contained a root `AGENTS.md` file, which is forbidden in installable plugin trees.",
+      "resolution": "Untracked AGENTS.md, moved instructions to CONTRIBUTING.md, and added a recursive CI script to reject agent-control files."
+    },
+    {
+      "issue_number": 6118,
+      "comment_id": 5633163256,
+      "plugin_name": "WhatsApp Web Companion",
+      "reviewer": "HANCORE-linux",
+      "detail": "Installable repository contains `.codex-plugin/plugin.json` with a default agent prompt and declared skill path, plus `PROMPT.md` containing reusable agent instructions that direct broad edits to Omarchy, Chromium, native messaging, Hyprland bindings, and local executables.",
+      "resolution": "Unresolved; maintainer requested removal of Codex plugin manifest, prompts, and skill declarations from the installable repository tree."
+    },
+    {
+      "issue_number": 6131,
+      "comment_id": 5624784313,
+      "plugin_name": "omai",
+      "reviewer": "HANCORE-linux",
+      "detail": "Distributed tree contains agent-control material (AGENTS.md, multiple skills/*/SKILL.md, and synchronized agents/commands/skills content); marketplace plugins must not install or synchronize instructions altering coding-agent behavior, plus baseline SHA mismatch with HEAD",
+      "resolution": "Unresolved"
+    },
+    {
+      "issue_number": 6158,
+      "comment_id": 5623417299,
+      "plugin_name": "OmaSports",
+      "reviewer": "HANCORE-linux",
+      "detail": "the installable repository root contains AGENTS.md",
+      "resolution": "Removed AGENTS.md from the repository root"
+    },
+    {
+      "issue_number": 6169,
+      "comment_id": 5623423926,
+      "plugin_name": "Workspace Layout Presets",
+      "reviewer": "HANCORE-linux",
+      "detail": "the installable repository root contains both AGENTS.md and CLAUDE.md. These are active agent-control instruction channels inside the installed plugin scope and are not permitted in marketplace payloads.",
+      "resolution": "Untracked AGENTS.md and CLAUDE.md, moved contributor docs to docs/repository-guide.md and CONTRIBUTING.md, and added a recursive payload guard script."
+    },
+    {
+      "issue_number": 6170,
+      "comment_id": 5641902129,
+      "plugin_name": "Hardware",
+      "reviewer": "HANCORE-linux",
+      "detail": "bin/setup.sh explicitly performs claude mcp add --scope user ..., registering this repository's hardware-mcp executable in the user's coding-agent configuration. Marketplace plugins must not install or alter coding-agent control/MCP configuration.",
+      "resolution": "Removed automatic claude mcp add from setup.sh, documenting it only as manual opt-in."
+    },
+    {
+      "issue_number": 6185,
+      "comment_id": 5645201966,
+      "plugin_name": "Relay",
+      "reviewer": "HANCORE-linux",
+      "detail": "the submitted plugin repository contains a root `AGENTS.md` agent-control file",
+      "resolution": "Moved to `docs/AGENTS.md`, which was also rejected, then deleted entirely from tree along with `docs/agent_testing_runbook.md`"
+    },
+    {
+      "issue_number": 6185,
+      "comment_id": 5647029084,
+      "plugin_name": "Relay",
+      "reviewer": "HANCORE-linux",
+      "detail": "Moving the file does not resolve the blocker: tree still contains `docs/AGENTS.md` and `docs/agent_testing_runbook.md`. Agent-control files are disallowed recursively anywhere in payload",
+      "resolution": "Completely removed both agent-control files and added a recursive payload guard test"
+    },
+    {
+      "issue_number": 6203,
+      "comment_id": 5625053530,
+      "plugin_name": "OnePlus Buds Control",
+      "reviewer": "HANCORE-linux",
+      "detail": "Submitted tree contains `docs/AGENT_HANDOFF.md`, a 42 KB agent handoff/control document with persistent operational instructions and host-specific workflow state.",
+      "resolution": "Removed `docs/AGENT_HANDOFF.md` and `PROJECT.md` agent-control files in commit `6e6622d`."
+    },
+    {
+      "issue_number": 6208,
+      "comment_id": 5638087912,
+      "plugin_name": "Omarchy Cryptomator Plugin",
+      "reviewer": "HANCORE-linux",
+      "detail": "Commit added root-level AGENT.md defining AI-agent operational rules, mandatory commit/push behavior, and synchronization instructions.",
+      "resolution": "Removed AGENT.md from the default-branch repository tree."
+    },
+    {
+      "issue_number": 6212,
+      "comment_id": 5735084192,
+      "plugin_name": "Omabuddy",
+      "reviewer": "HANCORE-linux",
+      "detail": ".claude/skills/bounded-inputs/SKILL.md in the published plugin tree contained instructions discoverable by Claude tooling directing agents to execute code, commit, push, and comment on marketplace issues.",
+      "resolution": "Unresolved; maintainer requested removing .claude/skills from the submitted repository tree or packaging from an artifact excluding agent instruction files."
+    },
+    {
+      "issue_number": 6225,
+      "comment_id": 5626351141,
+      "plugin_name": "Lid Suspend",
+      "reviewer": "HANCORE-linux",
+      "detail": "Installable repository root contains `AGENTS.md`, which acts as an active instruction channel for coding agents operating in or above the plugin directory.",
+      "resolution": "Renamed `AGENTS.md` to `CONTRIBUTING.md` and added recursive test `tests/repository-layout.bash` to guard against agent-control filenames."
+    },
+    {
+      "issue_number": 6227,
+      "comment_id": 5626434373,
+      "plugin_name": "Site Sentinel",
+      "reviewer": "HANCORE-linux",
+      "detail": "Repository shipped `docs/agents.md` giving operational directives to coding agents, which was embedded into the binary via `docs/embed.go`.",
+      "resolution": "Submitter withdrew the submission to remove the agent docs, embedded surface, and add a release guard in a new PR."
+    },
+    {
+      "issue_number": 6277,
+      "comment_id": 5638210603,
+      "plugin_name": "OpenCode Go Usage",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root-level AGENTS.md added to the repository containing AI-agent operating rules, credential details, and push instructions.",
+      "resolution": "Removed AGENTS.md from tree and rewritten git history."
+    },
+    {
+      "issue_number": 6330,
+      "comment_id": 5641426179,
+      "plugin_name": "Omarchy LLM",
+      "reviewer": "HANCORE-linux",
+      "detail": "Submission contains and loads agent-control instruction files (skills/*/SKILL.md) into an autonomous model/tool loop, plus ToolManager.js exposes arbitrary shell command execution, unpinned mutable Whisper model downloads, and unsafe file writes",
+      "resolution": null
+    },
+    {
+      "issue_number": 6341,
+      "comment_id": 5637742687,
+      "plugin_name": "Comigo",
+      "reviewer": "HANCORE-linux",
+      "detail": "submitted repository contains a root AGENTS.md",
+      "resolution": "removed AGENTS.md"
+    },
+    {
+      "issue_number": 6347,
+      "comment_id": 5637779985,
+      "plugin_name": "Scrobble",
+      "reviewer": "HANCORE-linux",
+      "detail": "tree contains agent-control files AGENTS.md and CLAUDE.md",
+      "resolution": "removed CLAUDE.md and AGENTS.md and added to .gitignore"
+    },
+    {
+      "issue_number": 6355,
+      "comment_id": 5637821564,
+      "plugin_name": "Wallpaper Per Monitor",
+      "reviewer": "HANCORE-linux",
+      "detail": "Submitted tree contained root CLAUDE.md agent-control file not excluded by the installer, and keep-loaded background invoked ambient bash, readlink, and theme helpers.",
+      "resolution": "Removed CLAUDE.md across git history using git filter-repo, switched installer rsync payload to an allowlist, and removed third-party PR docs."
+    },
+    {
+      "issue_number": 6355,
+      "comment_id": 5638476024,
+      "plugin_name": "Wallpaper Per Monitor",
+      "reviewer": "HANCORE-linux",
+      "detail": "Repository tree still contained agent and session handoff files in docs/ESTADO-DA-SESSAO.md and docs/CONTEXTO.md.",
+      "resolution": "Purged internal session handoff and context documents from git history and the repository tree."
+    },
+    {
+      "issue_number": 6366,
+      "comment_id": 5638635394,
+      "plugin_name": "RSS-Feeder",
+      "reviewer": "HANCORE-linux",
+      "detail": "Submitted plugin tree contains agent-control material: root `AGENTS.md` and `docs/agents/issue-tracker.md` / `docs/agents/triage-labels.md`.",
+      "resolution": "Removed `AGENTS.md`, `CONTEXT.md`, and the `docs/agents/` directory from the repository."
+    },
+    {
+      "issue_number": 6392,
+      "comment_id": 5640496949,
+      "plugin_name": "Hardware",
+      "reviewer": "HANCORE-linux",
+      "detail": "bin/setup.sh modifies an AI-agent control plane by registering this repository's executable as a user-scoped Claude Code MCP server (`claude mcp add`). Marketplace plugins may not install or modify agent-control configuration.",
+      "resolution": "Removed automatic `claude mcp add` / agent-control-plane modification from setup, though issue was subsequently closed as duplicate."
+    },
+    {
+      "issue_number": 6393,
+      "comment_id": 5640441603,
+      "plugin_name": "Omarchy Watch",
+      "reviewer": "HANCORE-linux",
+      "detail": "Automatically installs and rewrites Codex agent-control configuration at $CODEX_HOME/hooks.json and registers command hooks.",
+      "resolution": "Removed bundled Codex hook configuration, installer, and adapter."
+    },
+    {
+      "issue_number": 6397,
+      "comment_id": 5640518415,
+      "plugin_name": "Kopia Backups",
+      "reviewer": "HANCORE-linux",
+      "detail": "The installable repository tree contains root AGENTS.md and CLAUDE.md files.",
+      "resolution": "Removed AGENTS.md, moved CLAUDE.md to docs/CONTRIBUTING.md, and added a recursive CI checker `tools/check-agent-files`."
+    },
+    {
+      "issue_number": 6438,
+      "comment_id": 5642894150,
+      "plugin_name": "Daylight Slider",
+      "reviewer": "HANCORE-linux",
+      "detail": "Repository contained root `CLAUDE.md` and `docs/superpowers/` agent instruction files that could steer coding agents working in the installed plugin tree.",
+      "resolution": "Completely removed `CLAUDE.md` and `docs/superpowers/` development notes from the repo."
+    },
+    {
+      "issue_number": 6448,
+      "comment_id": 5645639421,
+      "plugin_name": "Update Watchdog",
+      "reviewer": "HANCORE-linux",
+      "detail": "ai_review_one ran opencode directly inside untrusted plugin checkouts, allowing untrusted repos to supply agent-control files, local configs, and hooks resulting in unsandboxed agent execution.",
+      "resolution": "Reworked to copy worktree to a fresh scratch directory with .git stripped, deny config overrides, and closed env, but submission was ultimately withdrawn by author."
+    },
+    {
+      "issue_number": 6453,
+      "comment_id": 5644017172,
+      "plugin_name": "Touchdeck",
+      "reviewer": "HANCORE-linux",
+      "detail": "Repository root contained CLAUDE.md, which acts as an agent instruction injection surface.",
+      "resolution": null
+    },
+    {
+      "issue_number": 6476,
+      "comment_id": 5644766001,
+      "plugin_name": "Departures",
+      "reviewer": "HANCORE-linux",
+      "detail": "Repository-root AGENTS.md creates an instruction/supply-chain injection surface for coding agents operating in or around checkouts",
+      "resolution": "Removed AGENTS.md, moved non-agent human documentation to CONTRIBUTING.md, and added gitignore rules"
+    },
+    {
+      "issue_number": 6488,
+      "comment_id": 5645131153,
+      "plugin_name": "OpenCode Usage",
+      "reviewer": "HANCORE-linux",
+      "detail": "Repository contained a root AGENTS.md agent-control file, which can improperly influence automated reviewers or agent behaviors.",
+      "resolution": "Author deleted AGENTS.md from the repository and added it to .gitignore."
+    },
+    {
+      "issue_number": 6541,
+      "comment_id": 5647438648,
+      "plugin_name": "Hyphae Memory",
+      "reviewer": "HANCORE-linux",
+      "detail": "Approval categorically blocked because the plugin manages agent control integrations, hooks, and MCP clients",
+      "resolution": "Removed all agent hooks and MCP configuration from the plugin, restricting it to a read/query client for an external service"
+    },
+    {
+      "issue_number": 6582,
+      "comment_id": 5695782501,
+      "plugin_name": "Nebius GPU",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root AGENTS.md shipped in the installable plugin tree giving operational instructions to execute uninstall tooling",
+      "resolution": "Removed AGENTS.md, migrated guidance to CONTRIBUTING.md, added AGENTS.md to .gitignore and added a CI guard against AGENTS.md files"
+    },
+    {
+      "issue_number": 6638,
+      "comment_id": 5687878281,
+      "plugin_name": "SuperNotch",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root AGENTS.md contains imperative instructions that can be automatically interpreted by coding agents in the installed plugin directory, creating an instruction-injection boundary.",
+      "resolution": "Removed AGENTS.md from the repository snapshot."
+    },
+    {
+      "issue_number": 6679,
+      "comment_id": 5661677148,
+      "plugin_name": "OmaCaffeine",
+      "reviewer": "HANCORE-linux",
+      "detail": "The installable repository root contains `CLAUDE.md`. Because the complete checkout becomes the plugin payload, this is an active agent-control instruction channel inside the installed plugin scope.",
+      "resolution": "Removed CLAUDE.md from the shipped tree, moved notes to dev/NOTES.md and git-ignored CLAUDE.md."
+    },
+    {
+      "issue_number": 6710,
+      "comment_id": 5655045546,
+      "plugin_name": "Dock Doctor",
+      "reviewer": "HANCORE-linux",
+      "detail": "Blocked by root AGENTS.md in the repository tree, which enters the user's ambient agent context upon marketplace installation.",
+      "resolution": "Removed root AGENTS.md from the repo tree, added regression testing against its reintroduction, and resubmitted clean commit 052802d."
+    },
+    {
+      "issue_number": 6721,
+      "comment_id": 5693583636,
+      "plugin_name": "Coolwatch",
+      "reviewer": "HANCORE-linux",
+      "detail": "Shipped root AGENTS.md identified itself as instructions for coding agents, introducing an unintended supply-chain boundary in published plugin files.",
+      "resolution": "Author removed root AGENTS.md and CLAUDE.md, moved developer notes to docs/development.md, and added root names to .gitignore."
+    },
+    {
+      "issue_number": 6824,
+      "comment_id": 5694256711,
+      "plugin_name": "The Ultimate Plugin Manager",
+      "reviewer": "HANCORE-linux",
+      "detail": "cmd_prepare_scan runs user's default coding agent on an untrusted checkout where malicious AGENTS.md or prompt injection could execute commands or forge CLEAR verdicts without isolation",
+      "resolution": "Unresolved; author closed issue to rework sandboxing later"
+    },
+    {
+      "issue_number": 6833,
+      "comment_id": 5661720239,
+      "plugin_name": "Android TV Remote",
+      "reviewer": "HANCORE-linux",
+      "detail": "The installable repository root contains CLAUDE.md, an active agent-control instruction channel inside the installed plugin scope",
+      "resolution": "Renamed CLAUDE.md to DEVELOPING.md for contributor notes and gitignored CLAUDE.md"
+    },
+    {
+      "issue_number": 6834,
+      "comment_id": 5661720698,
+      "plugin_name": "Transcripts",
+      "reviewer": "HANCORE-linux",
+      "detail": "the installable repository root contains AGENTS.md, an active agent-control instruction channel inside the installed plugin scope. Remove it from the shipped tree (ordinary contributor documentation can use a neutral filename)",
+      "resolution": "Removed AGENTS.md from the shipped tree and preserved the development reference under the neutral filename DEVELOPMENT.md, with a README link."
+    },
+    {
+      "issue_number": 6843,
+      "comment_id": 5688658406,
+      "plugin_name": "OmaStudio",
+      "reviewer": "HANCORE-linux",
+      "detail": "The validated installable tree contains root AGENTS.md:1. Because the marketplace installs the repository root, this becomes an active agent-control instruction channel inside the installed plugin scope",
+      "resolution": "Renamed AGENTS.md to CONTRIBUTING.md"
+    },
+    {
+      "issue_number": 6873,
+      "comment_id": 5688804356,
+      "plugin_name": "ROG Cetra Control",
+      "reviewer": "HANCORE-linux",
+      "detail": "root `AGENTS.md:1-67` contains executable agent directives and is shipped inside the installed plugin checkout. Coding agents that traverse the user's Omarchy configuration can automatically interpret this file, extending repository-authored instructions beyond the submitted runtime code.",
+      "resolution": "Renamed the root and three nested AGENTS.md files to ordinary DEVELOPMENT.md documentation and updated references."
+    },
+    {
+      "issue_number": 6886,
+      "comment_id": 5688825891,
+      "plugin_name": "Home Assistant",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root AGENTS.md contains agent directives that coding agents traversing user config can automatically interpret from an installed plugin",
+      "resolution": "Removed root AGENTS.md from the distributable tree in commit fe75167"
+    },
+    {
+      "issue_number": 6934,
+      "comment_id": 5689646325,
+      "plugin_name": "Omalogi",
+      "reviewer": "HANCORE-linux",
+      "detail": "Found publish-scope agent-instruction file: AGENTS.md in repository root allows agent tooling to interpret repo-authored instructions outside the plugin runtime contract.",
+      "resolution": "Removed AGENTS.md and CLAUDE.md from the root checkout and moved documentation to docs/agents/agent-guide.md."
+    },
+    {
+      "issue_number": 6975,
+      "comment_id": 5701103871,
+      "plugin_name": "OmaPkDex",
+      "reviewer": "HANCORE-linux",
+      "detail": "Repository-root CLAUDE.md is installed as part of the plugin payload under ~/.config/omarchy/plugins/<id>/, which Claude Code or coding agents could automatically interpret",
+      "resolution": "Renamed CLAUDE.md to docs/desenvolvimento.md"
+    },
+    {
+      "issue_number": 6982,
+      "comment_id": 5716509340,
+      "plugin_name": "Portal",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root AGENTS.md contained executable agent workflow instructions (commands, push behaviors, shell restarts) that violate the plugin payload trust boundary.",
+      "resolution": "Removed AGENTS.md and transferred general contributor instructions to CONTRIBUTING.md."
+    },
+    {
+      "issue_number": 6984,
+      "comment_id": 5689820409,
+      "plugin_name": "Todochy",
+      "reviewer": "HANCORE-linux",
+      "detail": "Snapshot contained root-level AGENTS.md, which agent tooling may automatically interpret as trusted instructions when operating in the directory.",
+      "resolution": "Removed AGENTS.md and CLAUDE.md pointer, migrating project documentation into docs/development.md."
+    },
+    {
+      "issue_number": 6993,
+      "comment_id": 5714960435,
+      "plugin_name": "Tinkerer Club",
+      "reviewer": "HANCORE-linux",
+      "detail": "Shipped 620 entries under agent-discovery paths (.agents/skills/**, .claude/skills/**, _bmad/) creating an undeclared agent instruction and supply-chain attack surface.",
+      "resolution": "Removed .agents/, .claude/, _bmad/, and _bmad-output/ trees from the repository."
+    },
+    {
+      "issue_number": 6995,
+      "comment_id": 5689871136,
+      "plugin_name": "Omaviz",
+      "reviewer": "HANCORE-linux",
+      "detail": "Submission contains a root-level AGENTS.md, which agent tooling may automatically interpret as trusted instructions when operating in the checkout.",
+      "resolution": "Moved AGENTS.md out of root to docs/AGENTS.md, but the issue remained in needs-fixes state pending complete re-review."
+    },
+    {
+      "issue_number": 6997,
+      "comment_id": 5689875732,
+      "plugin_name": "AirPods Experience",
+      "reviewer": "HANCORE-linux",
+      "detail": "Snapshot contains a root-level AGENTS.md that can be automatically interpreted by agent tooling operating in the checkout.",
+      "resolution": "Removed AGENTS.md and its README reference, publishing a clean release v1.9.2."
+    },
+    {
+      "issue_number": 7023,
+      "comment_id": 5716576178,
+      "plugin_name": "Writing Critter",
+      "reviewer": "HANCORE-linux",
+      "detail": "Security review was blocked by agent-control payloads (.codex/skills/openspec-*/SKILL.md, .claude/skills/openspec-*/SKILL.md, and .claude/commands/opsx/*.md) in the installable tree.",
+      "resolution": "Removed all Codex and Claude skills/commands from the default branch in commit 93e3c65."
+    },
+    {
+      "issue_number": 7060,
+      "comment_id": 5694837565,
+      "plugin_name": "Grabbar",
+      "reviewer": "HANCORE-linux",
+      "detail": "Security review cannot approve the published snapshot because it contains a root-level AGENTS.md, which agent tooling may automatically interpret as trusted instructions.",
+      "resolution": "Removed root AGENTS.md from the distributed plugin snapshot and moved agent guardrails into CONTRIBUTING.md."
+    },
+    {
+      "issue_number": 7107,
+      "comment_id": 5722643749,
+      "plugin_name": "Omarchy Moergo Companion",
+      "reviewer": "HANCORE-linux",
+      "detail": "Snapshot contains root `AGENTS.md:1-30`, which agent tooling operating in or above that directory may treat as trusted workspace instructions.",
+      "resolution": "Pending author removal from snapshot."
+    },
+    {
+      "issue_number": 7114,
+      "comment_id": 5716901275,
+      "plugin_name": "Ramen Bar",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root `AGENTS.md:19-31` instructs coding agents to copy files into user config paths, restart the shell, and execute git pull/commit commands, creating unintended agent-control risks.",
+      "resolution": "Unresolved; issue closed without changes."
+    },
+    {
+      "issue_number": 7132,
+      "comment_id": 5716953579,
+      "plugin_name": "OmaPods",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root AGENTS.md and .claude/advloop-rules.md act as agent-control files that are installed into the user's plugin directory and could influence coding agents.",
+      "resolution": null
+    },
+    {
+      "issue_number": 7163,
+      "comment_id": 5704030456,
+      "plugin_name": "Tinytray",
+      "reviewer": "HANCORE-linux",
+      "detail": "Repository-root `AGENTS.md` contained executable instructions that coding agents automatically discover and execute outside plugin runtime",
+      "resolution": "Removed `AGENTS.md` and moved contributor notes to `CONTRIBUTING.md`"
+    },
+    {
+      "issue_number": 7174,
+      "comment_id": 5722728373,
+      "plugin_name": "omafan",
+      "reviewer": "HANCORE-linux",
+      "detail": "AGENTS.md:65-80 contains root-level agent instructions directing tooling to create work records under external host paths (/home/prakhar/Documents/...), risking prompt/instruction injection and external writes during installation.",
+      "resolution": ""
+    },
+    {
+      "issue_number": 7241,
+      "comment_id": 5703946565,
+      "plugin_name": "Omarchy Gamepads",
+      "reviewer": "HANCORE-linux",
+      "detail": "Repository-root AGENTS.md contains executable agent instructions that coding agents could automatically discover and execute outside the plugin's runtime purpose.",
+      "resolution": "Removed repository-root AGENTS.md from the published plugin tree."
+    },
+    {
+      "issue_number": 7286,
+      "comment_id": 5723152622,
+      "plugin_name": "Panorama",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root AGENTS.md:1-36 is installed with the plugin and contains instructions that coding agents can automatically interpret",
+      "resolution": "Moved AGENTS.md content to docs/no-hyprctl-reload.md"
+    },
+    {
+      "issue_number": 7291,
+      "comment_id": 5723189785,
+      "plugin_name": "Wallpaper manager",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root AGENTS.md explicitly instructs AI agents and creates an unneeded instruction surface within the installed plugin checkout.",
+      "resolution": "Removed root AGENTS.md and relocated developer information to docs/DEVELOPMENT.md."
+    },
+    {
+      "issue_number": 7376,
+      "comment_id": 5735869558,
+      "plugin_name": "Vigil",
+      "reviewer": "HANCORE-linux",
+      "detail": "The repository ships a root AGENTS.md containing operational instructions for coding agents, creating an instruction-injection boundary when installed.",
+      "resolution": "Removed the root AGENTS.md from the repository."
+    },
+    {
+      "issue_number": 7377,
+      "comment_id": 5723736125,
+      "plugin_name": "Relaxy",
+      "reviewer": "HANCORE-linux",
+      "detail": "The repository-root AGENTS.md creates an instruction-injection surface because agent tools automatically interpret it as trusted operational instructions.",
+      "resolution": "Removed root AGENTS.md and relocated developer guidance to docs/DEVELOPMENT.md."
+    },
+    {
+      "issue_number": 7411,
+      "comment_id": 5741377334,
+      "plugin_name": "Lanarchy",
+      "reviewer": "HANCORE-linux",
+      "detail": "The published plugin tree contains root AGENTS.md and CLAUDE.md pointing to it; installed into ~/.config/omarchy/plugins/, coding agents launched there can treat instructions as trusted policy.",
+      "resolution": "Removed root AGENTS.md and CLAUDE.md and moved contributor notes to docs/contributing.md."
+    },
+    {
+      "issue_number": 7422,
+      "comment_id": 5731765249,
+      "plugin_name": "Groups",
+      "reviewer": "HANCORE-linux",
+      "detail": "Root AGENTS.md:1-16 was installed with the plugin and contained operational instructions automatically interpretable by coding agents.",
+      "resolution": "Deleted root AGENTS.md."
+    },
+    {
+      "issue_number": 7436,
+      "comment_id": 5736048051,
+      "plugin_name": "Quick Mouse",
+      "reviewer": "HANCORE-linux",
+      "detail": "The published plugin tree contains a root `AGENTS.md` giving agents executable build/run instructions, creating an instruction-injection risk in agent-assisted environments.",
+      "resolution": ""
+    },
+    {
+      "issue_number": 7440,
+      "comment_id": 5736072282,
+      "plugin_name": "OmaGAWD",
+      "reviewer": "HANCORE-linux",
+      "detail": "The published repository contains a root `AGENTS.md` with operational instructions, creating an instruction-injection path for agent tools operating in the checkout.",
+      "resolution": "Removed root `AGENTS.md` from the published tree and kept notes in an ignored local file."
+    },
+    {
+      "issue_number": 7473,
+      "comment_id": 5746205744,
+      "plugin_name": "Bar Drawer",
+      "reviewer": "HANCORE-linux",
+      "detail": "Published repository contains a Claude PostToolUse hook in .claude/settings.json that automatically executes install.sh on Write/Edit, which can overwrite files in ~/.config/omarchy/plugins without explicit install action.",
+      "resolution": "Unresolved; reviewer instructed removal of agent-interpreted hooks from the published tree."
+    },
+    {
+      "issue_number": 7476,
+      "comment_id": 5746209569,
+      "plugin_name": "Workspace Summon",
+      "reviewer": "HANCORE-linux",
+      "detail": "Published repo includes Claude PostToolUse hooks (.claude/settings.json, .claude/hooks/plugin-check.sh) and instructions (.claude/skills/verify-widget/SKILL.md) that install/restart the shell on agent tool use.",
+      "resolution": "Unresolved; author must remove .claude hooks, skills, and agent configs from published plugin tree."
+    },
+    {
+      "issue_number": 7485,
+      "comment_id": 5741725517,
+      "plugin_name": "Super Player",
+      "reviewer": "HANCORE-linux",
+      "detail": "Repository-root AGENTS.md contains executable workflow guidance for coding agents that could be auto-ingested by agents entering the installed plugin directory snapshot.",
+      "resolution": null
+    }
+  ],
+  "undeclared_dependencies_samples": [
+    {
+      "issue_number": 202,
+      "comment_id": 5302014425,
+      "plugin_name": "Recurring Reminders",
+      "reviewer": "HANCORE-linux",
+      "detail": "Service.qml attempted to execute a local recurring-reminders helper that was missing from the repository with no external dependency documented.",
+      "resolution": "Author committed and pushed the missing backend helper executable to the repository."
+    },
+    {
+      "issue_number": 848,
+      "comment_id": 5349474148,
+      "plugin_name": "Tasks & Time Tracker",
+      "reviewer": "ryanrhughes",
+      "detail": "The plugin’s core load/save path executes node, and clipboard support executes wl-copy, but the README does not document either external runtime dependency despite the checked submission statement.",
+      "resolution": "Removed node dependency, replaced it with a jq script, and documented jq and wl-clipboard in the README."
+    },
+    {
+      "issue_number": 1000,
+      "comment_id": 5360932837,
+      "plugin_name": "Kitty Terminal",
+      "reviewer": "ryanrhughes",
+      "detail": "README contains no removal instructions and does not document required jq runtime dependency",
+      "resolution": "Author added removal and jq dependency documentation"
+    },
+    {
+      "issue_number": 1735,
+      "comment_id": 5385489666,
+      "plugin_name": "YouTube Music",
+      "reviewer": "HANCORE-linux",
+      "detail": "setup path upgrades pip from live index and installs mutable ytmusicapi>=1.10 without a lockfile or hashes into persistent backend",
+      "resolution": "Removed pip self-upgrade and installed locked dependencies with `--require-hashes`"
+    },
+    {
+      "issue_number": 1745,
+      "comment_id": 5385825947,
+      "plugin_name": "WalkingPad",
+      "reviewer": "HANCORE-linux",
+      "detail": "backend/install.sh upgrades pip unconstrained and installs unhashed dependencies into a persistent background user service",
+      "resolution": "Pinned all dependencies with sha256 hashes in requirements.txt, used `pip install --require-hashes`, and removed pip upgrade command"
+    },
+    {
+      "issue_number": 2025,
+      "comment_id": 5399938082,
+      "plugin_name": "alvarosaavedra.sofle-layer",
+      "reviewer": "HANCORE-linux",
+      "detail": "Standard plugin installation does not install or enable the bundled sofle-layer.service while widget depends on sofle-layerd for state.",
+      "resolution": "Accepted as manual-setup listing snapshot with service-management capability."
+    },
+    {
+      "issue_number": 2035,
+      "comment_id": 5392532003,
+      "plugin_name": "chip402",
+      "reviewer": "HANCORE-linux",
+      "detail": "Runtime setup creates a package manifest with unpinned caret dependency and runs npm install without a committed lockfile or integrity-pinned dependency graph",
+      "resolution": "Pinned exact package version and committed package-lock.json with integrity hashes, switching setup to npm ci --ignore-scripts"
+    },
+    {
+      "issue_number": 2039,
+      "comment_id": 5391729758,
+      "plugin_name": "Limitless Library",
+      "reviewer": "HANCORE-linux",
+      "detail": "In-panel setup runs pip install, while pyproject.toml leaves executable build dependency as setuptools>=77 without a lock or hashes for the resolved environment",
+      "resolution": "Vendored pure-Python wheels with SHA-256 digests in bundle.json, enforced pip install with --only-binary=:all: --require-hashes --no-index --no-deps, and added standard-library verification"
+    },
+    {
+      "issue_number": 2197,
+      "comment_id": 5399500266,
+      "plugin_name": "Plugin Manager",
+      "reviewer": "HANCORE-linux",
+      "detail": "Privilege and package-manager capabilities flagged from README instructions for optional WebP previews (qt6-imageformats).",
+      "resolution": "Maintainer verified the package is optional with built-in fallbacks and approved the update."
+    },
+    {
+      "issue_number": 2475,
+      "comment_id": 5416537801,
+      "plugin_name": "Oma Cast",
+      "reviewer": "ryanrhughes",
+      "detail": "Documented FluxCast dependency installed a wide-open wpa_supplicant D-Bus policy, and DLNA/Chromecast cast started an unauthenticated desktop stream on 0.0.0.0:8080.",
+      "resolution": "Upstream fixed D-Bus policy in v0.2.4, but stream unauthenticated exposure fix remained unmerged; submitter did not disable DLNA/Chromecast before the 7-day timeout."
+    },
+    {
+      "issue_number": 2503,
+      "comment_id": 5430604206,
+      "plugin_name": "neomd Mail",
+      "reviewer": "HANCORE-linux",
+      "detail": "Fixes depended on uncommitted local working-tree changes in external dependency neomd rather than committed reproducible code.",
+      "resolution": "Pushed committed wrapper script capping live list/read output independently of neomd."
+    },
+    {
+      "issue_number": 2735,
+      "comment_id": 5440564045,
+      "plugin_name": "Voxbox",
+      "reviewer": "HANCORE-linux",
+      "detail": "install.sh installed unpinned dependencies and downloaded executable model data directly into live directories without verified SHA-256 hashes or size ceilings.",
+      "resolution": "Pinned dependencies with sha256 hashes using pip --require-hashes, verified model downloads against embedded SHA-256 digests with curl --max-filesize, and performed atomic moves."
+    },
+    {
+      "issue_number": 2784,
+      "comment_id": 5441016736,
+      "plugin_name": "Voice Assistant (Jarvis)",
+      "reviewer": "HANCORE-linux",
+      "detail": "requirements.txt lacked artifact hashes while install.sh performed unconstrained pip upgrade.",
+      "resolution": "Switched to hash-locked requirements.lock with --require-hashes, removed pip upgrade, pinned pip."
+    },
+    {
+      "issue_number": 2935,
+      "comment_id": 5447116679,
+      "plugin_name": "Mimarchy",
+      "reviewer": "HANCORE-linux",
+      "detail": "Installer resolves and executes mutable unpinned Python packaging inputs and reads privileged udev rules directly from checkout",
+      "resolution": "Hash-locked packaging inputs via requirements.lock with --require-hashes, and printed fixed udev rules inline via sudo tee"
+    },
+    {
+      "issue_number": 3248,
+      "comment_id": 5544750206,
+      "plugin_name": "Signal",
+      "reviewer": "HANCORE-linux",
+      "detail": "Bootstrap ran `pip install` without `--require-hashes` or a committed hash-locked requirements file for `sqlcipher3-binary` and `cryptography`",
+      "resolution": "None (timed out after 7 days without response)"
+    },
+    {
+      "issue_number": 3421,
+      "comment_id": 5560219749,
+      "plugin_name": "Linecast",
+      "reviewer": "HANCORE-linux",
+      "detail": "Runtime trusted unpinned PATH executables and pip RECORD hashes; QML buffering had no byte/line limits; launcher AST verification failed to validate re.sub/sys.exit call arguments.",
+      "resolution": "Pinned package verification against a committed manifest of sha256 digests, strictly validated launcher AST shapes, and enforced producer-side framing byte caps."
+    },
+    {
+      "issue_number": 3490,
+      "comment_id": 5502250849,
+      "plugin_name": "Storage Horizon",
+      "reviewer": "HANCORE-linux",
+      "detail": "Provenance workflow executed network-fetched RubyGems packages (bundler 4.0.18, zui 0.0.10) without content-integrity pins or SHA-256 digests.",
+      "resolution": "Central workflow updated to download exact gem artifacts, verify committed SHA-256 digests, and install only verified local files."
+    },
+    {
+      "issue_number": 3558,
+      "comment_id": 5532577782,
+      "plugin_name": "UniFi Protect",
+      "reviewer": "HANCORE-linux",
+      "detail": "bin/unifi-protect:660,663 installs unversioned websockets from PyPI into the plugin venv, so mutable registry content can change and execute after this review.",
+      "resolution": "requirements.txt pinned websockets 17.1 with digests and used pip --require-hashes --no-deps (moved to #5204)."
+    },
+    {
+      "issue_number": 3958,
+      "comment_id": 5503626486,
+      "plugin_name": "Z13 Power",
+      "reviewer": "HANCORE-linux",
+      "detail": "Dependencies accepted mutable git repos/unpinned versions (z13-power, z13ctl) and settings module imports were vulnerable to check-then-reopen substitution.",
+      "resolution": "Pinned exact tags, commits, and artifact digests for z13ctl and z13-power, and passed validated module file descriptors directly into importlib."
+    },
+    {
+      "issue_number": 4045,
+      "comment_id": 5502556392,
+      "plugin_name": "World Radio",
+      "reviewer": "HANCORE-linux",
+      "detail": "Flagged package-manager and remote-build capabilities; noted manual-setup remained applicable due to mpv-mpris dependency.",
+      "resolution": "Author clarified that mpv and mpv-mpris are included in Omarchy's base packages; maintainer approved the update under manual capability review."
+    },
+    {
+      "issue_number": 4170,
+      "comment_id": 5502594047,
+      "plugin_name": "Printbar",
+      "reviewer": "HANCORE-linux",
+      "detail": "Flagged operations are documented installation alternatives for the external printbar backend; because backend is mandatory and separately installed, manual-setup applies",
+      "resolution": "Maintainer tagged with manual-setup and approved the update"
+    },
+    {
+      "issue_number": 4171,
+      "comment_id": 5502595195,
+      "plugin_name": "Tickerbar",
+      "reviewer": "HANCORE-linux",
+      "detail": "Flagged operations are documented installation alternatives for external tickerbar backend; mandatory backend requires manual-setup classification",
+      "resolution": "Maintainer applied manual-setup label and approved"
+    },
+    {
+      "issue_number": 4175,
+      "comment_id": 5502603658,
+      "plugin_name": "NymVPN",
+      "reviewer": "HANCORE-linux",
+      "detail": "Package and system-service operations were remediation instructions for external nym daemon; mandatory daemon requires manual-setup label",
+      "resolution": "Maintainer verified fixed argv runtime commands and applied manual-setup label"
+    },
+    {
+      "issue_number": 4244,
+      "comment_id": 5500054147,
+      "plugin_name": "Omarvis",
+      "reviewer": "HANCORE-linux",
+      "detail": "Setup globally installed agent-browser@0.34 and created Python virtual environments without a complete transitive hash lock, allowing runtime dependency drift.",
+      "resolution": "Provided a complete transitive pip-compile lock with hashes (requirements.lock) and pinned agent-browser to exact SHA-256 verified assets."
+    },
+    {
+      "issue_number": 4299,
+      "comment_id": 5503156332,
+      "plugin_name": "Tidbyt",
+      "reviewer": "HANCORE-linux",
+      "detail": "bin/tidbyt implicitly installed unpinned PyPI packages at runtime; fonts downloaded from moving pixlet main branch without digests; API keys passed via argv; menu installer lacked transactional rollback.",
+      "resolution": "Moved dependencies behind explicit --with-venv flag with --require-hashes in requirements.txt; pinned font assets to immutable commit with SHA256; passed API keys via stdin/env; created safe descriptor-bound atomic installer."
+    }
+  ],
+  "scripts_binaries_samples": [
+    {
+      "issue_number": 92,
+      "comment_id": 5272823462,
+      "plugin_name": "Syncthing",
+      "reviewer": "HANCORE-linux",
+      "detail": "Remote source build needs a fixed commit: cloning Syncthing's mutable default branch or git tag then running 'go run build.go' executes unreviewed remote code.",
+      "resolution": "Author removed the mutable GitHub source build/checkout paths and the uninstaller option, keeping only standard package manager installation via omarchy pkg add syncthing."
+    },
+    {
+      "issue_number": 94,
+      "comment_id": 5272823448,
+      "plugin_name": "Wayfinder",
+      "reviewer": "HANCORE-linux",
+      "detail": "Standalone installer and workspace instructions built WayfinderRouter from an unpinned Git branch via `cargo install --git` without `--rev`, allowing remote code mutation after review.",
+      "resolution": "Pinned WayfinderRouter in `install.sh` and workspace instructions to reviewed commit `9874b08b466822ea6fd0c0875a88950521110997` using `--rev` and detached checkout."
+    },
+    {
+      "issue_number": 103,
+      "comment_id": null,
+      "plugin_name": "Alt+Tab",
+      "reviewer": "HANCORE-linux",
+      "detail": "Automated baseline flagged privilege request and package management due to `sudo pacman` commands in the root README for legacy implementations.",
+      "resolution": "Moved legacy build instructions into `rust/README.md` and rephrased package installation commands to avoid triggering regex baseline scans."
+    },
+    {
+      "issue_number": 150,
+      "comment_id": 5292395050,
+      "plugin_name": "Live Wallpaper",
+      "reviewer": "HANCORE-linux",
+      "detail": "Install/uninstall scripts deleted all style.background entries from shared menu configs, and the service invoked 'yay -S --noconfirm' during shell startup alongside PATH-shadowing shims.",
+      "resolution": "Narrowed menu deletion in unvalidated commit, but unapproved startup package installation and PATH shims remained."
+    },
+    {
+      "issue_number": 151,
+      "comment_id": 5295477390,
+      "plugin_name": "Omabench",
+      "reviewer": "HANCORE-linux",
+      "detail": "Accepted arbitrary shell commands and labels from discovered Omafiles, allowing untrusted local repositories to execute arbitrary code when clicked.",
+      "resolution": "Addressed and restricted execution of arbitrary shell commands defined in repository Omafiles via PR #1."
+    },
+    {
+      "issue_number": 183,
+      "comment_id": 5303843031,
+      "plugin_name": "Omasaver",
+      "reviewer": "HANCORE-linux",
+      "detail": "Supply-chain and integrity concern: the recommended installer performs an unpinned global `pip install` and rewrites `shell.json`, Hyprland bindings, and menu configuration. The uninstall instructions remove only the plugin directory, leaving those dependencies and configuration changes behind.",
+      "resolution": "Pinned dependencies in requirements.txt, isolated inside local `.venv`, used clearly marked delimiter blocks for config modifications, and provided an automated `uninstall.sh` to fully reverse changes."
+    },
+    {
+      "issue_number": 188,
+      "comment_id": null,
+      "plugin_name": "Parcel",
+      "reviewer": "HANCORE-linux",
+      "detail": "Automated baseline flagged remote build and package management; helper CLI installation commands needed strict immutable pinning.",
+      "resolution": "Author updated README and install-cli.sh to use `cargo install --locked --git … --rev <commit_sha>` pinning the exact commit."
+    },
+    {
+      "issue_number": 196,
+      "comment_id": 5302012135,
+      "plugin_name": "omash",
+      "reviewer": "HANCORE-linux",
+      "detail": "Supply-chain concern: The documented installer is fetched from mutable main, downloads a mutable version tag without a checksum or signature, builds it, and installs the resulting binary and service as root.",
+      "resolution": "Author noted users can build from source code and install anywhere; maintainer accepted and approved listing."
+    },
+    {
+      "issue_number": 201,
+      "comment_id": 5302014316,
+      "plugin_name": "Kefctl",
+      "reviewer": "HANCORE-linux",
+      "detail": "Repository contained ~90 unrelated shell scripts, docks, launchers, and task managers not referenced by the plugin entry point.",
+      "resolution": "Author cleaned up the branch to isolate only the kefctl plugin files."
+    },
+    {
+      "issue_number": 216,
+      "comment_id": 5302024684,
+      "plugin_name": "Uptime Kuma",
+      "reviewer": "HANCORE-linux",
+      "detail": "state.sh passes the Uptime Kuma API key through curl's --user command-line argument on every poll, making it visible through local process inspection. The same path also permits plain HTTP or disabled TLS verification.",
+      "resolution": "Enforced HTTPS, prevented disabling TLS verification, and passed the API key via stdin to curl."
+    },
+    {
+      "issue_number": 256,
+      "comment_id": 5304078286,
+      "plugin_name": "OmaDex",
+      "reviewer": "HANCORE-linux",
+      "detail": "Security concern (High): the documented setup clones erikwb/blueferry from a moving Git branch and immediately runs ./build.sh -si. Future upstream changes could therefore execute outside the exact OmaDex commit reviewed here, including package build/install actions.",
+      "resolution": "Removed remote clone and build instructions from README, decoupled external build dependency, and linked to upstream project's installation docs."
+    },
+    {
+      "issue_number": 268,
+      "comment_id": 5304018776,
+      "plugin_name": "BarDisplay",
+      "reviewer": "HANCORE-linux",
+      "detail": "Security concern (Medium): the `pkexec` patch path follows a user-controlled active-bar path and an existing `.bardisplay.bak` destination. A crafted symlink can make the privileged `cp -f`/patch operation overwrite a different root-owned file.",
+      "resolution": "Hardened the elevated script with symlink refusal, strict path allowlisting for the stock bar path, backup verification, and TOCTOU re-checks."
+    },
+    {
+      "issue_number": 268,
+      "comment_id": 5310962079,
+      "plugin_name": "BarDisplay",
+      "reviewer": "ryanrhughes",
+      "detail": "Security concern at `40539f2b744a9ea0946b1c902bb280064984c249` (Medium): the privileged patch still follows a user-controlled active-bar path and adjacent `.bardisplay.bak` destination, so crafted symlinks can make the root `cp -f` or Python write overwrite another root-owned file.",
+      "resolution": "Resolved alongside HANCORE-linux's review by hardening the elevated script against symlinks and restricting it to allowlisted paths."
+    },
+    {
+      "issue_number": 285,
+      "comment_id": 5310956385,
+      "plugin_name": "WireView Pro II",
+      "reviewer": "ryanrhughes",
+      "detail": "Bundled stripped ELF omarchy/bin/wireview-pro2-qs could not be inspected; subsequent unstripped versions had failing CI reproducibility checks and TOCTOU race conditions when signaling PIDs via kill(2).",
+      "resolution": "Committed unstripped binary, fixed CI pipeline to ensure byte-for-byte reproducible builds matching source SHA, and fixed PID validation races."
+    },
+    {
+      "issue_number": 292,
+      "comment_id": 5304521327,
+      "plugin_name": "Todoist",
+      "reviewer": "HANCORE-linux",
+      "detail": "Security concern at 23abe04: Panel.qml:163-168 handles the personal Todoist token and passes it as a process argument to td auth token. The credential can therefore be exposed through process metadata while the command runs.",
+      "resolution": "Updated token authentication flow to avoid passing personal tokens via CLI process arguments."
+    },
+    {
+      "issue_number": 298,
+      "comment_id": 5304521414,
+      "plugin_name": "IntelliJ Theme Sync",
+      "reviewer": "HANCORE-linux",
+      "detail": "Security concern at f3e0b55: install.sh downloads a mutable GitHub release archive and installs its JAR without a checksum or signature. That executable payload can change independently of the reviewed source commit; current HEAD is also eb4809c0.",
+      "resolution": "Added checksum to manifest.json and enforced verification inside install.sh."
+    },
+    {
+      "issue_number": 327,
+      "comment_id": 5310962444,
+      "plugin_name": "Keyboard RGB",
+      "reviewer": "ryanrhughes",
+      "detail": "The required setup clones a mutable external kernel-module repository, builds it, and runs its installers as root, leaving the installation unpinned and uninspectable.",
+      "resolution": "Updated README instructions to checkout an exact 40-character commit SHA before building."
+    },
+    {
+      "issue_number": 370,
+      "comment_id": 5311478764,
+      "plugin_name": "Omaprox",
+      "reviewer": "ryanrhughes",
+      "detail": "`bin/omaprox-rdp` passes a string containing `/p:<password>` as a positional argument to a long-lived `bash -c` process, exposing the saved RDP credential through that process's command line.",
+      "resolution": "Arguments are written to a 0600 file in $XDG_RUNTIME_DIR, read into xfreerdp3 via stdin (/args-from), and unlinked immediately."
+    },
+    {
+      "issue_number": 370,
+      "comment_id": 5311747475,
+      "plugin_name": "Omaprox",
+      "reviewer": "ryanrhughes",
+      "detail": "`bin/omaprox-rdp` interpolates the API/guest-derived address into `bash -c \"exec 3<>/dev/tcp/$host/$port\"`, allowing a crafted address to execute shell syntax on the user's machine.",
+      "resolution": "Passed the `/dev/tcp` path as a quoted positional argument `\"$1\"` to bash instead of interpolating into the command text."
+    },
+    {
+      "issue_number": 388,
+      "comment_id": 5311693350,
+      "plugin_name": "Recently Closed",
+      "reviewer": "ryanrhughes",
+      "detail": "scripts/capture-window flattens process arguments into an unquoted command string executed through hl.dsp.exec_cmd, allowing shell metacharacters in filenames to execute arbitrary commands",
+      "resolution": "Quotes every argument read out of /proc before executing and added test-capture regression tests"
+    },
+    {
+      "issue_number": 391,
+      "comment_id": 5311747262,
+      "plugin_name": "Firewall",
+      "reviewer": "ryanrhughes",
+      "detail": "UfwController.qml resolves ufw through session PATH and passes it to pkexec or sudo, allowing an attacker-controlled binary in user-writable PATH to execute as root",
+      "resolution": "Changed probe to use a fixed candidate list/allowlist of absolute paths instead of searching PATH, applied to pkexec/sudo invocations"
+    },
+    {
+      "issue_number": 410,
+      "comment_id": 5334151277,
+      "plugin_name": "Fan",
+      "reviewer": "ryanrhughes",
+      "detail": "The uninstaller leaves the saved manual fan target in ~/.local/state/omarchy-fan/mode, despite the removal documentation claiming no state remains; after reinstall, status --heal can silently stop mbpfan and restore that stale low-speed target without a temperature failsafe.",
+      "resolution": "Unresolved; submission closed due to prolonged inactivity."
+    },
+    {
+      "issue_number": 421,
+      "comment_id": 5313183458,
+      "plugin_name": "Focusd",
+      "reviewer": "HANCORE-linux",
+      "detail": "The plugin downloads the mutable `releases/latest` binary, marks it executable, and runs it without pinning a version or verifying a checksum or signature. This leaves the installed executable outside the guarantees of the reviewed repository commit.",
+      "resolution": "Updated the download logic to target a pinned release version and verify its SHA256 checksum prior to execution."
+    },
+    {
+      "issue_number": 441,
+      "comment_id": 5314396800,
+      "plugin_name": "rclone",
+      "reviewer": "HANCORE-linux",
+      "detail": "Sensitive backend answers and Google Drive client secrets were passed via argv in ConfigFlow.qml/rclone-config, exposing credentials in the local process table.",
+      "resolution": "Switched communication to a UNIX socket in $XDG_RUNTIME_DIR with credentials in request bodies and headers rather than CLI argv."
+    },
+    {
+      "issue_number": 443,
+      "comment_id": 5314396903,
+      "plugin_name": "Oyaku",
+      "reviewer": "HANCORE-linux",
+      "detail": "TranslateService.qml logged translations/clipboard to predictable persistent path /tmp/oyaku-debug.log vulnerable to symlink attacks.",
+      "resolution": "Removed debug logging."
+    }
+  ],
+  "qml_quality_samples": [
+    {
+      "issue_number": 169,
+      "comment_id": 5310970398,
+      "plugin_name": "YouTube Music",
+      "reviewer": "ryanrhughes",
+      "detail": "Panel.qml hard-codes '/home/sguardol/...', so a normal install cannot control the daemon for other users.",
+      "resolution": "Resolved the CLI executable path relative to the plugin installation directory."
+    },
+    {
+      "issue_number": 255,
+      "comment_id": 5376788433,
+      "plugin_name": "sing-box VPN",
+      "reviewer": "ryanrhughes",
+      "detail": "Profile names imported from proxy links flow into BarIconButton.tooltipText AutoText sink, allowing markup-shaped node metadata to trigger rich-text resource loading in the shell, and uninstall instructions fail to disclose credential files and privileged configs.",
+      "resolution": "Unresolved; closed by maintainer due to prolonged inactivity on outstanding findings."
+    },
+    {
+      "issue_number": 356,
+      "comment_id": 5345091639,
+      "plugin_name": "Omanodes",
+      "reviewer": "ryanrhughes",
+      "detail": "Controller-supplied network names rendered via default Text.AutoText QML elements, allowing crafted HTML image tags to trigger outbound requests or local file reads in the shell process.",
+      "resolution": "Pinned textFormat to Text.PlainText on all Text elements and sanitized HTML angle brackets in Service.plain()."
+    },
+    {
+      "issue_number": 371,
+      "comment_id": 5345158848,
+      "plugin_name": "omameet",
+      "reviewer": "ryanrhughes",
+      "detail": "Remote calendar titles are rendered through QML's default `AutoText` handling, allowing crafted ICS markup to trigger external resource loads. Calendar Basic Auth credentials are also forwarded across cross-origin or HTTPS-to-HTTP redirects.",
+      "resolution": "Enforced `textFormat: Text.PlainText` across all QML text elements and implemented SafeRedirectHandler to strip Authorization headers across non-identical origins or downgrade redirects."
+    },
+    {
+      "issue_number": 371,
+      "comment_id": 5346454076,
+      "plugin_name": "omameet",
+      "reviewer": "ryanrhughes",
+      "detail": "Remote ICS titles still reach Omarchy's default `AutoText` renderer through the host `WidgetButton` label, remote calendar text is emitted raw to terminal output, and feed responses are read without a size bound.",
+      "resolution": "Disabled WidgetButton host text in favor of an internal PlainText component, sanitized terminal output against ANSI/control codes, and enforced a 10 MiB limit on feed streams."
+    },
+    {
+      "issue_number": 371,
+      "comment_id": 5350522680,
+      "plugin_name": "omameet",
+      "reviewer": "ryanrhughes",
+      "detail": "Entity-encoded ICS markup is decoded only after HTML tags are stripped, and the resulting remote meeting summary reaches the host WidgetButton tooltip without a PlainText constraint.",
+      "resolution": "Iteratively unescaped entities before stripping HTML tags, stripped angle brackets, and built host tooltips with plain text sanitization."
+    },
+    {
+      "issue_number": 388,
+      "comment_id": 5334150087,
+      "plugin_name": "Recently Closed",
+      "reviewer": "ryanrhughes",
+      "detail": "Window titles flow into QML Text with automatic rich-text detection allowing page-controlled titles to cause remote resource loading; state history file lacked owner-only mode permissions",
+      "resolution": "Rendered strings via PlainText component, enforced 0600 mode on state history file with symlink and ownership checks"
+    },
+    {
+      "issue_number": 397,
+      "comment_id": 5313189773,
+      "plugin_name": "RSS",
+      "reviewer": "HANCORE-linux",
+      "detail": "Feed fetching accepts arbitrary URLs and follows redirects without a strict protocol allowlist or response-size limit, and article links are opened without restricting their URL scheme. Remote feed content can therefore reach unsafe URL handlers or cause unbounded resource consumption.",
+      "resolution": "Enforced HTTPS-only for feeds/redirects (--proto =https --proto-redir =https), limited response sizes (--max-filesize 2 MiB), and restricted article opening via Qt.openUrlExternally to https scheme."
+    },
+    {
+      "issue_number": 456,
+      "comment_id": 5345656292,
+      "plugin_name": "Prayer times",
+      "reviewer": "ryanrhughes",
+      "detail": "configuration- and geolocation-derived CLI fields are rendered through QML Text's default AutoText handling, so crafted markup can trigger arbitrary local or remote resource loads in the shell process.",
+      "resolution": "Author set textFormat: Text.PlainText across all QML Text elements, suppressed WidgetButton's private AutoText label, and sanitized markup."
+    },
+    {
+      "issue_number": 456,
+      "comment_id": 5360507243,
+      "plugin_name": "Prayer times",
+      "reviewer": "ryanrhughes",
+      "detail": "CLI-derived bar fields still reach WidgetButton.text without in-snapshot plain-text enforcement, leaving the prior resource-load path unresolved. README installation and removal commands also target obsolete ID prayer.times instead of io.github.mrcode.prayer-times.",
+      "resolution": "Author updated WidgetButton to labelVisible: false, painted explicit PlainText Text, and updated README references to the new ID."
+    },
+    {
+      "issue_number": 461,
+      "comment_id": 5315753748,
+      "plugin_name": "YT Mini",
+      "reviewer": "HANCORE-linux",
+      "detail": "YtPanel.qml accepts a youtu.be/<valid-id>/../../... URL because the short-URL regex is not end-anchored, allowing path traversal outside $XDG_CACHE_HOME/ytmini and overwriting user-writable files via yt-dlp.",
+      "resolution": "End-anchored the short-URL regex pattern and added strict video ID validation (`^[\\w-]{6,}$`) before passing to cache/exec."
+    },
+    {
+      "issue_number": 477,
+      "comment_id": 5334152606,
+      "plugin_name": "Omadisk",
+      "reviewer": "ryanrhughes",
+      "detail": "Scanned filesystem names and configured paths are rendered with QML automatic rich-text detection, allowing crafted names to trigger remote image loads from the long-lived shell process.",
+      "resolution": "Enforced textFormat: Text.PlainText across all overlay Text items and sanitized path inputs with asPlainLabel before rendering tooltips."
+    },
+    {
+      "issue_number": 507,
+      "comment_id": 5365677954,
+      "plugin_name": "omarchy-keylight-air",
+      "reviewer": "HANCORE-linux",
+      "detail": "Device- and mDNS-controlled strings (`displayName`, device details, discovered name) reached QML Text sinks without forcing `textFormat: Text.PlainText`, risking formatting/injection issues.",
+      "resolution": "None; submission was closed due to prolonged inactivity."
+    },
+    {
+      "issue_number": 533,
+      "comment_id": 5318860505,
+      "plugin_name": "Razer Control",
+      "reviewer": "HANCORE-linux",
+      "detail": "99-razer-hid.rules granted active desktop user access to event* input devices, bypassing Wayland input isolation to allow reading keystrokes or injecting passwords.",
+      "resolution": "Author modified udev rules to restrict uaccess strictly to hidraw* nodes and removed the event* uaccess rule."
+    },
+    {
+      "issue_number": 582,
+      "comment_id": 5334159167,
+      "plugin_name": "Mouse Sensitivity",
+      "reviewer": "ryanrhughes",
+      "detail": "At commit be33d1485ef143cd03aece93b137f29d49cede1b, the UPower-derived mouse model is rendered with QML automatic rich-text detection, so a crafted device name can inject an image URL and cause the shell to make an attacker-selected network request.",
+      "resolution": "Escaped device metadata and explicitly rendered text as plain text before passing to tooltips."
+    },
+    {
+      "issue_number": 587,
+      "comment_id": 5334159909,
+      "plugin_name": "OCR",
+      "reviewer": "ryanrhughes",
+      "detail": "At commit 91e07b3c57e85ec93603d281acb64dc1db5cf72d, OCR-derived result and history text is rendered using QML's default AutoText behavior, allowing crafted OCR content with inline-image markup to initiate remote network loads.",
+      "resolution": "unresolved"
+    },
+    {
+      "issue_number": 590,
+      "comment_id": 5334160793,
+      "plugin_name": "Mayar",
+      "reviewer": "ryanrhughes",
+      "detail": "bin/mayarctl exposes the Bearer key in curl's process arguments, and API-controlled transaction/error strings reach QML Text.AutoText, which can load remote inline images.",
+      "resolution": null
+    },
+    {
+      "issue_number": 595,
+      "comment_id": 5334161475,
+      "plugin_name": "Cliamp",
+      "reviewer": "ryanrhughes",
+      "detail": "remote media metadata and lyrics are assigned to QML Text elements using default AutoText, so HTML-like content can be interpreted as rich text and trigger external image loading",
+      "resolution": "Applied `textFormat: Text.PlainText` across all Text elements in the plugin."
+    },
+    {
+      "issue_number": 613,
+      "comment_id": 5334162245,
+      "plugin_name": "Zikr",
+      "reviewer": "ryanrhughes",
+      "detail": "Clipboard-imported personal text rendered with Qt AutoText allows crafted <img src> markup to trigger unintended remote requests.",
+      "resolution": "Author addressed the AutoText rendering issue in commit 502f297, which subsequently passed and was published."
+    },
+    {
+      "issue_number": 625,
+      "comment_id": 5334163610,
+      "plugin_name": "Cliamp Now Playing",
+      "reviewer": "ryanrhughes",
+      "detail": "untrusted track metadata is rendered by QML Text with the default AutoText format, allowing crafted metadata to load attacker-chosen remote images over the network",
+      "resolution": "updated commit to prevent remote image fetching, explicitly specifying plain text format"
+    },
+    {
+      "issue_number": 636,
+      "comment_id": 5334165109,
+      "plugin_name": "Omatab",
+      "reviewer": "ryanrhughes",
+      "detail": "Omatab rendered client-controlled window metadata using QML's default AutoText, allowing window titles with markup to trigger rich-text processing and remote image loads.",
+      "resolution": "Explicitly set 'textFormat: Text.PlainText' on window titles, search field, and empty-state elements."
+    },
+    {
+      "issue_number": 642,
+      "comment_id": 5360514053,
+      "plugin_name": "OmaLink",
+      "reviewer": "ryanrhughes",
+      "detail": "server-controlled collection and tag labels plus error text reach shared shell Text.AutoText renderers, allowing rich-text injection and attacker-selected resource requests.",
+      "resolution": "None; issue closed due to inactivity after outstanding findings remained unaddressed"
+    },
+    {
+      "issue_number": 655,
+      "comment_id": 5334169387,
+      "plugin_name": "Copy Tracker",
+      "reviewer": "ryanrhughes",
+      "detail": "Deleting entries or Clear All left copied image payloads on disk indefinitely; clipboard and search text rendered with QML automatic text-format detection could interpret rich text and load remote image resources",
+      "resolution": "Cleaned up image deletion and explicitly set `textFormat: Text.PlainText` on search input and preview elements"
+    },
+    {
+      "issue_number": 666,
+      "comment_id": 5334170183,
+      "plugin_name": "Cliamp Player",
+      "reviewer": "ryanrhughes",
+      "detail": "track metadata is passed to QML Text items without plain-text mode, allowing HTML-like media metadata to be interpreted as rich text and load referenced resources",
+      "resolution": "Added textFormat: Text.PlainText to all five Text items rendering track metadata and bumped version to 0.1.2"
+    },
+    {
+      "issue_number": 678,
+      "comment_id": 5336026908,
+      "plugin_name": "UniFi",
+      "reviewer": "ryanrhughes",
+      "detail": "controller-supplied site identifier is used without confinement in report-cache path and curl configuration, allowing file overwrite; site name passed to Text using AutoText allowing rich-text injection; unbound response accumulation risking memory exhaustion; terminal escape sequence injection via site labels",
+      "resolution": "Validated controller identifiers against regex ^[A-Za-z0-9_-]+$, set PlainText on all Text items, bounded fetch page sizes to 1MB/5 pages, and stripped Unicode control/format characters"
+    }
+  ]
+}
