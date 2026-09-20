@@ -51,7 +51,12 @@ Detection modes are strictly separated:
 - **Specification**:
   - `schemaVersion` must be numeric `1`.
   - Required non-empty string fields: `id`, `name`, `version`, `author`, `description`.
-  - `id` syntax: lowercase alphanumeric start, matching `^[a-z0-9][a-z0-9._-]{0,127}$` (length 1–128 characters), no `..` segments, and must NOT start with reserved namespace `omarchy.`. Single-segment IDs (e.g. `clock`) are permitted by the validator.
+  - `id` Canonical 3-Step Validation:
+    To ensure deterministic behavior across different regex engines without cross-language incompatibilities (e.g. negative lookaheads fail in Bash `[[ =~ ]]` with exit code 2 and are unsupported in RE2; Python `$` matches before a trailing newline), the plugin identifier is validated via three canonical rules:
+    1. **Base Syntax & Length:** Must match `^[a-z0-9][a-z0-9._-]{0,127}\Z` (length 1–128 UTF-16 code units; start with lowercase alphanumeric). In Python, use `re.fullmatch()` or `\Z` to reject trailing newlines. Single-segment IDs (e.g. `clock`) are permitted.
+    2. **No Path Traversal:** Must not contain double dots (`..`).
+    3. **No Reserved Namespace:** Must not start with reserved namespace `omarchy.`.
+    *Cross-Language Note:* Do not attempt to collapse these into a single regular expression with negative lookaheads `^(?!omarchy\.)(?!.*\.\.)` in shell scripts or Go/RE2 environments.
   - No control characters (CR, LF, NUL, tabs) in `id`, `name`, `version`, `author`, or `description`.
   - `kinds`: non-empty array consisting only of supported kinds:
     ```text

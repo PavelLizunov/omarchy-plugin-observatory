@@ -41,12 +41,23 @@ When executing helper scripts or subshells in background services:
    ```
 2. **Pipefail, early consumers, and bounded SIGPIPE handling (`SEC-001`):** Under `set -o pipefail`, if a downstream consumer (`head`, `grep -q`, `sed '...q'`) terminates early upon receiving its required data, the upstream producer receives `SIGPIPE` (exit code 141). Under `set -e` (`errexit`), this non-zero pipeline status aborts the shell. When early termination is expected, capture the pipeline output to a declared byte-bounded buffer, inspect `${PIPESTATUS[@]}` directly in the shell executing the pipeline, and ensure clean temporary file cleanup via trap:
    ```bash
-   set -e
-   set -o pipefail
+   #!/usr/bin/bash -p
+   # Runnable Helper Script: Pipefail-safe bounded stream reader
+   set -euo pipefail
+   export PATH="/usr/bin:/bin"
+   export LC_ALL="C"
+   unset BASH_ENV CDPATH GLOBIGNORE
 
    # Parameters with fail-fast input validation
    INPUT="${1:?Error: INPUT string is required as \$1}"
-   MAX_BYTES="${2:-65536}"
+   RAW_MAX_BYTES="${2:-65536}"
+
+   # Validate MAX_BYTES: must be a positive non-zero integer <= 16 MiB
+   if [[ ! "$RAW_MAX_BYTES" =~ ^[1-9][0-9]{0,7}$ ]] || [ "$RAW_MAX_BYTES" -gt 16777216 ]; then
+       echo "Error: MAX_BYTES must be a positive integer <= 16777216 (16 MiB), got: $RAW_MAX_BYTES" >&2
+       exit 1
+   fi
+   MAX_BYTES="$RAW_MAX_BYTES"
 
    tmp_out=$(mktemp) || exit 1
    trap 'rm -f -- "$tmp_out"' EXIT
@@ -83,6 +94,9 @@ When executing helper scripts or subshells in background services:
      #!/usr/bin/bash -p
      # Runnable Helper Script: Secure runtime directory initialization
      set -euo pipefail
+     export PATH="/usr/bin:/bin"
+     export LC_ALL="C"
+     unset BASH_ENV CDPATH GLOBIGNORE
 
      # Parameter with fail-fast input validation
      PLUGIN_ID="${1:?Error: PLUGIN_ID is required as \$1}"

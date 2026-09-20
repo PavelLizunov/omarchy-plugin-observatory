@@ -4,7 +4,7 @@
 **Target Platform:** Omarchy Quattro / Quickshell  
 **Upstream Authority:** `omacom/omarchy-plugin-marketplace`  
 **Reference Specification:** `docs/rule-matrix-specification.md` (v1.2)  
-**Evaluator Implementation:** `tools/check_marketplace_readiness.py` (v1.2.9)  
+**Evaluator Implementation:** `tools/check_marketplace_readiness.py` (v1.3.1)  
 
 ---
 
@@ -109,6 +109,7 @@ Empirical static analysis across 242 Wave 3 community repositories identified ad
 - **Remediation Pattern:** Always set `textFormat: Text.PlainText` on any UI element rendering dynamic or external text:
   ```qml
   // Component Fragment (Insert inside Item or Window component)
+  // Required Context Property: string dynamicWindowTitle (e.g. bound from parent or model)
   Text {
       text: root.dynamicWindowTitle
       textFormat: Text.PlainText
@@ -183,12 +184,21 @@ Empirical static analysis across 242 Wave 3 community repositories identified ad
   ```bash
   #!/usr/bin/bash -p
   # Runnable Helper Script: Pipefail-safe bounded stream reader
-  set -e
-  set -o pipefail
+  set -euo pipefail
+  export PATH="/usr/bin:/bin"
+  export LC_ALL="C"
+  unset BASH_ENV CDPATH GLOBIGNORE
 
   # Parameters with fail-fast input validation
   INPUT="${1:?Error: INPUT string is required as \$1}"
-  MAX_BYTES="${2:-65536}"
+  RAW_MAX_BYTES="${2:-65536}"
+
+  # Validate MAX_BYTES: must be a positive non-zero integer <= 16 MiB
+  if [[ ! "$RAW_MAX_BYTES" =~ ^[1-9][0-9]{0,7}$ ]] || [ "$RAW_MAX_BYTES" -gt 16777216 ]; then
+      echo "Error: MAX_BYTES must be a positive integer <= 16777216 (16 MiB), got: $RAW_MAX_BYTES" >&2
+      exit 1
+  fi
+  MAX_BYTES="$RAW_MAX_BYTES"
 
   tmp_out=$(mktemp) || exit 1
   trap 'rm -f -- "$tmp_out"' EXIT
@@ -224,6 +234,9 @@ Empirical static analysis across 242 Wave 3 community repositories identified ad
   #!/usr/bin/bash -p
   # Runnable Helper Script: Secure runtime directory initialization
   set -euo pipefail
+  export PATH="/usr/bin:/bin"
+  export LC_ALL="C"
+  unset BASH_ENV CDPATH GLOBIGNORE
 
   # Parameter with fail-fast input validation
   PLUGIN_ID="${1:?Error: PLUGIN_ID is required as \$1}"
@@ -303,6 +316,8 @@ Empirical static analysis across 242 Wave 3 community repositories identified ad
 - **Remediation Pattern:** Replace dynamic component evaluation with declarative `Loader` items referencing developer-controlled static component files, passing dynamic values strictly via properties:
   ```qml
   // Component Fragment (Declarative replacement for dynamic object creation)
+  // Required Context Properties: bool showCard, var safeData
+  // Required Target Component File: components/DynamicCard.qml
   Loader {
       source: "components/DynamicCard.qml"
       active: root.showCard
@@ -344,5 +359,5 @@ Validates that the provided update target SHA conforms to the required 40-charac
 
 ### 6.4 Exit Code Contract
 - `0`: Clean scan or advisory-only findings (`[OBS-REC]`).
-- `1`: Validation failure — compatibility blocker (`[MKT-COMPAT]`) or security baseline blocker (`[MKT-BASE]`) detected.
-- `2`: Target path discovery or argument syntax error.
+- `1`: Validation failure — compatibility blocker (`[MKT-COMPAT]`), security baseline blocker (`[MKT-BASE]`), or maintainer review policy blocker (`[MKT-POLICY]`, e.g. `SEC-009`) detected.
+- `2`: Target path discovery, file-not-directory target, unreadable directory, or argument syntax error.

@@ -1339,7 +1339,7 @@ class PluginValidator:
                         "Deterministic",
                         manifest_path,
                         1,
-                        f"Plugin id '{plugin_id}' is invalid. Must match '^[a-z0-9][a-z0-9._-]{{0,127}}$' (length 1-128, start with lowercase alphanumeric).",
+                        f"Plugin id '{plugin_id}' is invalid. Must match '^[a-z0-9][a-z0-9._-]{{0,127}}\\Z' (length 1-128, start with lowercase alphanumeric, no trailing newline).",
                     )
 
         # Kinds validation
