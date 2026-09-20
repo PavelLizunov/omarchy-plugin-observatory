@@ -13,14 +13,15 @@ Implements the complete 6-point SEC-005 hardening contract:
 4. Structural & Dimension Bounding: Validates format structure and enforces decode dimension caps
    (width and height > 0, <= 4096x4096 pixels, max 16 MP):
    - PNG: Validates signature, IHDR length/CRC, chunk CRCs, required IDAT and IEND, streaming zlib
-     deflate verification preserving unconsumed_tail across IDAT chunks, strictly bounded output
-     ceiling (preventing decompression bombs), and minimum scanline raster bytes.
+     deflate verification without unbounded flush, exact expected scanline bytes calculation based on
+     color type and bit depth, and filter type validation (0..4).
    - GIF: Validates Logical Screen Descriptor, all frame descriptors (0x2C) with bounds checks,
      frame sub-block data, and requires at least one valid image frame with sub-blocks.
    - JPEG: Validates SOI, SOF marker dimensions, and requires Start of Scan (SOS, 0xDA) with entropy scan data.
    - WebP: Validates RIFF/WEBP structure, chunk bounds, and requires valid image bitstream chunk (VP8, VP8L, or ANMF with frame payload).
 5. End-to-End Operation Deadline: Strict overall deadline (default 30s) bounding DNS wait, TCP connect,
-   TLS handshake, HTTP headers, and data transfer via single-owner descriptor-duplicate watchdog shutdown.
+   TLS handshake, HTTP headers, and data transfer via single-owner descriptor-duplicate watchdog shutdown
+   (failing closed if watchdog creation fails).
 6. Private Cache Storage: Caches verified images in an owner-verified mode 0700 private user cache
    directory created with umask 077, symlink rejection, atomic mkstemp, and content-addressed SHA-256 filenames.
 """
@@ -164,9 +165,13 @@ def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, in
         if ihdr_len != 13 or ihdr_type != b"IHDR":
             raise ImageFetchSecurityError("Invalid PNG structure: first chunk must be IHDR with length 13")
 
-        w, h = struct.unpack(">II", data[16:24])
+        w, h, depth, color, comp, filt, inter = struct.unpack("!IIBBBBB", data[16:29])
         if w <= 0 or h <= 0:
             raise ImageFetchSecurityError(f"Invalid PNG dimensions ({w}x{h}): width and height must be positive")
+
+        channels = {0: 1, 2: 3, 3: 1, 4: 2, 6: 4}.get(color)
+        if not channels:
+            raise ImageFetchSecurityError(f"Unsupported PNG color type {color}")
 
         expected_crc = struct.unpack(">I", data[29:33])[0]
         actual_crc = zlib.crc32(data[12:29]) & 0xFFFFFFFF
@@ -196,10 +201,11 @@ def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, in
         if not (has_idat and has_iend):
             raise ImageFetchSecurityError("Incomplete PNG: missing required IDAT or IEND chunk")
 
-        # Full stream verification of IDAT chunks with resource ceiling and unconsumed_tail handling
+        # Streaming verification of IDAT chunks preserving unconsumed_tail and enforcing exact raster bounds
         max_scanline_bytes = min(MAX_IMAGE_PIXELS * 4 + 4096, 64 * 1024 * 1024)
         try:
             decompressor = zlib.decompressobj()
+            decompressed_parts: List[bytes] = []
             decompressed_total = 0
 
             for chunk in idat_chunks:
@@ -212,6 +218,7 @@ def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, in
                     step_limit = min(65536, budget_left + 1)
                     out = decompressor.decompress(input_data, step_limit)
                     decompressed_total += len(out)
+                    decompressed_parts.append(out)
                     if decompressed_total > max_scanline_bytes:
                         raise ImageFetchSecurityError("Decompressed PNG exceeds maximum permitted pixel capacity")
 
@@ -219,30 +226,43 @@ def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, in
                     if not out and input_data == chunk:
                         break
 
-            # Handle remaining buffered data in decompressor without unbounded flush
-            while not decompressor.eof:
+            while not decompressor.eof and decompressor.unconsumed_tail:
                 budget_left = max_scanline_bytes - decompressed_total
                 if budget_left <= 0:
                     raise ImageFetchSecurityError("Decompressed PNG exceeds maximum permitted pixel capacity")
                 step_limit = min(65536, budget_left + 1)
                 out = decompressor.decompress(decompressor.unconsumed_tail, step_limit)
                 if not out:
-                    out = decompressor.flush(step_limit)
-                    if not out:
-                        break
+                    break
                 decompressed_total += len(out)
+                decompressed_parts.append(out)
                 if decompressed_total > max_scanline_bytes:
                     raise ImageFetchSecurityError("Decompressed PNG exceeds maximum permitted pixel capacity")
 
             if not decompressor.eof:
                 raise ImageFetchSecurityError("Incomplete or truncated PNG deflate stream in IDAT")
 
-            # Must have at least 1 filter byte + 1 data byte per scanline
-            min_required_bytes = h * 2
-            if decompressed_total < min_required_bytes:
-                raise ImageFetchSecurityError(
-                    f"Truncated PNG image data: decompressed {decompressed_total} bytes, expected at least {min_required_bytes} scanline bytes"
-                )
+            decompressed_bytes = b"".join(decompressed_parts)
+
+            # Exact scanline raster verification for non-interlaced PNGs
+            bits_per_pixel = depth * channels
+            row_bytes = (w * bits_per_pixel + 7) // 8
+
+            if inter == 0:
+                expected_bytes = h * (1 + row_bytes)
+                if len(decompressed_bytes) != expected_bytes:
+                    raise ImageFetchSecurityError(
+                        f"Truncated PNG image data: decompressed {len(decompressed_bytes)} bytes, expected exactly {expected_bytes} for {w}x{h} depth={depth} color={color}"
+                    )
+                stride = 1 + row_bytes
+                for row in range(h):
+                    filter_type = decompressed_bytes[row * stride]
+                    if filter_type > 4:
+                        raise ImageFetchSecurityError(f"Invalid PNG filter type {filter_type} in row {row}")
+            else:
+                if len(decompressed_bytes) < h * 2:
+                    raise ImageFetchSecurityError("Truncated interlaced PNG image data")
+
         except zlib.error as e:
             raise ImageFetchSecurityError(f"Corrupted or invalid PNG compressed image stream (IDAT): {e}") from e
 
@@ -392,9 +412,16 @@ def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, in
             elif chunk_type == b"ANMF":
                 # Animation frame must have frame header (16 bytes) plus actual payload sub-chunk
                 if len(chunk_data) > 16:
-                    sub_type = chunk_data[16:20]
-                    if sub_type in (b"VP8 ", b"VP8L", b"ALPH"):
-                        has_bitstream = True
+                    sub_idx = 16
+                    while sub_idx + 8 <= len(chunk_data):
+                        sub_tag = chunk_data[sub_idx:sub_idx + 4]
+                        sub_len = struct.unpack("<I", chunk_data[sub_idx + 4:sub_idx + 8])[0]
+                        if sub_idx + 8 + sub_len > len(chunk_data):
+                            raise ImageFetchSecurityError("Truncated WebP ANMF sub-chunk")
+                        if sub_tag in (b"VP8 ", b"VP8L") and sub_len > 0:
+                            has_bitstream = True
+                            break
+                        sub_idx += 8 + sub_len + (sub_len & 1)
             idx += 8 + chunk_len + (chunk_len & 1)
 
         if not has_bitstream or w <= 0 or h <= 0:
@@ -509,6 +536,7 @@ def fetch_remote_image(
         tls_sock = None
         conn = None
         watchdog_sock = None
+        watchdog = None
 
         try:
             # Check remaining deadline after TCP connect
@@ -517,12 +545,20 @@ def fetch_remote_image(
                 raise ImageFetchSecurityError(f"Operation exceeded overall deadline of {total_timeout}s after TCP connect")
 
             # Duplicate file descriptor for single-owner watchdog shutdown without stealing socket ownership
+            raw_sock_fd = -1
             try:
                 raw_sock_fd = raw_sock.fileno()
-                if isinstance(raw_sock_fd, int) and raw_sock_fd >= 0:
+            except Exception:
+                raw_sock_fd = -1
+
+            if isinstance(raw_sock_fd, int) and raw_sock_fd >= 0:
+                try:
                     dup_fd = os.dup(raw_sock_fd)
                     watchdog_sock = socket.socket(fileno=dup_fd)
-            except (OSError, TypeError):
+                except (OSError, TypeError) as e:
+                    raw_sock.close()
+                    raise ImageFetchSecurityError(f"Failed to create watchdog socket descriptor: {e}") from e
+            else:
                 watchdog_sock = None
 
             is_timeout_aborted = threading.Event()
@@ -607,7 +643,10 @@ def fetch_remote_image(
                     raise ImageFetchSecurityError(f"Operation exceeded overall deadline of {total_timeout}s during transfer") from e
                 raise
             finally:
-                watchdog.cancel()
+                if watchdog is not None:
+                    watchdog.cancel()
+                    if hasattr(watchdog, "join"):
+                        watchdog.join()
         finally:
             if conn is not None:
                 try:

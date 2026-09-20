@@ -491,6 +491,93 @@ class TestFetchRemoteImage(unittest.TestCase):
         elapsed = time.monotonic() - start
         self.assertLess(elapsed, 0.15, "Handshake timeout must not exceed overall budget")
 
+    def test_png_rgb1x1_only_two_scanline_bytes_rejected(self):
+        """RGB 1x1 PNG with only 2 scanline bytes (requires 4: 1 filter + 3 RGB) must be rejected."""
+        ihdr = struct.pack("!I", 13) + b"IHDR" + struct.pack("!IIBBBBB", 1, 1, 8, 2, 0, 0, 0)
+        ihdr_crc = struct.pack("!I", zlib.crc32(b"IHDR" + struct.pack("!IIBBBBB", 1, 1, 8, 2, 0, 0, 0)) & 0xFFFFFFFF)
+        packed = zlib.compress(b"\0\0")
+        idat = struct.pack("!I", len(packed)) + b"IDAT" + packed + struct.pack("!I", zlib.crc32(b"IDAT" + packed) & 0xFFFFFFFF)
+        iend = struct.pack("!I", 0) + b"IEND" + struct.pack("!I", zlib.crc32(b"IEND") & 0xFFFFFFFF)
+        bad_png = b"\x89PNG\r\n\x1a\n" + ihdr + ihdr_crc + idat + iend
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(bad_png)
+        self.assertIn("expected exactly 4", str(ctx.exception))
+
+    def test_png_rgb1x1_invalid_filter5_rejected(self):
+        """PNG scanline starting with invalid filter type 5 (must be 0..4) must be rejected."""
+        ihdr = struct.pack("!I", 13) + b"IHDR" + struct.pack("!IIBBBBB", 1, 1, 8, 2, 0, 0, 0)
+        ihdr_crc = struct.pack("!I", zlib.crc32(b"IHDR" + struct.pack("!IIBBBBB", 1, 1, 8, 2, 0, 0, 0)) & 0xFFFFFFFF)
+        packed = zlib.compress(b"\5\0\0\0")
+        idat = struct.pack("!I", len(packed)) + b"IDAT" + packed + struct.pack("!I", zlib.crc32(b"IDAT" + packed) & 0xFFFFFFFF)
+        iend = struct.pack("!I", 0) + b"IEND" + struct.pack("!I", zlib.crc32(b"IEND") & 0xFFFFFFFF)
+        bad_png = b"\x89PNG\r\n\x1a\n" + ihdr + ihdr_crc + idat + iend
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(bad_png)
+        self.assertIn("Invalid PNG filter type 5", str(ctx.exception))
+
+    def test_webp_anmf_alpha_only_rejected(self):
+        """WebP with ANMF sub-chunk containing only ALPH transparency and no color bitstream must be rejected."""
+        def riffchunk(kind, data):
+            return kind + struct.pack("<I", len(data)) + data + (b"\0" if len(data) % 2 else b"")
+        chunks = riffchunk(b"VP8X", b"\x12" + b"\0" * 9) + riffchunk(b"ANIM", b"\0" * 6) + riffchunk(b"ANMF", b"\0" * 16 + riffchunk(b"ALPH", b"\0\xff"))
+        bad_webp = b"RIFF" + struct.pack("<I", 4 + len(chunks)) + b"WEBP" + chunks
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(bad_webp)
+        self.assertIn("missing image bitstream chunk", str(ctx.exception))
+
+    def test_webp_anmf_fourcc_only_rejected(self):
+        """WebP with ANMF sub-chunk containing only a bare 4-byte FourCC without length or payload must be rejected."""
+        def riffchunk(kind, data):
+            return kind + struct.pack("<I", len(data)) + data + (b"\0" if len(data) % 2 else b"")
+        chunks = riffchunk(b"VP8X", b"\x12" + b"\0" * 9) + riffchunk(b"ANIM", b"\0" * 6) + riffchunk(b"ANMF", b"\0" * 16 + b"VP8L")
+        bad_webp = b"RIFF" + struct.pack("<I", 4 + len(chunks)) + b"WEBP" + chunks
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(bad_webp)
+        self.assertIn("missing image bitstream chunk", str(ctx.exception))
+
+    def test_valid_png_grayscale1bit_accepted(self):
+        """Valid 1-bit grayscale PNG (2 scanline bytes for 1x1) must be accepted."""
+        ihdr = struct.pack("!I", 13) + b"IHDR" + struct.pack("!IIBBBBB", 1, 1, 1, 0, 0, 0, 0)
+        ihdr_crc = struct.pack("!I", zlib.crc32(b"IHDR" + struct.pack("!IIBBBBB", 1, 1, 1, 0, 0, 0, 0)) & 0xFFFFFFFF)
+        packed = zlib.compress(b"\0\0")
+        idat = struct.pack("!I", len(packed)) + b"IDAT" + packed + struct.pack("!I", zlib.crc32(b"IDAT" + packed) & 0xFFFFFFFF)
+        iend = struct.pack("!I", 0) + b"IEND" + struct.pack("!I", zlib.crc32(b"IEND") & 0xFFFFFFFF)
+        valid_png = b"\x89PNG\r\n\x1a\n" + ihdr + ihdr_crc + idat + iend
+        ext, w, h = parse_and_validate_image_format_and_dimensions(valid_png)
+        self.assertEqual(ext, ".png")
+        self.assertEqual(w, 1)
+        self.assertEqual(h, 1)
+
+    def test_valid_png_rgb1x1_accepted(self):
+        """Valid 8-bit RGB 1x1 PNG (4 scanline bytes: 1 filter + 3 RGB) must be accepted."""
+        ihdr = struct.pack("!I", 13) + b"IHDR" + struct.pack("!IIBBBBB", 1, 1, 8, 2, 0, 0, 0)
+        ihdr_crc = struct.pack("!I", zlib.crc32(b"IHDR" + struct.pack("!IIBBBBB", 1, 1, 8, 2, 0, 0, 0)) & 0xFFFFFFFF)
+        packed = zlib.compress(b"\0\0\0\0")
+        idat = struct.pack("!I", len(packed)) + b"IDAT" + packed + struct.pack("!I", zlib.crc32(b"IDAT" + packed) & 0xFFFFFFFF)
+        iend = struct.pack("!I", 0) + b"IEND" + struct.pack("!I", zlib.crc32(b"IEND") & 0xFFFFFFFF)
+        valid_png = b"\x89PNG\r\n\x1a\n" + ihdr + ihdr_crc + idat + iend
+        ext, w, h = parse_and_validate_image_format_and_dimensions(valid_png)
+        self.assertEqual(ext, ".png")
+        self.assertEqual(w, 1)
+        self.assertEqual(h, 1)
+
+    def test_dup_failure_fails_closed_immediately(self):
+        """If os.dup() fails, fetch_remote_image must fail-closed immediately without slow I/O."""
+        left, right = socket.socketpair()
+        try:
+            start = time.monotonic()
+            with patch("tools.helpers.fetch_remote_image.resolve_and_validate_host", return_value="93.184.216.34"), \
+                 patch("tools.helpers.fetch_remote_image.socket.create_connection", return_value=left), \
+                 patch("os.dup", side_effect=OSError(24, "Too many open files")):
+                with self.assertRaises(ImageFetchSecurityError) as ctx:
+                    fetch_remote_image("https://example.com/img.png", total_timeout=0.10)
+                self.assertIn("Failed to create watchdog socket descriptor", str(ctx.exception))
+            elapsed = time.monotonic() - start
+            self.assertLess(elapsed, 0.05, "Failure on os.dup must fail closed immediately")
+        finally:
+            left.close()
+            right.close()
+
 
 if __name__ == "__main__":
     unittest.main()
