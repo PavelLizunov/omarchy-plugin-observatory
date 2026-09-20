@@ -106,6 +106,8 @@ test_eof_crossing_deadline_rejected (test_fetch_remote_image.TestFetchRemoteImag
 If data transfer crosses the deadline, even if it returns EOF, it must be rejected. ... ok
 test_fake_or_truncated_png_headers_rejected (test_fetch_remote_image.TestFetchRemoteImage.test_fake_or_truncated_png_headers_rejected)
 Fake PNG headers, zero-size PNGs, and truncated headers must be rejected. ... ok
+test_frame_count_mismatch_rejected (test_fetch_remote_image.TestFetchRemoteImage.test_frame_count_mismatch_rejected)
+If worker reports fewer frames than expected by structural profile, fetch must reject. ... ok
 test_gif_frame_dimension_bomb_rejected (test_fetch_remote_image.TestFetchRemoteImage.test_gif_frame_dimension_bomb_rejected)
 GIF with logical screen (0,0) or (1,1) but frame (10000,1) must be rejected. ... ok
 test_gif_truncated_descriptor_safe_rejection (test_fetch_remote_image.TestFetchRemoteImage.test_gif_truncated_descriptor_safe_rejection)
@@ -118,6 +120,8 @@ test_http_error_cleanup_closes_connection (test_fetch_remote_image.TestFetchRemo
 HTTP error response (e.g. 503) must ensure connection and socket are explicitly closed. ... ok
 test_insecure_scheme_rejected (test_fetch_remote_image.TestFetchRemoteImage.test_insecure_scheme_rejected)
 Non-HTTPS URLs must be rejected before any network resolution. ... ok
+test_invalid_worker_response_schema_rejected (test_fetch_remote_image.TestFetchRemoteImage.test_invalid_worker_response_schema_rejected)
+Worker responses with non-integer or out-of-range frames must be rejected. ... ok
 test_ip_validation_cgnat_and_site_local_rejected (test_fetch_remote_image.TestFetchRemoteImage.test_ip_validation_cgnat_and_site_local_rejected)
 Carrier-Grade NAT (100.64.0.0/10) and site-local (fec0::/10) must be rejected. ... ok
 test_ip_validation_loopback_rejected (test_fetch_remote_image.TestFetchRemoteImage.test_ip_validation_loopback_rejected)
@@ -219,6 +223,6 @@ test_stale_output_does_not_control_provenance (test_regressions.ReleaseRegressio
 test_unlinked_source_requires_explicit_external_context (test_regressions.ReleaseRegressions.test_unlinked_source_requires_explicit_external_context) ... ok
 
 ----------------------------------------------------------------------
-Ran 137 tests in 9.905s
+Ran 139 tests in 10.016s
 
 OK

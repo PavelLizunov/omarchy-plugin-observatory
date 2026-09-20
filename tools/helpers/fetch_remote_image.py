@@ -260,7 +260,7 @@ def _read_vp8l_info(payload: bytes) -> Tuple[int, int]:
     return w, h
 
 
-def _validate_png(data: bytes) -> Tuple[str, int, int]:
+def _validate_png(data: bytes) -> Tuple[str, int, int, int]:
     """Inspect and structurally validate a PNG image stream."""
     if len(data) < 33:
         raise ImageFetchSecurityError("Truncated PNG header (must be at least 33 bytes for valid IHDR)")
@@ -389,10 +389,10 @@ def _validate_png(data: bytes) -> Tuple[str, int, int]:
     except zlib.error as e:
         raise ImageFetchSecurityError(f"Corrupted or invalid PNG compressed image stream (IDAT): {e}") from e
 
-    return ".png", w, h
+    return ".png", w, h, 1
 
 
-def _validate_gif(data: bytes) -> Tuple[str, int, int]:
+def _validate_gif(data: bytes) -> Tuple[str, int, int, int]:
     """Inspect and structurally validate a GIF image stream."""
     if len(data) < 13:
         raise ImageFetchSecurityError("Truncated GIF header")
@@ -407,6 +407,7 @@ def _validate_gif(data: bytes) -> Tuple[str, int, int]:
     idx = 13 + gct_size
 
     has_image_frame = False
+    gif_frames_count = 0
     while idx < len(data):
         block_type = data[idx]
         if block_type == 0x3B:  # Trailer
@@ -432,6 +433,7 @@ def _validate_gif(data: bytes) -> Tuple[str, int, int]:
             max_w = max(max_w, left + iw)
             max_h = max(max_h, top + ih)
             has_image_frame = True
+            gif_frames_count += 1
 
             local_flags = data[idx + 9]
             has_lct = bool(local_flags & 0x80)
@@ -459,10 +461,10 @@ def _validate_gif(data: bytes) -> Tuple[str, int, int]:
     if not has_image_frame:
         raise ImageFetchSecurityError("Invalid GIF: no image frames found in stream")
 
-    return ".gif", max_w, max_h
+    return ".gif", max_w, max_h, gif_frames_count
 
 
-def _validate_jpeg(data: bytes) -> Tuple[str, int, int]:
+def _validate_jpeg(data: bytes) -> Tuple[str, int, int, int]:
     """Inspect and structurally validate a JPEG image stream."""
     idx = 2
     w, h = 0, 0
@@ -508,10 +510,10 @@ def _validate_jpeg(data: bytes) -> Tuple[str, int, int]:
     if not (has_sof and has_sos and scan_data_present):
         raise ImageFetchSecurityError("Invalid JPEG: missing Start of Frame (SOF) or Start of Scan (SOS) data")
 
-    return ".jpg", w, h
+    return ".jpg", w, h, 1
 
 
-def _validate_webp(data: bytes) -> Tuple[str, int, int]:
+def _validate_webp(data: bytes) -> Tuple[str, int, int, int]:
     """Inspect and structurally validate a WebP image stream using strict RIFF chunk iteration."""
     if len(data) < 12 or data[:4] != b"RIFF" or data[8:12] != b"WEBP":
         raise ImageFetchSecurityError("Downloaded payload does not match WebP RIFF/WEBP signature")
@@ -643,12 +645,12 @@ def _validate_webp(data: bytes) -> Tuple[str, int, int]:
         if top_level_raster_count > 0:
             raise ImageFetchSecurityError("Animated WebP contains prohibited top-level raster chunks")
         w, h = canvas_w, canvas_h
+        return ".webp", w, h, frames_count
     else:
         if top_level_raster_count != 1:
             raise ImageFetchSecurityError(f"Non-animated WebP must contain exactly one raster chunk (missing image bitstream chunk) (found {top_level_raster_count})")
         w, h = max_observed_w, max_observed_h
-
-    return ".webp", w, h
+        return ".webp", w, h, 1
 
 
 def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, int, int]:
@@ -657,24 +659,30 @@ def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, in
     Returns (format_extension, width, height).
     Raises ImageFetchSecurityError if payload is not a valid recognized image or exceeds dimension caps.
     """
+    ext, w, h, _ = _parse_and_validate_structural_profile(data)
+    return ext, w, h
+
+
+def _parse_and_validate_structural_profile(data: bytes) -> Tuple[str, int, int, int]:
+    """Level A structural validation: returns (format_extension, width, height, expected_frames)."""
     if len(data) < 12:
         raise ImageFetchSecurityError("Downloaded payload is too small to be a valid image header")
 
     # 1. PNG: \x89PNG\r\n\x1a\n
     if data.startswith(b"\x89PNG\r\n\x1a\n"):
-        ext, w, h = _validate_png(data)
+        ext, w, h, frames = _validate_png(data)
 
     # 2. GIF: GIF87a or GIF89a
     elif data.startswith(b"GIF87a") or data.startswith(b"GIF89a"):
-        ext, w, h = _validate_gif(data)
+        ext, w, h, frames = _validate_gif(data)
 
     # 3. JPEG: \xff\xd8
     elif data.startswith(b"\xff\xd8"):
-        ext, w, h = _validate_jpeg(data)
+        ext, w, h, frames = _validate_jpeg(data)
 
     # 4. WebP: RIFF....WEBP
     elif len(data) >= 12 and data[:4] == b"RIFF" and data[8:12] == b"WEBP":
-        ext, w, h = _validate_webp(data)
+        ext, w, h, frames = _validate_webp(data)
 
     else:
         raise ImageFetchSecurityError("Downloaded payload does not match a valid recognized image signature (PNG, JPEG, GIF, WebP)")
@@ -687,7 +695,7 @@ def parse_and_validate_image_format_and_dimensions(data: bytes) -> Tuple[str, in
             f"Image dimensions ({w}x{h}, {w * h} pixels) exceed permitted limits (max {MAX_IMAGE_WIDTH}x{MAX_IMAGE_HEIGHT}, {MAX_IMAGE_PIXELS} pixels)"
         )
 
-    return ext, w, h
+    return ext, w, h, frames
 
 
 def _run_worker_decode() -> None:
@@ -761,7 +769,14 @@ def _run_worker_decode() -> None:
         sys.exit(1)
 
 
-def _validate_image_with_decoder(data: bytes, expected_ext: str, expected_w: int, expected_h: int, timeout: float = 5.0) -> None:
+def _validate_image_with_decoder(
+    data: bytes,
+    expected_ext: str,
+    expected_w: int,
+    expected_h: int,
+    expected_frames: Optional[int] = None,
+    timeout: float = 5.0,
+) -> None:
     """Level B Verification: decode image in a separate resource-bounded worker process."""
     helper_path = str(Path(__file__).resolve())
     cmd = [sys.executable, helper_path, "--worker-decode"]
@@ -801,11 +816,18 @@ def _validate_image_with_decoder(data: bytes, expected_ext: str, expected_w: int
     except Exception as e:
         raise ImageFetchSecurityError(f"Invalid JSON response from image decoder worker: {e}") from e
 
+    if not isinstance(res, dict):
+        raise ImageFetchSecurityError("Worker response is not a valid JSON object")
+
     if res.get("status") != "ok":
         raise ImageFetchSecurityError(f"Image decoder rejected payload: {res.get('error')}")
 
     # Reconcile format
-    fmt = (res.get("format") or "").lower()
+    fmt = res.get("format")
+    if not isinstance(fmt, str):
+        raise ImageFetchSecurityError("Worker response missing valid format string")
+    fmt = fmt.lower()
+
     expected_fmt = {
         ".png": "png",
         ".jpg": "jpeg",
@@ -818,14 +840,23 @@ def _validate_image_with_decoder(data: bytes, expected_ext: str, expected_w: int
 
     dec_w = res.get("width")
     dec_h = res.get("height")
+    if type(dec_w) is not int or type(dec_h) is not int:
+        raise ImageFetchSecurityError("Decoded dimensions must be integers")
     if dec_w != expected_w or dec_h != expected_h:
         raise ImageFetchSecurityError(
             f"Decoded dimensions ({dec_w}x{dec_h}) mismatch verified structural dimensions ({expected_w}x{expected_h})"
         )
 
-    dec_frames = res.get("frames", 0)
-    if dec_frames < 1:
-        raise ImageFetchSecurityError(f"Decoded frame count ({dec_frames}) must be at least 1")
+    dec_frames = res.get("frames")
+    if type(dec_frames) is not int:
+        raise ImageFetchSecurityError("Decoded frames count must be an integer")
+    if dec_frames < 1 or dec_frames > MAX_ANIM_FRAMES:
+        raise ImageFetchSecurityError(f"Decoded frames count ({dec_frames}) must be between 1 and {MAX_ANIM_FRAMES}")
+
+    if expected_frames is not None and dec_frames != expected_frames:
+        raise ImageFetchSecurityError(
+            f"Decoded frame count ({dec_frames}) mismatches structural profile frame count ({expected_frames})"
+        )
 
 
 def get_private_cache_dir(custom_dir: Optional[Path] = None) -> Path:
@@ -1062,14 +1093,21 @@ def fetch_remote_image(
         raise ImageFetchSecurityError(f"Exceeded maximum redirect limit of {max_redirects} hops")
 
     # 4. Level A Verification: inspect image headers, chunks, and frame descriptors
-    ext, width, height = parse_and_validate_image_format_and_dimensions(bytes(data))
+    ext, width, height, expected_frames = _parse_and_validate_structural_profile(bytes(data))
 
     # 5. Level B Verification: full decode gate in resource-bounded worker process
     remaining_before_decode = deadline - time.monotonic()
     if remaining_before_decode <= 0:
         raise ImageFetchSecurityError(f"Operation exceeded overall deadline of {total_timeout}s before decode verification")
     decode_timeout = min(5.0, remaining_before_decode)
-    _validate_image_with_decoder(bytes(data), expected_ext=ext, expected_w=width, expected_h=height, timeout=decode_timeout)
+    _validate_image_with_decoder(
+        bytes(data),
+        expected_ext=ext,
+        expected_w=width,
+        expected_h=height,
+        expected_frames=expected_frames,
+        timeout=decode_timeout,
+    )
     if time.monotonic() > deadline:
         raise ImageFetchSecurityError(f"Operation exceeded overall deadline of {total_timeout}s after decode verification")
 

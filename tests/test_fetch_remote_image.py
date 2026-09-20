@@ -3,6 +3,7 @@
 import hashlib
 import io
 import ipaddress
+import json
 import os
 import socket
 import ssl
@@ -761,6 +762,68 @@ class TestFetchRemoteImage(unittest.TestCase):
         self.assertEqual(ext, ".webp")
         self.assertEqual(w, 64)
         self.assertEqual(h, 64)
+
+        # End-to-end decode-gate test with real worker
+        with tempfile.TemporaryDirectory() as td:
+            cache_dir = Path(td) / "cache"
+            body = io.BytesIO(valid_anim_webp)
+            resp = MagicMock(status=200)
+            resp.getheader.side_effect = lambda k, default=None: "image/webp" if k == "Content-Type" else default
+            resp.read.side_effect = body.read
+            conn = MagicMock()
+            conn.getresponse.return_value = resp
+
+            with patch("tools.helpers.fetch_remote_image.resolve_and_validate_host", return_value="93.184.216.34"), \
+                 patch("tools.helpers.fetch_remote_image.socket.create_connection"), \
+                 patch("tools.helpers.fetch_remote_image.ssl.create_default_context"), \
+                 patch("tools.helpers.fetch_remote_image.http.client.HTTPSConnection", return_value=conn):
+                out = fetch_remote_image("https://example.com/anim.webp", cache_dir=cache_dir)
+            self.assertTrue(out.exists())
+            self.assertEqual(out.read_bytes(), valid_anim_webp)
+
+    def test_frame_count_mismatch_rejected(self):
+        """If worker reports fewer frames than expected by structural profile, fetch must reject."""
+        valid_png = create_minimal_png(2, 2)
+        with tempfile.TemporaryDirectory() as td:
+            # Mock worker returning frames=1 when 3 expected
+            with patch("subprocess.Popen") as mock_popen:
+                mock_proc = MagicMock()
+                mock_proc.returncode = 0
+                mock_proc.communicate.return_value = (
+                    json.dumps({"status": "ok", "format": "webp", "width": 8, "height": 8, "frames": 1}).encode(),
+                    b"",
+                )
+                mock_popen.return_value = mock_proc
+
+                from tools.helpers.fetch_remote_image import _validate_image_with_decoder
+                with self.assertRaises(ImageFetchSecurityError) as ctx:
+                    _validate_image_with_decoder(valid_png, expected_ext=".webp", expected_w=8, expected_h=8, expected_frames=3)
+                self.assertIn("mismatches structural profile frame count", str(ctx.exception))
+
+    def test_invalid_worker_response_schema_rejected(self):
+        """Worker responses with non-integer or out-of-range frames must be rejected."""
+        valid_png = create_minimal_png(2, 2)
+        from tools.helpers.fetch_remote_image import _validate_image_with_decoder
+
+        invalid_payloads = [
+            {"status": "ok", "format": "png", "width": 2, "height": 2, "frames": True},   # bool
+            {"status": "ok", "format": "png", "width": 2, "height": 2, "frames": 1.5},    # float
+            {"status": "ok", "format": "png", "width": 2, "height": 2, "frames": "1"},    # string
+            {"status": "ok", "format": "png", "width": 2, "height": 2, "frames": None},   # null
+            {"status": "ok", "format": "png", "width": 2, "height": 2, "frames": 129},    # > MAX_ANIM_FRAMES
+            {"status": "ok", "format": "png", "width": 2, "height": 2, "frames": 0},      # < 1
+        ]
+
+        for payload in invalid_payloads:
+            with self.subTest(payload=payload):
+                with patch("subprocess.Popen") as mock_popen:
+                    mock_proc = MagicMock()
+                    mock_proc.returncode = 0
+                    mock_proc.communicate.return_value = (json.dumps(payload).encode(), b"")
+                    mock_popen.return_value = mock_proc
+
+                    with self.assertRaises(ImageFetchSecurityError):
+                        _validate_image_with_decoder(valid_png, expected_ext=".png", expected_w=2, expected_h=2, expected_frames=1)
 
 
 if __name__ == "__main__":
