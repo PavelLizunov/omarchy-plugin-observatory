@@ -4,8 +4,12 @@ import hashlib
 import io
 import ipaddress
 import os
+import socket
 import struct
 import tempfile
+import threading
+import time
+import types
 import unittest
 import zlib
 from pathlib import Path
@@ -20,7 +24,7 @@ from tools.helpers.fetch_remote_image import (
 )
 
 
-def create_minimal_png(width: int, height: int) -> bytes:
+def create_minimal_png(width: int = 2, height: int = 2) -> bytes:
     """Generate a minimal valid PNG byte sequence with specified dimensions."""
     def pngchunk(tag: bytes, data: bytes) -> bytes:
         return struct.pack("!I", len(data)) + tag + data + struct.pack("!I", zlib.crc32(tag + data) & 0xFFFFFFFF)
@@ -29,6 +33,31 @@ def create_minimal_png(width: int, height: int) -> bytes:
     raw_scanlines = (b"\x00" + b"\x00\x00\x00" * width) * height
     idat = zlib.compress(raw_scanlines)
     return b"\x89PNG\r\n\x1a\n" + pngchunk(b"IHDR", ihdr) + pngchunk(b"IDAT", idat) + pngchunk(b"IEND", b"")
+
+
+def create_minimal_gif(logical_w: int, logical_h: int, frame_w: int, frame_h: int) -> bytes:
+    """Generate a minimal valid GIF byte sequence with distinct logical and frame dimensions."""
+    # Header: GIF89a
+    out = bytearray(b"GIF89a")
+    # Logical Screen Descriptor
+    out.extend(struct.pack("<HH", logical_w, logical_h))
+    out.extend(b"\x80\x00\x00")  # Global Color Table flag, 2 colors
+    # Global Color Table (2 colors: black and white)
+    out.extend(b"\x00\x00\x00\xff\xff\xff")
+    # Image Descriptor
+    out.append(0x2C)  # comma
+    out.extend(struct.pack("<HHHH", 0, 0, frame_w, frame_h))
+    out.append(0x00)  # no local color table
+    # LZW minimum code size
+    out.append(0x02)
+    # 1 sub-block with 1 byte 0x00
+    out.append(0x01)
+    out.append(0x00)
+    # Block terminator
+    out.append(0x00)
+    # Trailer
+    out.append(0x3B)
+    return bytes(out)
 
 
 class TestFetchRemoteImage(unittest.TestCase):
@@ -95,11 +124,47 @@ class TestFetchRemoteImage(unittest.TestCase):
                 with self.assertRaises(ImageFetchSecurityError):
                     get_private_cache_dir(custom_cache)
 
+    def test_cache_creation_mode_with_permissive_umask(self):
+        """Cache directory must be created private immediately, even with permissive umask 000."""
+        with tempfile.TemporaryDirectory() as td:
+            target = Path(td) / "permissive_cache"
+            old_umask = os.umask(0o000)
+            try:
+                res = get_private_cache_dir(target)
+            finally:
+                os.umask(old_umask)
+            mode = oct(res.stat().st_mode & 0o777)
+            self.assertEqual(mode, "0o700")
+
+    def test_fake_or_truncated_png_headers_rejected(self):
+        """Fake PNG headers, zero-size PNGs, and truncated headers must be rejected."""
+        # 1. Fake 24-byte PNG with garbage chunk
+        fake_png = b"\x89PNG\r\n\x1a\n" + b"garbage!" + struct.pack(">II", 1, 1)
+        with self.assertRaises(ImageFetchSecurityError):
+            parse_and_validate_image_format_and_dimensions(fake_png)
+
+        # 2. Zero-size PNG
+        zero_png = b"\x89PNG\r\n\x1a\n" + b"\x00\x00\x00\rIHDR" + struct.pack(">II", 0, 0) + b"\x08\x02\x00\x00\x00"
+        with self.assertRaises(ImageFetchSecurityError):
+            parse_and_validate_image_format_and_dimensions(zero_png)
+
+        # 3. Truncated PNG header (only 24 bytes)
+        valid = create_minimal_png(2, 2)
+        with self.assertRaises(ImageFetchSecurityError):
+            parse_and_validate_image_format_and_dimensions(valid[:24])
+
     def test_dimension_bomb_rejected(self):
         """Image exceeding dimension bounds (e.g. 10000x1 PNG) must be rejected."""
         png_10k = create_minimal_png(10000, 1)
         with self.assertRaises(ImageFetchSecurityError) as ctx:
             parse_and_validate_image_format_and_dimensions(png_10k)
+        self.assertIn("exceed permitted limits", str(ctx.exception))
+
+    def test_gif_frame_dimension_bomb_rejected(self):
+        """GIF with logical screen (0,0) or (1,1) but frame (10000,1) must be rejected."""
+        gif_bomb = create_minimal_gif(logical_w=0, logical_h=0, frame_w=10000, frame_h=1)
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(gif_bomb)
         self.assertIn("exceed permitted limits", str(ctx.exception))
 
     def test_non_image_payload_rejected(self):
@@ -148,6 +213,47 @@ class TestFetchRemoteImage(unittest.TestCase):
             self.assertFalse(result_path.is_symlink(), "Destination file must NOT be a symlink")
             self.assertEqual(result_path.read_bytes(), png_valid)
             self.assertEqual(sentinel.read_bytes(), b"original victim content", "Victim file must NOT have been overwritten")
+
+    def test_slow_dns_deadline_interrupted(self):
+        """DNS resolution taking longer than total_timeout must be interrupted."""
+        def slow_dns(*args, **kwargs):
+            time.sleep(0.15)
+            return "93.184.216.34"
+
+        with tempfile.TemporaryDirectory() as td:
+            with patch("tools.helpers.fetch_remote_image.resolve_and_validate_host", side_effect=slow_dns):
+                start = time.monotonic()
+                with self.assertRaises(ImageFetchSecurityError):
+                    fetch_remote_image("https://example.com/img.png", cache_dir=Path(td), total_timeout=0.05)
+
+    def test_eof_crossing_deadline_rejected(self):
+        """If data transfer crosses the deadline, even if it returns EOF, it must be rejected."""
+        valid_png = create_minimal_png(2, 2)
+        clock = types.SimpleNamespace(value=0.0)
+        reads = iter((valid_png, b""))
+
+        def eof_crosses_deadline(size):
+            val = next(reads)
+            clock.value = 0.02 if val else 1.0
+            return val
+
+        with tempfile.TemporaryDirectory() as td:
+            body = MagicMock()
+            body.read.side_effect = eof_crosses_deadline
+            resp = MagicMock(status=200)
+            resp.getheader.side_effect = lambda k, default=None: "image/png" if k == "Content-Type" else default
+            resp.read.side_effect = eof_crosses_deadline
+            conn = MagicMock()
+            conn.getresponse.return_value = resp
+
+            with patch("tools.helpers.fetch_remote_image.resolve_and_validate_host", return_value="93.184.216.34"), \
+                 patch("tools.helpers.fetch_remote_image.socket.create_connection"), \
+                 patch("tools.helpers.fetch_remote_image.ssl.create_default_context"), \
+                 patch("tools.helpers.fetch_remote_image.http.client.HTTPSConnection", return_value=conn), \
+                 patch("tools.helpers.fetch_remote_image.time.monotonic", side_effect=lambda: clock.value):
+                with self.assertRaises(ImageFetchSecurityError) as ctx:
+                    fetch_remote_image("https://example.com/img.png", cache_dir=Path(td), total_timeout=0.05)
+                self.assertIn("exceeded overall deadline", str(ctx.exception))
 
 
 if __name__ == "__main__":

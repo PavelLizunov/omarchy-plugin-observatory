@@ -40,6 +40,9 @@ Detection modes are strictly separated:
 | **SEC-008** | `ambient-path-daemon-exec` | `[OBS-REC]` | **MEDIUM** | Heuristic | `*.sh`, `bin/*` |
 | **SEC-009** | `agent-steering-directive-injection` | `[MKT-POLICY]` | **HIGH (Policy Blocker)** | Deterministic | `AGENTS.md`, `agent.md`, `CLAUDE.md`, `.cursorrules` |
 | **SEC-010** | `shared-temp-path-state` | `[OBS-REC]` | **HIGH** | Heuristic | `*.sh`, `*.py` |
+| **OBS-001** | `file-size-limit-exceeded` | `[OBS-REC]` | **HIGH** | Deterministic | File > 1 MiB during scan |
+| **OBS-002** | `file-read-error` | `[OBS-REC]` | **HIGH** | Deterministic | Unreadable regular file |
+| **OBS-003** | `directory-walk-error` | `[OBS-REC]` | **HIGH** | Deterministic | Unreadable directory during scan |
 
 ---
 

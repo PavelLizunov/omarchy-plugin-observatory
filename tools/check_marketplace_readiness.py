@@ -1551,7 +1551,7 @@ class PluginValidator:
             try:
                 if path.stat().st_size > MAX_FILE_READ_BYTES:
                     self.report(
-                        "SEC-004",
+                        "OBS-001",
                         "file-size-limit-exceeded",
                         "[OBS-REC]",
                         "HIGH",
@@ -1568,7 +1568,7 @@ class PluginValidator:
                 raw_bytes = f.read(MAX_FILE_READ_BYTES + 1)
             if len(raw_bytes) > MAX_FILE_READ_BYTES:
                 self.report(
-                    "SEC-004",
+                    "OBS-001",
                     "file-size-limit-exceeded",
                     "[OBS-REC]",
                     "HIGH",
@@ -1581,7 +1581,7 @@ class PluginValidator:
             return raw_bytes.decode("utf-8", errors="replace")
         except OSError as e:
             self.report(
-                "MKT-001",
+                "OBS-002",
                 "file-read-error",
                 "[OBS-REC]",
                 "HIGH",
@@ -1596,9 +1596,9 @@ class PluginValidator:
         """Scan scripts and QML files for security and hardening rules."""
         def on_walk_error(err: OSError):
             self.report(
-                "MKT-001",
-                "traversal-error",
-                "[MKT-COMPAT]",
+                "OBS-003",
+                "directory-walk-error",
+                "[OBS-REC]",
                 "HIGH",
                 "Deterministic",
                 getattr(err, "filename", str(self.plugin_dir)) or self.plugin_dir,

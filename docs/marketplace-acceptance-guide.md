@@ -43,6 +43,9 @@ The following matrix summarizes the validation rules implemented in the communit
 | **SEC-008** | `ambient-path-daemon-exec` | `[OBS-REC]` | MEDIUM | Advisory | Shell helper scripts relying on ambient PATH resolution (`#!/usr/bin/env bash` or `sh`). |
 | **SEC-009** | `agent-steering-directive-injection` | `[MKT-POLICY]` | HIGH | Policy Blocker | AI agent directive files (`AGENTS.md`, `agent.md`, `CLAUDE.md`, `.cursorrules`) in plugin tree. |
 | **SEC-010** | `shared-temp-path-state` | `[OBS-REC]` | HIGH | Advisory | Unprivileged hardcoded paths in shared directories (`/tmp`, `/dev/shm`) vulnerable to TOCTOU/symlinks. |
+| **OBS-001** | `file-size-limit-exceeded` | `[OBS-REC]` | HIGH | Diagnostic | File exceeds 1 MiB scan ceiling; full static analysis skipped for this file. |
+| **OBS-002** | `file-read-error` | `[OBS-REC]` | HIGH | Diagnostic | Unreadable regular file encountered during scan due to I/O or permissions. |
+| **OBS-003** | `directory-walk-error` | `[OBS-REC]` | HIGH | Diagnostic | Unreadable directory encountered during recursive filesystem scan. |
 
 ---
 
