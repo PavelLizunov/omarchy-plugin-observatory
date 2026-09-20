@@ -37,26 +37,18 @@ def create_minimal_png(width: int = 2, height: int = 2) -> bytes:
 
 def create_minimal_gif(logical_w: int, logical_h: int, frame_w: int, frame_h: int) -> bytes:
     """Generate a minimal valid GIF byte sequence with distinct logical and frame dimensions."""
-    # Header: GIF89a
     out = bytearray(b"GIF89a")
-    # Logical Screen Descriptor
     out.extend(struct.pack("<HH", logical_w, logical_h))
     out.extend(b"\x80\x00\x00")  # Global Color Table flag, 2 colors
-    # Global Color Table (2 colors: black and white)
-    out.extend(b"\x00\x00\x00\xff\xff\xff")
-    # Image Descriptor
-    out.append(0x2C)  # comma
+    out.extend(b"\x00\x00\x00\xff\xff\xff")  # Global Color Table
+    out.append(0x2C)  # Image Descriptor
     out.extend(struct.pack("<HHHH", 0, 0, frame_w, frame_h))
     out.append(0x00)  # no local color table
-    # LZW minimum code size
-    out.append(0x02)
-    # 1 sub-block with 1 byte 0x00
-    out.append(0x01)
+    out.append(0x02)  # LZW min code size
+    out.append(0x01)  # sub-block len
     out.append(0x00)
-    # Block terminator
-    out.append(0x00)
-    # Trailer
-    out.append(0x3B)
+    out.append(0x00)  # block terminator
+    out.append(0x3B)  # trailer
     return bytes(out)
 
 
@@ -153,6 +145,16 @@ class TestFetchRemoteImage(unittest.TestCase):
         with self.assertRaises(ImageFetchSecurityError):
             parse_and_validate_image_format_and_dimensions(valid[:24])
 
+    def test_png_valid_crc_invalid_deflate_rejected(self):
+        """PNG with valid chunk CRCs but invalid zlib compressed IDAT data must be rejected."""
+        def chunk(kind, data):
+            return struct.pack("!I", len(data)) + kind + data + struct.pack("!I", zlib.crc32(kind + data) & 0xFFFFFFFF)
+        ihdr = chunk(b"IHDR", struct.pack("!IIBBBBB", 1, 1, 8, 2, 0, 0, 0))
+        corrupted_png = b"\x89PNG\r\n\x1a\n" + ihdr + chunk(b"IDAT", b"NOT A ZLIB STREAM") + chunk(b"IEND", b"")
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(corrupted_png)
+        self.assertIn("IDAT", str(ctx.exception))
+
     def test_dimension_bomb_rejected(self):
         """Image exceeding dimension bounds (e.g. 10000x1 PNG) must be rejected."""
         png_10k = create_minimal_png(10000, 1)
@@ -166,6 +168,34 @@ class TestFetchRemoteImage(unittest.TestCase):
         with self.assertRaises(ImageFetchSecurityError) as ctx:
             parse_and_validate_image_format_and_dimensions(gif_bomb)
         self.assertIn("exceed permitted limits", str(ctx.exception))
+
+    def test_gif_without_frames_rejected(self):
+        """GIF with logical screen but zero image frame descriptors must be rejected."""
+        gif_no_frames = b"GIF89a" + struct.pack("<HH", 1, 1) + b"\x80\x00\x00\x00\x00\x00\xff\xff\xff" + b";"
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(gif_no_frames)
+        self.assertIn("no image frames", str(ctx.exception))
+
+    def test_gif_truncated_descriptor_safe_rejection(self):
+        """Truncated GIF image descriptor must raise ImageFetchSecurityError, not IndexError."""
+        bad_gif = b"GIF89a" + struct.pack("<HH", 1, 1) + b"\x00\x00\x00" + b"," + struct.pack("<HHHH", 0, 0, 1, 1)
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(bad_gif)
+        self.assertIn("Truncated", str(ctx.exception))
+
+    def test_webp_canvas_without_bitstream_rejected(self):
+        """WebP with VP8X extended header but no image bitstream chunk must be rejected."""
+        webp_no_bitstream = b"RIFF" + struct.pack("<I", 22) + b"WEBPVP8X" + struct.pack("<I", 10) + b"\x00" * 10
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(webp_no_bitstream)
+        self.assertIn("missing image bitstream chunk", str(ctx.exception))
+
+    def test_jpeg_sof_without_scan_rejected(self):
+        """JPEG with SOF but no Start of Scan (SOS) marker must be rejected."""
+        jpeg_no_sos = b"\xff\xd8\xff\xc0" + struct.pack(">H", 17) + b"\x08" + struct.pack(">HH", 1, 1) + b"\x03\x01\x11\x00\x02\x11\x00\x03\x11\x00\xff\xd9"
+        with self.assertRaises(ImageFetchSecurityError) as ctx:
+            parse_and_validate_image_format_and_dimensions(jpeg_no_sos)
+        self.assertIn("missing Start of Frame (SOF) or Start of Scan (SOS)", str(ctx.exception))
 
     def test_non_image_payload_rejected(self):
         """HTML or arbitrary non-image payload must be rejected."""
@@ -195,7 +225,6 @@ class TestFetchRemoteImage(unittest.TestCase):
             sentinel.write_bytes(b"original victim content")
             dest_file.symlink_to(sentinel)
 
-            # Mock network fetch
             body = io.BytesIO(png_valid)
             resp = MagicMock(status=200)
             resp.getheader.side_effect = lambda k, default=None: "image/png" if k == "Content-Type" else default
@@ -218,13 +247,16 @@ class TestFetchRemoteImage(unittest.TestCase):
         """DNS resolution taking longer than total_timeout must be interrupted."""
         def slow_dns(*args, **kwargs):
             time.sleep(0.15)
-            return "93.184.216.34"
+            return [(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP, "", ("93.184.216.34", 443))]
 
         with tempfile.TemporaryDirectory() as td:
-            with patch("tools.helpers.fetch_remote_image.resolve_and_validate_host", side_effect=slow_dns):
+            with patch("tools.helpers.fetch_remote_image.socket.getaddrinfo", side_effect=slow_dns):
                 start = time.monotonic()
-                with self.assertRaises(ImageFetchSecurityError):
+                with self.assertRaises(ImageFetchSecurityError) as ctx:
                     fetch_remote_image("https://example.com/img.png", cache_dir=Path(td), total_timeout=0.05)
+                elapsed = time.monotonic() - start
+                self.assertLess(elapsed, 0.12, "DNS wait must not exceed timeout budget")
+                self.assertIn("timed out", str(ctx.exception))
 
     def test_eof_crossing_deadline_rejected(self):
         """If data transfer crosses the deadline, even if it returns EOF, it must be rejected."""

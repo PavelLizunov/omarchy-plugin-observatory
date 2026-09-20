@@ -985,14 +985,14 @@ class PluginValidator:
         """MKT-002: Check for symbolic links within the plugin directory."""
         def on_walk_error(err: OSError):
             self.report(
-                "MKT-002",
-                "traversal-error",
-                "[MKT-COMPAT]",
+                "OBS-003",
+                "directory-walk-error",
+                "[OBS-REC]",
                 "HIGH",
                 "Deterministic",
                 getattr(err, "filename", str(self.plugin_dir)) or self.plugin_dir,
                 0,
-                f"Unreadable directory or traversal error: {err}",
+                f"Unreadable directory during symlink check: {err}",
             )
 
         try:

@@ -112,7 +112,8 @@ Empirical static analysis across 242 Wave 3 community repositories identified ad
 - **Remediation Pattern:** Always set `textFormat: Text.PlainText` on any UI element rendering dynamic or external text:
   ```qml
   // Component Fragment (Insert inside Item or Window component)
-  // Required Context Property: string dynamicWindowTitle (e.g. bound from parent or model)
+  // Interface & Context Requirements:
+  // - Enclosing parent component must define 'id: root' exposing context property: string dynamicWindowTitle (e.g. bound from parent or model)
   Text {
       text: root.dynamicWindowTitle
       textFormat: Text.PlainText
@@ -319,8 +320,9 @@ Empirical static analysis across 242 Wave 3 community repositories identified ad
 - **Remediation Pattern:** Replace dynamic component evaluation with declarative `Loader` items referencing developer-controlled static component files, passing dynamic values strictly via properties:
   ```qml
   // Component Fragment (Declarative replacement for dynamic object creation)
-  // Required Context Properties: bool showCard, var safeData
-  // Required Target Component File: components/DynamicCard.qml
+  // Interface & Context Requirements:
+  // - Enclosing parent component must define 'id: root' exposing context properties: bool showCard, var safeData
+  // - Loaded target component ('components/DynamicCard.qml') root object must define a writable property: 'property var cardData'
   Loader {
       source: "components/DynamicCard.qml"
       active: root.showCard
