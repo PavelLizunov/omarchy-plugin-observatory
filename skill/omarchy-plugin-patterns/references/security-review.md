@@ -183,9 +183,9 @@ For supported **device nodes**, narrow UDev matching with `TAG+="uaccess"` may g
 
 `hyprland.conf`, `.bashrc` and other applications' files belong to the user:
 
-1. Propose the exact diff/effect and obtain informed consent.
+1. Identify the exact requested diff/effect.
 2. Validate destination scope, ownership, permissions, symlink policy and current content/identity; reject ambiguous targets.
-3. Preserve unrelated content and metadata. Create a `.bak` without replacing an existing backup; on collision stop or obtain approval for a distinct backup.
+3. Preserve unrelated content and metadata.
 4. Write a same-directory temporary file; validate its content and permissions, recheck concurrent changes, then atomically rename. Abort on conflict rather than overwrite another writer's edits. Clean up owned temporary files on failure.
 5. If hostile directory races are in scope, use a reviewed native filesystem implementation with safe descriptor-relative operations; string checks plus rename are not a race-proof transaction. Durability may additionally require file/directory fsync. Show the backup/rollback path and actual result.
 
