@@ -103,8 +103,7 @@ function decodeFrame(text) {
 }
 ```
 
-Syntax guard is not schema validation; false and zero survive. Decide whether failure clears data or retains explicitly stale last-good state. Bound nesting, frame bytes, rate and stored history independently. Do not log secrets or unbounded invalid input. A finite one-shot `head -c 65536` limits bytes, but cannot by itself prove complete JSON or detect all truncation: use an upstream length/EOF contract or reject ambiguous completion. Preserve producer failure; never use this cap as a permanent streaming protocol.
-
+Syntax guard is not schema validation; false and zero survive. Decide whether failure clears data or retains explicitly stale last-good state. Bound nesting, frame bytes, rate and stored history independently.
 ## Ownership and hotplug
 
 For every resource record **creator / owner / maximum / cancellation / late-result policy**. QObject parentage, visual parenting and JS references differ. C++ bridges need RAII, thread-affinity-safe queued delivery, cancellation and no dangling QObject callbacks; parentage does not prove thread safety.
